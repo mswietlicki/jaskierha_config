@@ -1,0 +1,103 @@
+water_transition_grid_filling_to_normal:
+    alias: Water - Transition Grid Filling -> Normal
+    description: "Order: Grid -> Loop -> Pump Overwrite"
+    mode: queued
+    max: 5
+    fields:
+      pump_was_on:
+        description: Was pump on before transition.
+        example: true
+    sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_valve_grid
+      - delay: "00:00:05"
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_valve_loop
+      - delay: "00:00:05"
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_valve_pump_overwrite
+      - delay: "00:00:05"
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_current
+        data:
+          option: Normal
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ pump_was_on | default(false) }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_pump_relay
+        default:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.water_pump_relay
+
+water_transition_grid_filling_to_pump_filling:
+    alias: Water - Transition Grid Filling -> Pump Filling
+    description: "Order: Pump Overwrite"
+    mode: queued
+    max: 5
+    fields:
+      pump_was_on:
+        description: Was pump on before transition.
+        example: true
+    sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_valve_pump_overwrite
+      - delay: "00:00:05"
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_current
+        data:
+          option: Pump Filling
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ pump_was_on | default(false) }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_pump_relay
+        default:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.water_pump_relay
+
+water_transition_grid_filling_to_grid:
+    alias: Water - Transition Grid Filling -> Grid
+    description: "Order: Tank"
+    mode: queued
+    max: 5
+    fields:
+      pump_was_on:
+        description: Was pump on before transition.
+        example: true
+    sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
+      - action: switch.turn_on
+        target:
+          entity_id: switch.water_valve_tank
+      - delay: "00:00:05"
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_current
+        data:
+          option: Grid
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay

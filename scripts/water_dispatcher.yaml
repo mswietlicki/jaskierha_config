@@ -1,0 +1,116 @@
+water_set_mode:
+    alias: Water - Set Mode (Dispatcher)
+    description: Run dedicated transition script for current -> target mode.
+    mode: queued
+    max: 10
+    fields:
+      mode:
+        description: Target water mode.
+        example: Grid Filling
+    sequence:
+      - variables:
+          target_mode: "{{ mode }}"
+          current_mode: "{{ states('input_select.water_mode_current') }}"
+          pump_was_on: "{{ is_state('switch.water_pump_relay', 'on') }}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == target_mode }}"
+            sequence:
+              - stop: Already in target mode.
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Normal' and target_mode == 'Pump Filling' }}"
+            sequence:
+              - action: script.water_transition_normal_to_pump_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Normal' and target_mode == 'Grid Filling' }}"
+            sequence:
+              - action: script.water_transition_normal_to_grid_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Normal' and target_mode == 'Grid' }}"
+            sequence:
+              - action: script.water_transition_normal_to_grid
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Pump Filling' and target_mode == 'Normal' }}"
+            sequence:
+              - action: script.water_transition_pump_filling_to_normal
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Pump Filling' and target_mode == 'Grid Filling' }}"
+            sequence:
+              - action: script.water_transition_pump_filling_to_grid_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Pump Filling' and target_mode == 'Grid' }}"
+            sequence:
+              - action: script.water_transition_pump_filling_to_grid
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid Filling' and target_mode == 'Normal' }}"
+            sequence:
+              - action: script.water_transition_grid_filling_to_normal
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid Filling' and target_mode == 'Pump Filling' }}"
+            sequence:
+              - action: script.water_transition_grid_filling_to_pump_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid Filling' and target_mode == 'Grid' }}"
+            sequence:
+              - action: script.water_transition_grid_filling_to_grid
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid' and target_mode == 'Normal' }}"
+            sequence:
+              - action: script.water_transition_grid_to_normal
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid' and target_mode == 'Pump Filling' }}"
+            sequence:
+              - action: script.water_transition_grid_to_pump_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"
+
+          - conditions:
+              - condition: template
+                value_template: "{{ current_mode == 'Grid' and target_mode == 'Grid Filling' }}"
+            sequence:
+              - action: script.water_transition_grid_to_grid_filling
+                data:
+                  pump_was_on: "{{ pump_was_on }}"

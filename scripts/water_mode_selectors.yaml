@@ -1,0 +1,35 @@
+water_mode_normal:
+    alias: Water - Normal
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_target
+        data:
+          option: Normal
+
+water_mode_pump_filling:
+    alias: Water - Pump Filling
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_target
+        data:
+          option: Pump Filling
+
+water_mode_grid_filling:
+    alias: Water - Grid Filling
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_target
+        data:
+          option: Grid Filling
+
+water_mode_grid:
+    alias: Water - Grid
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.water_mode_target
+        data:
+          option: Grid
