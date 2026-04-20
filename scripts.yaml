@@ -48,19 +48,19 @@ water_set_mode:
       - variables:
           target_mode: "{{ mode }}"
           pump_was_on: "{{ is_state('switch.water_pump_relay', 'on') }}"
-          desired_valve_1: >-
+          desired_tank: >-
             {% if target_mode == 'Grid' %}on
             {% else %}off
             {% endif %}
-          desired_valve_2: >-
+          desired_loop: >-
             {% if target_mode in ['Pump Filling', 'Grid Filling', 'Grid'] %}on
             {% else %}off
             {% endif %}
-          desired_valve_3: >-
+          desired_overwrite: >-
             {% if target_mode in ['Grid Filling', 'Grid'] %}on
             {% else %}off
             {% endif %}
-          desired_valve_4: >-
+          desired_grid: >-
             {% if target_mode in ['Pump Filling', 'Grid Filling', 'Grid'] %}on
             {% else %}off
             {% endif %}
@@ -69,80 +69,86 @@ water_set_mode:
         target:
           entity_id: switch.water_pump_relay
 
+      # OFF phase order: Grid -> Loop -> Pump Overwrite -> Tank
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ states('switch.water_valve_tank') != desired_valve_1 }}"
+                value_template: "{{ is_state('switch.water_valve_grid', 'on') and desired_grid == 'off' }}"
             sequence:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ desired_valve_1 == 'on' }}"
-                    sequence:
-                      - action: switch.turn_on
-                        target:
-                          entity_id: switch.water_valve_tank
-                default:
-                  - action: switch.turn_off
-                    target:
-                      entity_id: switch.water_valve_tank
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_valve_grid
               - delay: "00:00:05"
 
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ states('switch.water_valve_loop') != desired_valve_2 }}"
+                value_template: "{{ is_state('switch.water_valve_loop', 'on') and desired_loop == 'off' }}"
             sequence:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ desired_valve_2 == 'on' }}"
-                    sequence:
-                      - action: switch.turn_on
-                        target:
-                          entity_id: switch.water_valve_loop
-                default:
-                  - action: switch.turn_off
-                    target:
-                      entity_id: switch.water_valve_loop
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_valve_loop
               - delay: "00:00:05"
 
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ states('switch.water_valve_pump_overwrite') != desired_valve_3 }}"
+                value_template: "{{ is_state('switch.water_valve_pump_overwrite', 'on') and desired_overwrite == 'off' }}"
             sequence:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ desired_valve_3 == 'on' }}"
-                    sequence:
-                      - action: switch.turn_on
-                        target:
-                          entity_id: switch.water_valve_pump_overwrite
-                default:
-                  - action: switch.turn_off
-                    target:
-                      entity_id: switch.water_valve_pump_overwrite
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_valve_pump_overwrite
               - delay: "00:00:05"
 
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ states('switch.water_valve_grid') != desired_valve_4 }}"
+                value_template: "{{ is_state('switch.water_valve_tank', 'on') and desired_tank == 'off' }}"
             sequence:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ desired_valve_4 == 'on' }}"
-                    sequence:
-                      - action: switch.turn_on
-                        target:
-                          entity_id: switch.water_valve_grid
-                default:
-                  - action: switch.turn_off
-                    target:
-                      entity_id: switch.water_valve_grid
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_valve_tank
+              - delay: "00:00:05"
+
+      # ON phase order: Pump Overwrite -> Loop -> Grid -> Tank
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ is_state('switch.water_valve_pump_overwrite', 'off') and desired_overwrite == 'on' }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_valve_pump_overwrite
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ is_state('switch.water_valve_loop', 'off') and desired_loop == 'on' }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_valve_loop
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ is_state('switch.water_valve_grid', 'off') and desired_grid == 'on' }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_valve_grid
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ is_state('switch.water_valve_tank', 'off') and desired_tank == 'on' }}"
+            sequence:
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.water_valve_tank
               - delay: "00:00:05"
 
       - action: input_select.select_option

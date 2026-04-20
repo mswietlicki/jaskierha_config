@@ -11,12 +11,12 @@ This document describes the target end-state for each water mode and the valve n
 
 ## Mode State Table
 
-| Water Mode      | Tank Valve (`water_valve_tank`) | Loop Valve (`water_valve_loop`) | Pump Overwrite Valve (`water_valve_pump_overwrite`) | Grid Valve (`water_valve_grid`) | Pump (`water_pump_relay`) |
-|-----------------|----------------------------------|----------------------------------|------------------------------------------------------|----------------------------------|----------------------------|
-| Normal          | OFF                              | OFF                              | OFF                                                  | OFF                              | Restore previous state     |
-| Pump Filling    | OFF                              | ON                               | OFF                                                  | ON                               | Restore previous state     |
-| Grid Filling    | OFF                              | ON                               | ON                                                   | ON                               | OFF                        |
-| Grid            | ON                               | ON                               | ON                                                   | ON                               | OFF                        |
+| Water Mode | Tank Valve (`water_valve_tank`) | Loop Valve (`water_valve_loop`) | Pump Overwrite Valve (`water_valve_pump_overwrite`) | Grid Valve (`water_valve_grid`) | Pump (`water_pump_relay`) |
+| --- | --- | --- | --- | --- | --- |
+| Normal | OFF | OFF | OFF | OFF | Restore previous state |
+| Pump Filling | OFF | ON | OFF | ON | Restore previous state |
+| Grid Filling | OFF | ON | ON | ON | OFF |
+| Grid | ON | ON | ON | ON | OFF |
 
 ## State Machine Behavior
 
@@ -27,8 +27,29 @@ This document describes the target end-state for each water mode and the valve n
 - Valves are changed one-by-one in sequence (never in parallel).
 - A 5-second delay is added after each valve action.
 - If a valve is already in the required state, no action is taken for that valve.
+- OFF phase order is always: `Grid -> Loop -> Pump Overwrite -> Tank`.
+- ON phase order is always: `Pump Overwrite -> Loop -> Grid -> Tank`.
 - For `Grid` and `Grid Filling`, pump remains OFF after transition.
 - For other modes, pump returns to its pre-transition state.
+
+## Transition Sequences
+
+The sequence below lists only valves that actually change for each transition.
+
+| From | To | Valve Change Sequence |
+| --- | --- | --- |
+| Normal | Pump Filling | Loop -> Grid |
+| Normal | Grid Filling | Pump Overwrite -> Loop -> Grid |
+| Normal | Grid | Pump Overwrite -> Loop -> Grid -> Tank |
+| Pump Filling | Normal | Grid -> Loop |
+| Pump Filling | Grid Filling | Pump Overwrite |
+| Pump Filling | Grid | Pump Overwrite -> Tank |
+| Grid Filling | Normal | Grid -> Loop -> Pump Overwrite |
+| Grid Filling | Pump Filling | Pump Overwrite |
+| Grid Filling | Grid | Tank |
+| Grid | Normal | Grid -> Loop -> Pump Overwrite -> Tank |
+| Grid | Pump Filling | Pump Overwrite -> Tank |
+| Grid | Grid Filling | Tank |
 
 ## Compatibility Scripts
 
