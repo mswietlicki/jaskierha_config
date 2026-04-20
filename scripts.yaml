@@ -2,50 +2,146 @@
 water_mode_normal:
     alias: Water - Normal
     sequence:
-      - service: switch.turn_off
+      - action: input_select.select_option
         target:
-          entity_id:
-            - switch.water_valve_1
-            - switch.water_valve_2
-            - switch.water_valve_3
-            - switch.water_valve_4
+          entity_id: input_select.water_mode_target
+        data:
+          option: Normal
 
 water_mode_pump_filling:
     alias: Water - Pump Filling
     sequence:
-      - service: switch.turn_off
+      - action: input_select.select_option
         target:
-          entity_id: switch.water_valve_1
-      - service: switch.turn_on
-        target:
-          entity_id:
-            - switch.water_valve_2
-            - switch.water_valve_3
-            - switch.water_valve_4
+          entity_id: input_select.water_mode_target
+        data:
+          option: Pump Filling
 
 water_mode_grid_filling:
     alias: Water - Grid Filling
     sequence:
-      - service: switch.turn_off
+      - action: input_select.select_option
         target:
-          entity_id:
-            - switch.water_valve_1
-            - switch.water_valve_3
-      - service: switch.turn_on
-        target:
-          entity_id:
-            - switch.water_valve_2
-            - switch.water_valve_4
+          entity_id: input_select.water_mode_target
+        data:
+          option: Grid Filling
 
 water_mode_grid:
     alias: Water - Grid
     sequence:
-      - service: switch.turn_on
+      - action: input_select.select_option
         target:
-          entity_id:
-            - switch.water_valve_1
-            - switch.water_valve_2
-            - switch.water_valve_4
-      - service: switch.turn_off
+          entity_id: input_select.water_mode_target
+        data:
+          option: Grid
+
+water_set_mode:
+    alias: Water - Set Mode Safely
+    description: Move valves one-by-one with 5s pauses to reach selected mode.
+    mode: queued
+    max: 10
+    fields:
+      mode:
+        description: Target water mode.
+        example: Grid Filling
+    sequence:
+      - variables:
+          target_mode: "{{ mode }}"
+          desired_valve_1: >-
+            {% if target_mode == 'Grid' %}on
+            {% else %}off
+            {% endif %}
+          desired_valve_2: >-
+            {% if target_mode in ['Pump Filling', 'Grid Filling', 'Grid'] %}on
+            {% else %}off
+            {% endif %}
+          desired_valve_3: >-
+            {% if target_mode == 'Pump Filling' %}on
+            {% else %}off
+            {% endif %}
+          desired_valve_4: >-
+            {% if target_mode in ['Pump Filling', 'Grid Filling', 'Grid'] %}on
+            {% else %}off
+            {% endif %}
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ states('switch.water_valve_tank') != desired_valve_1 }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ desired_valve_1 == 'on' }}"
+                    sequence:
+                      - action: switch.turn_on
+                        target:
+                          entity_id: switch.water_valve_tank
+                default:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: switch.water_valve_tank
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ states('switch.water_valve_loop') != desired_valve_2 }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ desired_valve_2 == 'on' }}"
+                    sequence:
+                      - action: switch.turn_on
+                        target:
+                          entity_id: switch.water_valve_loop
+                default:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: switch.water_valve_loop
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ states('switch.water_valve_pump_overwrite') != desired_valve_3 }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ desired_valve_3 == 'on' }}"
+                    sequence:
+                      - action: switch.turn_on
+                        target:
+                          entity_id: switch.water_valve_pump_overwrite
+                default:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: switch.water_valve_pump_overwrite
+              - delay: "00:00:05"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ states('switch.water_valve_grid') != desired_valve_4 }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ desired_valve_4 == 'on' }}"
+                    sequence:
+                      - action: switch.turn_on
+                        target:
+                          entity_id: switch.water_valve_grid
+                default:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: switch.water_valve_grid
+              - delay: "00:00:05"
+
+      - action: input_select.select_option
         target:
-          entity_id: switch.water_valve_3
+          entity_id: input_select.water_mode_current
+        data:
+          option: "{{ target_mode }}"

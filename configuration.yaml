@@ -10,6 +10,27 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+input_select:
+  water_mode_target:
+    name: Water Mode Target
+    options:
+      - Normal
+      - Pump Filling
+      - Grid Filling
+      - Grid
+    initial: Normal
+    icon: mdi:water-sync
+
+  water_mode_current:
+    name: Water Mode Current
+    options:
+      - Normal
+      - Pump Filling
+      - Grid Filling
+      - Grid
+    initial: Normal
+    icon: mdi:water-check
+
 modbus:
   - name: relay_board
     type: rtuovertcp
@@ -222,25 +243,25 @@ modbus:
         address: 1
         write_type: coil
           
-      - name: Water Valve 1
+      - name: Water Valve Tank
         unique_id: water_valve_relay_1
         slave: 33
         address: 0
         write_type: coil
         
-      - name: Water Valve 2
+      - name: Water Valve Loop
         unique_id: water_valve_relay_2
         slave: 33
         address: 1
         write_type: coil
         
-      - name: Water Valve 3
+      - name: Water Valve Pump Overwrite
         unique_id: water_valve_relay_3
         slave: 33
         address: 2
         write_type: coil
         
-      - name: Water Valve 4
+      - name: Water Valve Grid
         unique_id: water_valve_relay_4
         slave: 33
         address: 3
