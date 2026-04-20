@@ -11,12 +11,12 @@ This document describes the target end-state for each water mode and the valve n
 
 ## Mode State Table
 
-| Water Mode      | Tank Valve (`water_valve_tank`) | Loop Valve (`water_valve_loop`) | Pump Overwrite Valve (`water_valve_pump_overwrite`) | Grid Valve (`water_valve_grid`) |
-|-----------------|----------------------------------|----------------------------------|------------------------------------------------------|----------------------------------|
-| Normal          | OFF                              | OFF                              | OFF                                                  | OFF                              |
-| Pump Filling    | OFF                              | ON                               | ON                                                   | ON                               |
-| Grid Filling    | OFF                              | ON                               | OFF                                                  | ON                               |
-| Grid            | ON                               | ON                               | OFF                                                  | ON                               |
+| Water Mode      | Tank Valve (`water_valve_tank`) | Loop Valve (`water_valve_loop`) | Pump Overwrite Valve (`water_valve_pump_overwrite`) | Grid Valve (`water_valve_grid`) | Pump (`water_pump_relay`) |
+|-----------------|----------------------------------|----------------------------------|------------------------------------------------------|----------------------------------|----------------------------|
+| Normal          | OFF                              | OFF                              | OFF                                                  | OFF                              | Restore previous state     |
+| Pump Filling    | OFF                              | ON                               | ON                                                   | ON                               | Restore previous state     |
+| Grid Filling    | OFF                              | ON                               | OFF                                                  | ON                               | OFF                        |
+| Grid            | ON                               | ON                               | OFF                                                  | ON                               | OFF                        |
 
 ## State Machine Behavior
 
