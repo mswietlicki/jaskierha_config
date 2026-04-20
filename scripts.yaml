@@ -57,7 +57,7 @@ water_set_mode:
             {% else %}off
             {% endif %}
           desired_valve_3: >-
-            {% if target_mode == 'Pump Filling' %}on
+            {% if target_mode in ['Grid Filling', 'Grid'] %}on
             {% else %}off
             {% endif %}
           desired_valve_4: >-
