@@ -1,0 +1,52 @@
+- id: '1772610742505'
+  alias: Light press notification
+  description: ''
+  triggers:
+  - device_id: 3f67873a70ae0f4c20e5a1579d7b3604
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+  - device_id: 6929468e394bf280185ad4d26eff8c4d
+    domain: zha
+    type: remote_button_short_press
+    subtype: button
+    trigger: device
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    target:
+      entity_id: switch.relay_0
+    data: {}
+  mode: single
+- id: '1772611103694'
+  alias: Freezing Notice
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sensor_internal_temperature
+    below: 1
+  conditions: []
+  actions:
+  - action: notify.notify
+    metadata: {}
+    data:
+      message: Freezing temp internal
+  mode: single
+- id: '1776195340767'
+  alias: Battery Voltage
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.victron_battery_voltage
+    below: 12.8
+  conditions: []
+  actions:
+  - action: notify.notify
+    metadata: {}
+    data:
+      message: Battery low
+  mode: single

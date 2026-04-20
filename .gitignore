@@ -1,0 +1,92 @@
+# ========================
+# Core runtime / state
+# ========================
+.storage/
+home-assistant_v2.db*
+home-assistant.log*
+*.log
+*.db
+*.db-*
+*.sqlite*
+*.log.*
+
+# Locks / temp
+*.lock
+*.tmp
+*.swp
+*.bak
+
+# HA runtime dirs
+deps/
+tts/
+tmp/
+backup/
+
+# ========================
+# Secrets / sensitive
+# ========================
+secrets.yaml
+*.pem
+*.key
+*.crt
+*.pfx
+*.der
+
+# SSL folders
+ssl/
+certs/
+
+# ========================
+# Integrations data
+# ========================
+zigbee.db*
+zwave_js/
+esphome/
+*.json.bak
+
+# Frigate / cameras / media
+media/
+recordings/
+
+# ========================
+# Add-ons / containers
+# ========================
+addons/data/
+addons/local/
+share/
+
+# ========================
+# Editor / OS junk
+# ========================
+.vscode/
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# ========================
+# Node / frontend
+# ========================
+node_modules/
+
+# ========================
+# HA internal / misc
+# ========================
+.HA_VERSION
+.cache/
+.cloud/
+ha_run.lock
+image/
+
+# ========================
+# KEEP THESE (explicitly tracked)
+# ========================
+!.gitignore
+!configuration.yaml
+!automations.yaml
+!scripts.yaml
+!scenes.yaml
+!blueprints/
+!custom_components/
+!www/
+!packages/
+!modbus.yaml

@@ -1,0 +1,51 @@
+
+water_mode_normal:
+    alias: Water - Normal
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+            - switch.water_valve_1
+            - switch.water_valve_2
+            - switch.water_valve_3
+            - switch.water_valve_4
+
+water_mode_pump_filling:
+    alias: Water - Pump Filling
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.water_valve_1
+      - service: switch.turn_on
+        target:
+          entity_id:
+            - switch.water_valve_2
+            - switch.water_valve_3
+            - switch.water_valve_4
+
+water_mode_grid_filling:
+    alias: Water - Grid Filling
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+            - switch.water_valve_1
+            - switch.water_valve_3
+      - service: switch.turn_on
+        target:
+          entity_id:
+            - switch.water_valve_2
+            - switch.water_valve_4
+
+water_mode_grid:
+    alias: Water - Grid
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id:
+            - switch.water_valve_1
+            - switch.water_valve_2
+            - switch.water_valve_4
+      - service: switch.turn_off
+        target:
+          entity_id: switch.water_valve_3
