@@ -232,37 +232,37 @@ modbus:
         
     switches:
       - name: "Water Pump Relay"
-        unique_id: water_pump_relay_1
+        unique_id: water_pump_relay
         slave: 32
         address: 0
         write_type: coil
           
-      - name: "Water Relay 2"
-        unique_id: water_pump_relay_2
+      - name: "Gray Water Valve"
+        unique_id: gray_water_valve
         slave: 32
         address: 1
         write_type: coil
           
-      - name: Water Valve Tank
-        unique_id: water_valve_relay_1
+      - name: "Water Valve Tank"
+        unique_id: water_valve_tank
         slave: 33
         address: 0
         write_type: coil
         
-      - name: Water Valve Loop
-        unique_id: water_valve_relay_2
+      - name: "Water Valve Loop"
+        unique_id: water_valve_loop
         slave: 33
         address: 1
         write_type: coil
         
-      - name: Water Valve Pump Overwrite
-        unique_id: water_valve_relay_3
+      - name: "Water Valve Pump Overwrite"
+        unique_id: water_valve_pump_overwrite
         slave: 33
         address: 2
         write_type: coil
         
-      - name: Water Valve Grid
-        unique_id: water_valve_relay_4
+      - name: "Water Valve Grid"
+        unique_id: water_valve_grid
         slave: 33
         address: 3
         write_type: coil
