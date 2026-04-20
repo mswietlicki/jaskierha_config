@@ -47,6 +47,7 @@ water_set_mode:
     sequence:
       - variables:
           target_mode: "{{ mode }}"
+          pump_was_on: "{{ is_state('switch.water_pump_relay', 'on') }}"
           desired_valve_1: >-
             {% if target_mode == 'Grid' %}on
             {% else %}off
@@ -63,6 +64,10 @@ water_set_mode:
             {% if target_mode in ['Pump Filling', 'Grid Filling', 'Grid'] %}on
             {% else %}off
             {% endif %}
+
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
 
       - choose:
           - conditions:
@@ -145,3 +150,25 @@ water_set_mode:
           entity_id: input_select.water_mode_current
         data:
           option: "{{ target_mode }}"
+
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ target_mode in ['Grid Filling', 'Grid'] }}"
+            sequence:
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_pump_relay
+        default:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ pump_was_on }}"
+                sequence:
+                  - action: switch.turn_on
+                    target:
+                      entity_id: switch.water_pump_relay
+            default:
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.water_pump_relay

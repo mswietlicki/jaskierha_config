@@ -23,9 +23,12 @@ This document describes the target end-state for each water mode and the valve n
 - Desired mode is selected via `input_select.water_mode_target`.
 - Current applied mode is tracked in `input_select.water_mode_current`.
 - Transitions are performed by `script.water_set_mode`.
+- Pump is forced OFF before any valve transition starts.
 - Valves are changed one-by-one in sequence (never in parallel).
 - A 5-second delay is added after each valve action.
 - If a valve is already in the required state, no action is taken for that valve.
+- For `Grid` and `Grid Filling`, pump remains OFF after transition.
+- For other modes, pump returns to its pre-transition state.
 
 ## Compatibility Scripts
 
