@@ -31,6 +31,24 @@ input_select:
     initial: Normal
     icon: mdi:water-check
 
+template:
+  - binary_sensor:
+      - name: Water Mode Normal Selected
+        unique_id: water_mode_normal_selected
+        state: "{{ is_state('input_select.water_mode_target', 'Normal') }}"
+
+      - name: Water Mode Pump Filling Selected
+        unique_id: water_mode_pump_filling_selected
+        state: "{{ is_state('input_select.water_mode_target', 'Pump Filling') }}"
+
+      - name: Water Mode Grid Filling Selected
+        unique_id: water_mode_grid_filling_selected
+        state: "{{ is_state('input_select.water_mode_target', 'Grid Filling') }}"
+
+      - name: Water Mode Grid Selected
+        unique_id: water_mode_grid_selected
+        state: "{{ is_state('input_select.water_mode_target', 'Grid') }}"
+
 modbus:
   - name: relay_board
     type: rtuovertcp
