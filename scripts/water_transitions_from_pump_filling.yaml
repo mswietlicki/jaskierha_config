@@ -24,18 +24,9 @@ water_transition_pump_filling_to_normal:
           entity_id: input_select.water_mode_current
         data:
           option: Normal
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: "{{ pump_was_on | default(false) }}"
-            sequence:
-              - action: switch.turn_on
-                target:
-                  entity_id: switch.water_pump_relay
-        default:
-          - action: switch.turn_off
-            target:
-              entity_id: switch.water_pump_relay
+      - action: switch.turn_on
+        target:
+          entity_id: switch.water_pump_relay
 
 water_transition_pump_filling_to_grid_filling:
     alias: Water - Transition Pump Filling -> Grid Filling
