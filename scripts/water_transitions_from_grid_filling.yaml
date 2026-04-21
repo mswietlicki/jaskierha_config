@@ -14,15 +14,15 @@ water_transition_grid_filling_to_normal:
       - action: switch.turn_off
         target:
           entity_id: switch.water_valve_grid
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: switch.turn_off
         target:
           entity_id: switch.water_valve_loop
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: switch.turn_off
         target:
           entity_id: switch.water_valve_pump_overwrite
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: input_select.select_option
         target:
           entity_id: input_select.water_mode_current
@@ -57,7 +57,7 @@ water_transition_grid_filling_to_pump_filling:
       - action: switch.turn_off
         target:
           entity_id: switch.water_valve_pump_overwrite
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: input_select.select_option
         target:
           entity_id: input_select.water_mode_current
@@ -92,7 +92,7 @@ water_transition_grid_filling_to_grid:
       - action: switch.turn_on
         target:
           entity_id: switch.water_valve_tank
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: input_select.select_option
         target:
           entity_id: input_select.water_mode_current
