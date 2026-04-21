@@ -14,9 +14,9 @@ This document describes the target end-state for each water mode and the valve n
 | Water Mode | Tank Valve (`water_valve_tank`) | Loop Valve (`water_valve_loop`) | Pump Overwrite Valve (`water_valve_pump_overwrite`) | Grid Valve (`water_valve_grid`) | Pump (`water_pump_relay`) |
 | --- | --- | --- | --- | --- | --- |
 | Normal | OFF | OFF | OFF | OFF | Restore previous state |
-| Pump Filling | OFF | ON | OFF | ON | Restore previous state |
-| Grid Filling | OFF | ON | ON | ON | OFF |
-| Grid | ON | ON | ON | ON | OFF |
+| Pump Filling | OFF | ON | ON | ON | Restore previous state |
+| Grid Filling | OFF | ON | OFF | ON | OFF |
+| Grid | ON | ON | OFF | ON | OFF |
 
 ## State Machine Behavior
 
@@ -38,17 +38,17 @@ The sequence below lists only valves that actually change for each transition.
 
 | From | To | Valve Change Sequence |
 | --- | --- | --- |
-| Normal | Pump Filling | Loop -> Grid |
-| Normal | Grid Filling | Pump Overwrite -> Loop -> Grid |
-| Normal | Grid | Pump Overwrite -> Loop -> Grid -> Tank |
-| Pump Filling | Normal | Grid -> Loop |
+| Normal | Pump Filling | Pump Overwrite -> Loop -> Grid |
+| Normal | Grid Filling | Loop -> Grid |
+| Normal | Grid | Loop -> Grid -> Tank |
+| Pump Filling | Normal | Grid -> Loop -> Pump Overwrite |
 | Pump Filling | Grid Filling | Pump Overwrite |
 | Pump Filling | Grid | Pump Overwrite -> Tank |
-| Grid Filling | Normal | Grid -> Loop -> Pump Overwrite |
+| Grid Filling | Normal | Grid -> Loop |
 | Grid Filling | Pump Filling | Pump Overwrite |
 | Grid Filling | Grid | Tank |
-| Grid | Normal | Grid -> Loop -> Pump Overwrite -> Tank |
-| Grid | Pump Filling | Pump Overwrite -> Tank |
+| Grid | Normal | Grid -> Loop -> Tank |
+| Grid | Pump Filling | Tank -> Pump Overwrite |
 | Grid | Grid Filling | Tank |
 
 ## Compatibility Scripts

@@ -1,93 +1,89 @@
 water_transition_grid_to_normal:
-    alias: Water - Transition Grid -> Normal
-    description: "Order: Grid -> Loop -> Pump Overwrite -> Tank"
-    mode: queued
-    max: 5
-    fields:
-      pump_was_on:
-        description: Was pump on before transition.
-        example: true
-    sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_pump_relay
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_grid
-      - delay: "00:00:10"
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_loop
-      - delay: "00:00:10"
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_pump_overwrite
-      - delay: "00:00:10"
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_tank
-      - delay: "00:00:10"
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.water_mode_current
-        data:
-          option: Normal
-      - action: switch.turn_on
-        target:
-          entity_id: switch.water_pump_relay
+  alias: Water - Transition Grid -> Normal
+  description: "Order: Grid -> Loop -> Tank"
+  mode: queued
+  max: 5
+  fields:
+    pump_was_on:
+      description: Was pump on before transition.
+      example: true
+  sequence:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_pump_relay
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve_grid
+    - delay: "00:00:10"
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve_loop
+    - delay: "00:00:10"
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve_tank
+    - delay: "00:00:10"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.water_mode_current
+      data:
+        option: Normal
+    - action: switch.turn_on
+      target:
+        entity_id: switch.water_pump_relay
 
 water_transition_grid_to_pump_filling:
-    alias: Water - Transition Grid -> Pump Filling
-    description: "Order: Pump Overwrite -> Tank"
-    mode: queued
-    max: 5
-    fields:
-      pump_was_on:
-        description: Was pump on before transition.
-        example: true
-    sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_pump_relay
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_pump_overwrite
-      - delay: "00:00:10"
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_tank
-      - delay: "00:00:10"
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.water_mode_current
-        data:
-          option: Pump Filling
-      - action: switch.turn_on
-        target:
-          entity_id: switch.water_pump_relay
+  alias: Water - Transition Grid -> Pump Filling
+  description: "Order: Tank -> Pump Overwrite"
+  mode: queued
+  max: 5
+  fields:
+    pump_was_on:
+      description: Was pump on before transition.
+      example: true
+  sequence:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_pump_relay
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve_tank
+    - delay: "00:00:10"
+    - action: switch.turn_on
+      target:
+        entity_id: switch.water_valve_pump_overwrite
+    - delay: "00:00:10"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.water_mode_current
+      data:
+        option: Pump Filling
+    - action: switch.turn_on
+      target:
+        entity_id: switch.water_pump_relay
 
 water_transition_grid_to_grid_filling:
-    alias: Water - Transition Grid -> Grid Filling
-    description: "Order: Tank"
-    mode: queued
-    max: 5
-    fields:
-      pump_was_on:
-        description: Was pump on before transition.
-        example: true
-    sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_pump_relay
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_valve_tank
-      - delay: "00:00:10"
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.water_mode_current
-        data:
-          option: Grid Filling
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_pump_relay
+  alias: Water - Transition Grid -> Grid Filling
+  description: "Order: Tank"
+  mode: queued
+  max: 5
+  fields:
+    pump_was_on:
+      description: Was pump on before transition.
+      example: true
+  sequence:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_pump_relay
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve_tank
+    - delay: "00:00:10"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.water_mode_current
+      data:
+        option: Grid Filling
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_pump_relay
