@@ -94,10 +94,10 @@ template:
             Unknown
           {% endif %}
         options:
-          - Charger Only
-          - Inverter Only
-          - On
-          - Off
+          - "Charger Only"
+          - "Inverter Only"
+          - "On"
+          - "Off"
         select_option:
           - action: modbus.write_register
             data:
