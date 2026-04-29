@@ -93,11 +93,7 @@ template:
           {% else %}
             Unknown
           {% endif %}
-        options:
-          - "Charger Only"
-          - "Inverter Only"
-          - "On"
-          - "Off"
+        options: "{{ ['Charger Only', 'Inverter Only', 'On', 'Off'] }}"
         select_option:
           - action: modbus.write_register
             data:
