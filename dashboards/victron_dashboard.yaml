@@ -1,0 +1,126 @@
+title: Victron
+views:
+  - title: Overview
+    path: overview
+    icon: mdi:flash
+    cards:
+      - type: heading
+        heading: System Snapshot
+        icon: mdi:home-battery
+
+      - type: entities
+        title: Battery
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_battery_soc
+            name: State of Charge
+          - entity: sensor.victron_battery_voltage
+            name: Voltage
+          - entity: sensor.victron_battery_current
+            name: Current
+          - entity: sensor.victron_battery_power
+            name: Power
+          - entity: sensor.victron_battery_time_to_go_system
+            name: Time To Go
+          - entity: sensor.victron_battery_temperature
+            name: Battery Temperature
+          - entity: sensor.victron_bms_min_cell_temperature
+            name: BMS Min Cell Temperature
+          - entity: sensor.victron_bms_max_cell_temperature
+            name: BMS Max Cell Temperature
+
+      - type: entities
+        title: Solar
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_solar_panel_voltage
+            name: Panel Voltage
+          - entity: sensor.victron_solar_panel_current
+            name: Panel Current
+          - entity: sensor.victron_solar_panel_power
+            name: Panel Power
+          - entity: sensor.victron_dc_pv_power
+            name: DC PV Power (System)
+
+      - type: entities
+        title: Grid and Load
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_grid_power_l1
+            name: Grid Power L1
+          - entity: sensor.victron_ac_consumption_l1
+            name: AC Consumption L1
+
+  - title: Inverter
+    path: inverter
+    icon: mdi:power
+    cards:
+      - type: heading
+        heading: Inverter Control and Status
+        icon: mdi:transmission-tower
+
+      - type: entities
+        title: Inverter Control
+        show_header_toggle: false
+        entities:
+          - entity: select.inverter_mode
+            name: Mode
+          - entity: sensor.victron_vebus_state
+            name: VE.Bus State (raw)
+          - entity: sensor.victron_vebus_switch_position
+            name: VE.Bus Switch Position (raw)
+
+      - type: entities
+        title: BMS and VE.Bus Status
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_vebus_bms_error
+            name: VE.Bus BMS Error (raw)
+          - entity: sensor.victron_vebus_bms_allow_to_charge
+            name: BMS Allow To Charge
+          - entity: sensor.victron_vebus_bms_allow_to_discharge
+            name: BMS Allow To Discharge
+
+      - type: markdown
+        content: |
+          If some entities appear unavailable, adjust entity IDs in this dashboard file.
+          Entity IDs can differ from unique_id naming, depending on when entities were first created.
+
+  - title: Trends
+    path: trends
+    icon: mdi:chart-line
+    cards:
+      - type: heading
+        heading: Power Trends
+        icon: mdi:chart-box
+
+      - type: history-graph
+        title: Battery and Solar Power (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_power
+            name: Battery Power
+          - entity: sensor.victron_solar_panel_power
+            name: Solar Power
+          - entity: sensor.victron_dc_pv_power
+            name: DC PV Power
+
+      - type: history-graph
+        title: Grid and Load Power (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_grid_power_l1
+            name: Grid Power
+          - entity: sensor.victron_ac_consumption_l1
+            name: AC Consumption
+
+      - type: history-graph
+        title: Temperatures (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_temperature
+            name: Battery Temperature
+          - entity: sensor.victron_bms_min_cell_temperature
+            name: BMS Min Cell Temperature
+          - entity: sensor.victron_bms_max_cell_temperature
+            name: BMS Max Cell Temperature

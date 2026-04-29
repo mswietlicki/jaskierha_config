@@ -1,0 +1,248 @@
+- name: victron_cerbo
+  type: tcp
+  host: 192.168.88.22
+  port: 502
+  delay: 1
+  timeout: 5
+
+  sensors:
+    - name: "Stan baterii"
+      unique_id: victron_battery_soc
+      address: 843
+      slave: 100
+      input_type: holding
+      device_class: battery
+      unit_of_measurement: "%"
+      state_class: measurement
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "Battery Voltage"
+      unique_id: victron_battery_voltage
+      address: 840
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      data_type: uint16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "Battery Current"
+      unique_id: victron_battery_current
+      address: 841
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "Battery Power"
+      unique_id: victron_battery_power
+      address: 842
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: int16
+      scan_interval: 10
+
+    - name: "DC PV Power"
+      unique_id: victron_dc_pv_power
+      address: 850
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "Battery Time To Go (System)"
+      unique_id: victron_battery_time_to_go_system
+      address: 846
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "s"
+      state_class: measurement
+      data_type: uint16
+      scale: 0.01
+      precision: 0
+      scan_interval: 10
+
+    - name: "Solar Panel Voltage"
+      unique_id: victron_solar_panel_voltage
+      address: 776
+      slave: 226
+      input_type: holding
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      scan_interval: 10
+
+    - name: "Solar Panel Current"
+      unique_id: victron_solar_panel_current
+      address: 777
+      slave: 226
+      input_type: holding
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "Solar Panel Power"
+      unique_id: victron_solar_panel_power
+      address: 792
+      slave: 226
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: uint32
+      scan_interval: 10
+
+    - name: "Battery Temperature"
+      unique_id: victron_battery_temperature
+      address: 262
+      slave: 225
+      input_type: holding
+      unit_of_measurement: "C"
+      device_class: temperature
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "BMS Min Cell Temperature"
+      unique_id: victron_bms_min_cell_temperature
+      address: 318
+      slave: 225
+      input_type: holding
+      unit_of_measurement: "C"
+      device_class: temperature
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "BMS Max Cell Temperature"
+      unique_id: victron_bms_max_cell_temperature
+      address: 319
+      slave: 225
+      input_type: holding
+      unit_of_measurement: "C"
+      device_class: temperature
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "VE.Bus State"
+      unique_id: victron_vebus_state
+      address: 31
+      slave: 246
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "VE.Bus Switch Position"
+      unique_id: victron_vebus_switch_position
+      address: 33
+      slave: 246
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "VE.Bus BMS Error"
+      unique_id: victron_vebus_bms_error
+      address: 60
+      slave: 246
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "VE.Bus BMS Allow To Charge"
+      unique_id: victron_vebus_bms_allow_to_charge
+      address: 57
+      slave: 246
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "VE.Bus BMS Allow To Discharge"
+      unique_id: victron_vebus_bms_allow_to_discharge
+      address: 58
+      slave: 246
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "AC Consumption L1"
+      unique_id: victron_ac_consumption_l1
+      address: 817
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "Grid Power L1"
+      unique_id: victron_grid_power_l1
+      address: 820
+      slave: 100
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: int16
+      scan_interval: 10
+
+    - name: "Alternator Input Voltage"
+      slave: 239
+      address: 4117
+      input_type: holding
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+
+    - name: "Alternator Input Power"
+      slave: 239
+      address: 4118
+      input_type: holding
+      data_type: uint16
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+
+  selects:
+    - name: "Inverter Mode"
+      unique_id: victron_inverter_mode_control
+      slave: 246
+      address: 33
+      input_type: holding
+      optionsmap:
+        "Charger Only": 1
+        "Inverter Only": 2
+        "On": 3
+        "Off": 4

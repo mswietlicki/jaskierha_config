@@ -1,0 +1,56 @@
+- name: relay_board
+  type: rtuovertcp
+  host: 192.168.88.19
+  port: 502
+  delay: 1
+  timeout: 5
+  retries: 3
+
+  switches:
+    - name: Relay 0
+      unique_id: big_relay_0
+      slave: 1
+      address: 0
+      write_type: coil
+
+    - name: Relay 1
+      unique_id: big_relay_1
+      slave: 1
+      address: 1
+      write_type: coil
+
+    - name: Relay 2
+      unique_id: big_relay_2
+      slave: 1
+      address: 2
+      write_type: coil
+
+    - name: Relay 3
+      unique_id: big_relay_3
+      slave: 1
+      address: 3
+      write_type: coil
+
+    - name: Relay 4
+      unique_id: big_relay_4
+      slave: 1
+      address: 4
+      write_type: coil
+
+    - name: Relay 5
+      unique_id: big_relay_5
+      slave: 1
+      address: 5
+      write_type: coil
+
+    - name: Relay 6
+      unique_id: big_relay_6
+      slave: 1
+      address: 6
+      write_type: coil
+
+    - name: Relay 7
+      unique_id: big_relay_7
+      slave: 1
+      address: 7
+      write_type: coil
