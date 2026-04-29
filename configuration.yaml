@@ -59,3 +59,56 @@ template:
       - name: Water Mode Grid Selected
         unique_id: water_mode_grid_selected
         state: "{{ is_state('input_select.water_mode_target', 'Grid') }}"
+
+    sensor:
+      - name: VE.Bus Switch Position Mode
+        unique_id: victron_vebus_switch_position_mode
+        state: >
+          {% set mode = states('sensor.victron_vebus_switch_position') | int(-1) %}
+          {% if mode == 1 %}
+            Charger Only
+          {% elif mode == 2 %}
+            Inverter Only
+          {% elif mode == 3 %}
+            On
+          {% elif mode == 4 %}
+            Off
+          {% else %}
+            Unknown
+          {% endif %}
+
+    select:
+      - name: Inverter Mode
+        unique_id: victron_inverter_mode_control
+        state: >
+          {% set mode = states('sensor.victron_vebus_switch_position') | int(-1) %}
+          {% if mode == 1 %}
+            Charger Only
+          {% elif mode == 2 %}
+            Inverter Only
+          {% elif mode == 3 %}
+            On
+          {% elif mode == 4 %}
+            Off
+          {% else %}
+            Unknown
+          {% endif %}
+        options:
+          - Charger Only
+          - Inverter Only
+          - On
+          - Off
+        select_option:
+          - action: modbus.write_register
+            data:
+              hub: victron_cerbo
+              slave: 227
+              address: 33
+              value: >
+                {% set mode_map = {
+                  'Charger Only': 1,
+                  'Inverter Only': 2,
+                  'On': 3,
+                  'Off': 4
+                } %}
+                {{ mode_map.get(option, 4) }}

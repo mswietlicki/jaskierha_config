@@ -272,14 +272,3 @@
       device_class: power
       state_class: measurement
 
-  selects:
-    - name: "Inverter Mode"
-      unique_id: victron_inverter_mode_control
-      slave: 227
-      address: 33
-      input_type: holding
-      optionsmap:
-        "Charger Only": 1
-        "Inverter Only": 2
-        "On": 3
-        "Off": 4
