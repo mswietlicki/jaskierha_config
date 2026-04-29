@@ -95,16 +95,9 @@ template:
           {% endif %}
         options: "{{ ['Charger Only', 'Inverter Only', 'On', 'Off'] }}"
         select_option:
-          - action: modbus.write_register
+          - service: modbus.write_register
             data:
               hub: victron_cerbo
               slave: 227
               address: 33
-              value: >
-                {% set mode_map = {
-                  'Charger Only': 1,
-                  'Inverter Only': 2,
-                  'On': 3,
-                  'Off': 4
-                } %}
-                {{ mode_map.get(option, 4) }}
+              value: "{{ {'Charger Only': 1, 'Inverter Only': 2, 'On': 3, 'Off': 4}.get(option, 4) | int }}"
