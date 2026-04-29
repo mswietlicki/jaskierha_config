@@ -77,7 +77,7 @@
       precision: 0
       scan_interval: 10
 
-    - name: "Solar Panel Voltage"
+    - name: "Solar 226 Panel Voltage"
       unique_id: victron_solar_panel_voltage
       address: 776
       slave: 226
@@ -90,7 +90,7 @@
       precision: 2
       scan_interval: 10
 
-    - name: "Solar Panel Current"
+    - name: "Solar 226 Panel Current"
       unique_id: victron_solar_panel_current
       address: 777
       slave: 226
@@ -103,7 +103,7 @@
       precision: 1
       scan_interval: 10
 
-    - name: "Solar Panel Power"
+    - name: "Solar 226 Panel Power"
       unique_id: victron_solar_panel_power
       address: 792
       slave: 226
@@ -114,10 +114,47 @@
       data_type: uint32
       scan_interval: 10
 
+    - name: "Solar 224 Panel Voltage"
+      unique_id: victron_solar_224_panel_voltage
+      address: 776
+      slave: 224
+      input_type: holding
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      scan_interval: 10
+
+    - name: "Solar 224 Panel Current"
+      unique_id: victron_solar_224_panel_current
+      address: 777
+      slave: 224
+      input_type: holding
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 10
+
+    - name: "Solar 224 Panel Power"
+      unique_id: victron_solar_224_panel_power
+      address: 792
+      slave: 224
+      input_type: holding
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      data_type: uint32
+      scan_interval: 10
+
     - name: "Battery Temperature"
       unique_id: victron_battery_temperature
       address: 262
-      slave: 225
+      slave: 239
       input_type: holding
       unit_of_measurement: "C"
       device_class: temperature
@@ -130,7 +167,7 @@
     - name: "BMS Min Cell Temperature"
       unique_id: victron_bms_min_cell_temperature
       address: 318
-      slave: 225
+      slave: 239
       input_type: holding
       unit_of_measurement: "C"
       device_class: temperature
@@ -143,7 +180,7 @@
     - name: "BMS Max Cell Temperature"
       unique_id: victron_bms_max_cell_temperature
       address: 319
-      slave: 225
+      slave: 239
       input_type: holding
       unit_of_measurement: "C"
       device_class: temperature
@@ -156,7 +193,7 @@
     - name: "VE.Bus State"
       unique_id: victron_vebus_state
       address: 31
-      slave: 246
+      slave: 227
       input_type: holding
       data_type: uint16
       scan_interval: 10
@@ -164,7 +201,7 @@
     - name: "VE.Bus Switch Position"
       unique_id: victron_vebus_switch_position
       address: 33
-      slave: 246
+      slave: 227
       input_type: holding
       data_type: uint16
       scan_interval: 10
@@ -172,7 +209,7 @@
     - name: "VE.Bus BMS Error"
       unique_id: victron_vebus_bms_error
       address: 60
-      slave: 246
+      slave: 227
       input_type: holding
       data_type: uint16
       scan_interval: 10
@@ -180,7 +217,7 @@
     - name: "VE.Bus BMS Allow To Charge"
       unique_id: victron_vebus_bms_allow_to_charge
       address: 57
-      slave: 246
+      slave: 227
       input_type: holding
       data_type: uint16
       scan_interval: 10
@@ -188,7 +225,7 @@
     - name: "VE.Bus BMS Allow To Discharge"
       unique_id: victron_vebus_bms_allow_to_discharge
       address: 58
-      slave: 246
+      slave: 227
       input_type: holding
       data_type: uint16
       scan_interval: 10
@@ -238,7 +275,7 @@
   selects:
     - name: "Inverter Mode"
       unique_id: victron_inverter_mode_control
-      slave: 246
+      slave: 227
       address: 33
       input_type: holding
       optionsmap:

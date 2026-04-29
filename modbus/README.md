@@ -32,7 +32,7 @@ Devices on this hub:
   - 846: Battery time-to-go (system)
   - 817: AC consumption L1
   - 820: Grid power L1
-- Slave `225` (assumed): Victron battery service registers:
+- Slave `239`: Victron battery service registers:
   - 262: Battery temperature
   - 318: Minimum cell temperature
   - 319: Maximum cell temperature
@@ -40,7 +40,7 @@ Devices on this hub:
   - 776: PV voltage
   - 777: PV current
   - 792: PV power
-- Slave `246` (assumed): Victron VE.Bus inverter/charger registers:
+- Slave `227`: Victron VE.Bus inverter/charger registers:
   - 31: VE.Bus state
   - 33: VE.Bus switch position (control)
   - 57: BMS allows charge
@@ -50,7 +50,7 @@ Devices on this hub:
   - 4117: Alternator input voltage
   - 4118: Alternator input power
 
-Note: IDs `225`, `226`, and `246` are common defaults for Victron services and may vary by installation. If an entity is unavailable, check your Cerbo GX Modbus service list and update `slave` values in [modbus/victron_cerbo.yaml](modbus/victron_cerbo.yaml).
+Note: ID `226` is a common default for Victron solar service and may vary by installation. If an entity is unavailable, check your Cerbo GX Modbus service list and update `slave` values in [modbus/victron_cerbo.yaml](modbus/victron_cerbo.yaml).
 
 ## Hub: rs485_1
 
