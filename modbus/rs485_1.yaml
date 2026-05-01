@@ -40,7 +40,7 @@
     - name: "Water Heater Relay"
       unique_id: water_heater_relay
       slave: 1
-      address: 0
+      address: 1
       write_type: coil
 
     - name: "Gray Water Valve"
