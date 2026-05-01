@@ -40,6 +40,12 @@
     - name: "Water Heater Relay"
       unique_id: water_heater_relay
       slave: 1
+      address: 0
+      write_type: coil
+
+    - name: "Water Heater Relay 2"
+      unique_id: water_heater_relay_2
+      slave: 1
       address: 1
       write_type: coil
 
