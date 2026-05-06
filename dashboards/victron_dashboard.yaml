@@ -9,7 +9,7 @@ views:
         icon: mdi:home-battery
 
       - type: entities
-        title: Battery
+        title: Battery Status
         show_header_toggle: false
         entities:
           - entity: sensor.victron_battery_soc
@@ -20,9 +20,39 @@ views:
             name: Current
           - entity: sensor.victron_battery_power
             name: Power
+          - entity: sensor.victron_battery_time_to_go_system
+            name: Time To Go
+          - entity: sensor.victron_battery_temperature
+            name: Battery Temperature
+          - entity: sensor.victron_bms_min_cell_temperature
+            name: BMS Min Cell Temperature
+          - entity: sensor.victron_bms_max_cell_temperature
+            name: BMS Max Cell Temperature
 
       - type: entities
-        title: Solar
+        title: Solar Charger 226
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_solar_panel_voltage
+            name: Panel Voltage
+          - entity: sensor.victron_solar_panel_current
+            name: Panel Current
+          - entity: sensor.victron_solar_panel_power
+            name: Panel Power
+
+      - type: entities
+        title: Solar Charger 224
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_solar_224_panel_voltage
+            name: Panel Voltage
+          - entity: sensor.victron_solar_224_panel_current
+            name: Panel Current
+          - entity: sensor.victron_solar_224_panel_power
+            name: Panel Power
+
+      - type: entities
+        title: Total System
         show_header_toggle: false
         entities:
           - entity: sensor.victron_dc_pv_power
@@ -37,39 +67,42 @@ views:
           - entity: sensor.victron_ac_consumption_l1
             name: AC Consumption L1
 
-  - title: System Status
-    path: status
-    icon: mdi:speedometer
+  - title: Inverter & VE.Bus
+    path: inverter
+    icon: mdi:power
     cards:
       - type: heading
-        heading: Inverter Status
+        heading: Inverter Control and Status
         icon: mdi:transmission-tower
 
       - type: entities
         title: VE.Bus Control
         show_header_toggle: false
         entities:
+          - entity: select.inverter_mode
+            name: Mode
+          - entity: sensor.victron_vebus_state
+            name: VE.Bus State
           - entity: sensor.victron_vebus_switch_position
             name: Switch Position
 
-      - type: markdown
-        content: |
-          ## Missing Entities - Pending Configuration
-          
-          The following entities are defined in modbus but not yet available in Home Assistant:
-          - **Battery**: Temperature, BMS cell temps, Time to Go
-          - **Solar**: All panel voltage/current/power (226 & 224)
-          - **VE.Bus**: State, BMS Error, Charge/Discharge flags
-          - **Alternator**: Voltage and Power
-          
-          Check the Modbus TCP integration to ensure sensors are scanned and converting properly.
+      - type: entities
+        title: BMS and Charge Control
+        show_header_toggle: false
+        entities:
+          - entity: sensor.victron_vebus_bms_error
+            name: BMS Error
+          - entity: sensor.victron_vebus_bms_allow_to_charge
+            name: BMS Allow To Charge
+          - entity: sensor.victron_vebus_bms_allow_to_discharge
+            name: BMS Allow To Discharge
 
   - title: Trends
     path: trends
     icon: mdi:chart-line
     cards:
       - type: heading
-        heading: Power Trends
+        heading: Power and Energy Trends
         icon: mdi:chart-box
 
       - type: history-graph
@@ -80,6 +113,17 @@ views:
             name: Battery Power
 
       - type: history-graph
+        title: Solar Generation (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_solar_panel_power
+            name: Solar 226 Power
+          - entity: sensor.victron_solar_224_panel_power
+            name: Solar 224 Power
+          - entity: sensor.victron_dc_pv_power
+            name: Total DC PV Power
+
+      - type: history-graph
         title: Grid and Load Power (24h)
         hours_to_show: 24
         entities:
@@ -87,3 +131,43 @@ views:
             name: Grid Power
           - entity: sensor.victron_ac_consumption_l1
             name: AC Consumption
+
+      - type: history-graph
+        title: Battery State of Charge (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_soc
+            name: State of Charge
+
+      - type: history-graph
+        title: Battery Voltages (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_voltage
+            name: Battery Voltage
+          - entity: sensor.victron_solar_panel_voltage
+            name: Solar 226 Panel Voltage
+          - entity: sensor.victron_solar_224_panel_voltage
+            name: Solar 224 Panel Voltage
+
+      - type: history-graph
+        title: Temperatures (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_temperature
+            name: Battery Temperature
+          - entity: sensor.victron_bms_min_cell_temperature
+            name: BMS Min Cell Temperature
+          - entity: sensor.victron_bms_max_cell_temperature
+            name: BMS Max Cell Temperature
+
+      - type: history-graph
+        title: Battery Current (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.victron_battery_current
+            name: Battery Current
+          - entity: sensor.victron_solar_panel_current
+            name: Solar 226 Current
+          - entity: sensor.victron_solar_224_panel_current
+            name: Solar 224 Current
