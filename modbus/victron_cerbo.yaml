@@ -164,32 +164,6 @@
       precision: 1
       scan_interval: 10
 
-    - name: "BMS Min Cell Temperature"
-      unique_id: victron_bms_min_cell_temperature
-      address: 318
-      slave: 239
-      input_type: holding
-      unit_of_measurement: "°C"
-      device_class: temperature
-      state_class: measurement
-      data_type: int16
-      scale: 0.1
-      precision: 1
-      scan_interval: 10
-
-    - name: "BMS Max Cell Temperature"
-      unique_id: victron_bms_max_cell_temperature
-      address: 319
-      slave: 239
-      input_type: holding
-      unit_of_measurement: "°C"
-      device_class: temperature
-      state_class: measurement
-      data_type: int16
-      scale: 0.1
-      precision: 1
-      scan_interval: 10
-
     - name: "VE.Bus State"
       unique_id: victron_vebus_state
       address: 31

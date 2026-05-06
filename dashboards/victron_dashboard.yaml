@@ -24,10 +24,6 @@ views:
             name: Time To Go
           - entity: sensor.victron_battery_temperature
             name: Battery Temperature
-          - entity: sensor.victron_bms_min_cell_temperature
-            name: BMS Min Cell Temperature
-          - entity: sensor.victron_bms_max_cell_temperature
-            name: BMS Max Cell Temperature
 
       - type: entities
         title: Solar Charger 226
@@ -81,8 +77,6 @@ views:
         entities:
           - entity: select.inverter_mode
             name: Mode
-          - entity: sensor.victron_vebus_state
-            name: VE.Bus State
           - entity: sensor.victron_vebus_switch_position
             name: Switch Position
 
@@ -156,10 +150,6 @@ views:
         entities:
           - entity: sensor.victron_battery_temperature
             name: Battery Temperature
-          - entity: sensor.victron_bms_min_cell_temperature
-            name: BMS Min Cell Temperature
-          - entity: sensor.victron_bms_max_cell_temperature
-            name: BMS Max Cell Temperature
 
       - type: history-graph
         title: Battery Current (24h)
