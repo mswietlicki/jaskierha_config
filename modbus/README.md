@@ -71,3 +71,8 @@ Devices on this hub:
   - Coil 1: Water valve loop
   - Coil 2: Water valve pump overwrite
   - Coil 3: Water valve grid
+- Slave `34`: Relay module 4-ch
+  - Coil 0: Water heater
+  - Coil 1: None
+  - Coil 2: None
+  - Coil 3: None

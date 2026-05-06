@@ -66,3 +66,49 @@
     data:
       mode: "{{ trigger.to_state.state }}"
   mode: queued
+
+- id: water_heating_control
+  alias: Water - Heating Control
+  description: Keep boiler temperature near the configured target using the water heater relay.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.boiler_temp
+    - input_boolean.water_heating_enabled
+    - input_number.water_heating_target_temp
+    - input_number.water_heating_hysteresis
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - variables:
+      heating_enabled: "{{ is_state('input_boolean.water_heating_enabled', 'on') }}"
+      boiler_temp: "{{ states('sensor.boiler_temp') | float(none) }}"
+      target_temp: "{{ states('input_number.water_heating_target_temp') | float(45) }}"
+      hysteresis: "{{ states('input_number.water_heating_hysteresis') | float(3) }}"
+      lower_limit: "{{ target_temp - hysteresis }}"
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ not heating_enabled }}"
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_heater_relay
+
+    - conditions:
+      - condition: template
+        value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp <= lower_limit }}"
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.water_heater_relay
+
+    - conditions:
+      - condition: template
+        value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp >= target_temp }}"
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_heater_relay
+  mode: single
