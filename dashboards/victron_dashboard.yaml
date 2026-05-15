@@ -12,55 +12,55 @@ views:
         title: Battery Status
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_battery_soc
+          - entity: sensor.shunt_main_charge
             name: State of Charge
-          - entity: sensor.victron_battery_voltage
+          - entity: sensor.shunt_main_dc_bus_voltage
             name: Voltage
-          - entity: sensor.victron_battery_current
+          - entity: sensor.shunt_main_dc_bus_current
             name: Current
-          - entity: sensor.victron_battery_power
+          - entity: sensor.shunt_main_power
             name: Power
-          - entity: sensor.victron_battery_time_to_go_system
+          - entity: sensor.shunt_main_time_to_go
             name: Time To Go
-          - entity: sensor.victron_battery_temperature
+          - entity: sensor.shunt_main_temperature
             name: Battery Temperature
 
       - type: entities
         title: Solar Charger 226
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_solar_panel_voltage
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
             name: Panel Voltage
-          - entity: sensor.victron_solar_panel_current
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_dc_battery_bus_current
             name: Panel Current
-          - entity: sensor.victron_solar_panel_power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
             name: Panel Power
 
       - type: entities
         title: Solar Charger 224
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_solar_224_panel_voltage
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
             name: Panel Voltage
-          - entity: sensor.victron_solar_224_panel_current
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
             name: Panel Current
-          - entity: sensor.victron_solar_224_panel_power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
             name: Panel Power
 
       - type: entities
         title: Total System
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_dc_pv_power
+          - entity: sensor.gx_device_pv_power
             name: DC PV Power (System)
 
       - type: entities
         title: Grid and Load
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_grid_power_l1
+          - entity: sensor.inverter_input_power_l1
             name: Grid Power L1
-          - entity: sensor.victron_ac_consumption_l1
+          - entity: sensor.gx_device_consumption_power_l1
             name: AC Consumption L1
 
   - title: Inverter & VE.Bus
@@ -77,19 +77,19 @@ views:
         entities:
           - entity: select.inverter_mode
             name: Mode
-          - entity: sensor.victron_vebus_switch_position
-            name: Switch Position
+          - entity: sensor.inverter_state
+            name: Inverter State
 
       - type: entities
         title: BMS and Charge Control
         show_header_toggle: false
         entities:
-          - entity: sensor.victron_vebus_bms_error
-            name: BMS Error
-          - entity: sensor.victron_vebus_bms_allow_to_charge
-            name: BMS Allow To Charge
-          - entity: sensor.victron_vebus_bms_allow_to_discharge
-            name: BMS Allow To Discharge
+          - entity: sensor.inverter_low_battery_alarm
+            name: Low Battery Alarm
+          - entity: sensor.inverter_grid_lost_alarm
+            name: Grid Lost Alarm
+          - entity: sensor.inverter_overload_alarm
+            name: Overload Alarm
 
   - title: Trends
     path: trends
@@ -103,61 +103,61 @@ views:
         title: Battery Power (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_battery_power
+          - entity: sensor.shunt_main_power
             name: Battery Power
 
       - type: history-graph
         title: Solar Generation (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_solar_panel_power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
             name: Solar 226 Power
-          - entity: sensor.victron_solar_224_panel_power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
             name: Solar 224 Power
-          - entity: sensor.victron_dc_pv_power
+          - entity: sensor.gx_device_pv_power
             name: Total DC PV Power
 
       - type: history-graph
         title: Grid and Load Power (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_grid_power_l1
+          - entity: sensor.inverter_input_power_l1
             name: Grid Power
-          - entity: sensor.victron_ac_consumption_l1
+          - entity: sensor.gx_device_consumption_power_l1
             name: AC Consumption
 
       - type: history-graph
         title: Battery State of Charge (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_battery_soc
+          - entity: sensor.shunt_main_charge
             name: State of Charge
 
       - type: history-graph
         title: Battery Voltages (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_battery_voltage
+          - entity: sensor.shunt_main_dc_bus_voltage
             name: Battery Voltage
-          - entity: sensor.victron_solar_panel_voltage
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
             name: Solar 226 Panel Voltage
-          - entity: sensor.victron_solar_224_panel_voltage
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
             name: Solar 224 Panel Voltage
 
       - type: history-graph
         title: Temperatures (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_battery_temperature
+          - entity: sensor.shunt_main_temperature
             name: Battery Temperature
 
       - type: history-graph
         title: Battery Current (24h)
         hours_to_show: 24
         entities:
-          - entity: sensor.victron_battery_current
+          - entity: sensor.shunt_main_dc_bus_current
             name: Battery Current
-          - entity: sensor.victron_solar_panel_current
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_dc_battery_bus_current
             name: Solar 226 Current
-          - entity: sensor.victron_solar_224_panel_current
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
             name: Solar 224 Current
