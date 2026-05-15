@@ -126,9 +126,9 @@ template:
             data:
               option: >
                 {% set map = {
-                  'Charger Only': 'Charger only',
-                  'Inverter Only': 'Inverter only',
-                  'On': 'On',
-                  'Off': 'Off'
+                  'Charger Only': 'charger',
+                  'Inverter Only': 'inverter',
+                  'On': 'on',
+                  'Off': 'off'
                 } %}
                 {{ map.get(option, option) }}
