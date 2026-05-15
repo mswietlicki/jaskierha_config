@@ -21,20 +21,64 @@
     data: {}
   mode: single
 - id: '1772611103694'
-  alias: Freezing Notice
-  description: ''
+  alias: Temperature - Freezing Warning/Error
+  description: Warn before freezing, alert on freeze, and notify on recovery.
   triggers:
   - trigger: numeric_state
     entity_id:
     - sensor.sensor_internal_temperature
-    below: 1
+    below: 3
+    for:
+      minutes: 5
+    id: warning
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sensor_internal_temperature
+    below: 0
+    for:
+      minutes: 2
+    id: critical
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sensor_internal_temperature
+    above: 4
+    for:
+      minutes: 5
+    id: recovered
   conditions: []
   actions:
-  - action: notify.notify
-    metadata: {}
-    data:
-      message: Freezing temp internal
-  mode: single
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: warning
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Temperature Warning"
+          message: >
+            Internal temperature is low: {{ states('sensor.sensor_internal_temperature') }} °C
+
+    - conditions:
+      - condition: trigger
+        id: critical
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Temperature Error - Freezing Risk"
+          message: >
+            Freezing detected. Internal temperature is {{ states('sensor.sensor_internal_temperature') }} °C
+
+    - conditions:
+      - condition: trigger
+        id: recovered
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Temperature Recovery"
+          message: >
+            Temperature recovered to {{ states('sensor.sensor_internal_temperature') }} °C
+  mode: queued
+  max: 5
 - id: '1776195340767'
   alias: Victron - Battery Warning/Error
   description: Notify on low battery voltage and low battery charge.
@@ -68,7 +112,7 @@
       sequence:
       - action: notify.notify
         data:
-          title: "Victron Warning"
+          title: "Victron Battery Warning"
           message: "Battery voltage low: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
 
     - conditions:
@@ -77,7 +121,7 @@
       sequence:
       - action: notify.notify
         data:
-          title: "Victron Error"
+          title: "Victron Battery Error"
           message: "Battery voltage critical: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
 
     - conditions:
@@ -86,7 +130,7 @@
       sequence:
       - action: notify.notify
         data:
-          title: "Victron Warning"
+          title: "Victron Battery Warning"
           message: "Battery charge low: {{ states('sensor.shunt_main_charge') }} %"
 
     - conditions:
@@ -95,7 +139,7 @@
       sequence:
       - action: notify.notify
         data:
-          title: "Victron Error"
+          title: "Victron Battery Error"
           message: "Battery charge critical: {{ states('sensor.shunt_main_charge') }} %"
   mode: single
 
@@ -123,7 +167,7 @@
   actions:
   - action: notify.notify
     data:
-      title: "Victron Error"
+      title: "Victron Inverter Alarm"
       message: >
         Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
   mode: queued
@@ -144,7 +188,7 @@
   actions:
   - action: notify.notify
     data:
-      title: "Victron Error"
+      title: "Victron Dynamic ESS Error"
       message: "Dynamic ESS error: {{ trigger.to_state.state }}"
   mode: single
 
@@ -164,7 +208,7 @@
   actions:
   - action: notify.notify
     data:
-      title: "Victron Warning"
+      title: "Victron SmartSolar Warning"
       message: >
         SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
   mode: queued
@@ -185,7 +229,7 @@
   actions:
   - action: notify.notify
     data:
-      title: "Victron Warning"
+      title: "Victron GX System Warning"
       message: "GX system state changed: {{ trigger.to_state.state }}"
   mode: single
 
