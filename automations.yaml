@@ -36,19 +36,157 @@
       message: Freezing temp internal
   mode: single
 - id: '1776195340767'
-  alias: Battery Voltage
-  description: ''
+  alias: Victron - Battery Warning/Error
+  description: Notify on low battery voltage and low battery charge.
   triggers:
   - trigger: numeric_state
     entity_id:
-    - sensor.victron_battery_voltage
+    - sensor.shunt_main_dc_bus_voltage
     below: 12.8
+    id: voltage_warning
+  - trigger: numeric_state
+    entity_id:
+    - sensor.shunt_main_dc_bus_voltage
+    below: 12.2
+    id: voltage_error
+  - trigger: numeric_state
+    entity_id:
+    - sensor.shunt_main_charge
+    below: 25
+    id: soc_warning
+  - trigger: numeric_state
+    entity_id:
+    - sensor.shunt_main_charge
+    below: 15
+    id: soc_error
   conditions: []
   actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: voltage_warning
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Victron Warning"
+          message: "Battery voltage low: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
+
+    - conditions:
+      - condition: trigger
+        id: voltage_error
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Victron Error"
+          message: "Battery voltage critical: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
+
+    - conditions:
+      - condition: trigger
+        id: soc_warning
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Victron Warning"
+          message: "Battery charge low: {{ states('sensor.shunt_main_charge') }} %"
+
+    - conditions:
+      - condition: trigger
+        id: soc_error
+      sequence:
+      - action: notify.notify
+        data:
+          title: "Victron Error"
+          message: "Battery charge critical: {{ states('sensor.shunt_main_charge') }} %"
+  mode: single
+
+- id: victron_inverter_alarm_notifications
+  alias: Victron - Inverter Alarm Warning/Error
+  description: Notify when inverter alarm sensors report a non-OK state.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.inverter_grid_lost_alarm
+    - sensor.inverter_high_dc_current_alarm
+    - sensor.inverter_high_dc_voltage_alarm
+    - sensor.inverter_high_temperature_alarm
+    - sensor.inverter_low_battery_alarm
+    - sensor.inverter_overload_alarm
+    - sensor.inverter_phase_rotation_alarm
+    - sensor.inverter_ripple_alarm
+    - sensor.inverter_temperature_sensor_alarm
+    - sensor.inverter_voltage_sensor_alarm
+  conditions:
+  - condition: template
+    value_template: >
+      {% set val = trigger.to_state.state | lower %}
+      {{ val not in ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable'] }}
+  actions:
   - action: notify.notify
-    metadata: {}
     data:
-      message: Battery low
+      title: "Victron Error"
+      message: >
+        Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
+  mode: queued
+  max: 20
+
+- id: victron_dynamic_ess_error_notification
+  alias: Victron - Dynamic ESS Error Notification
+  description: Notify when Dynamic ESS reports an error.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.gx_device_dynamic_ess_error
+  conditions:
+  - condition: template
+    value_template: >
+      {% set val = trigger.to_state.state | lower %}
+      {{ val not in ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable'] }}
+  actions:
+  - action: notify.notify
+    data:
+      title: "Victron Error"
+      message: "Dynamic ESS error: {{ trigger.to_state.state }}"
+  mode: single
+
+- id: victron_solar_charger_error_notifications
+  alias: Victron - Solar Charger Error Notifications
+  description: Notify when SmartSolar chargers report non-zero error code.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
+    - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
+  conditions:
+  - condition: template
+    value_template: >
+      {% set val = trigger.to_state.state | lower %}
+      {{ val not in ['0', 'none', 'ok', 'normal', 'unknown', 'unavailable'] }}
+  actions:
+  - action: notify.notify
+    data:
+      title: "Victron Warning"
+      message: >
+        SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
+  mode: queued
+  max: 10
+
+- id: victron_system_state_warning
+  alias: Victron - System State Warning
+  description: Notify when GX system state leaves normal operating state.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.gx_device_system_state
+  conditions:
+  - condition: template
+    value_template: >
+      {% set val = trigger.to_state.state | lower %}
+      {{ val not in ['on', 'running', 'normal', 'ok', 'unknown', 'unavailable'] }}
+  actions:
+  - action: notify.notify
+    data:
+      title: "Victron Warning"
+      message: "GX system state changed: {{ trigger.to_state.state }}"
   mode: single
 
 - id: water_mode_state_machine_transition
