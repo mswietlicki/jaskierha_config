@@ -8,6 +8,23 @@ views:
         heading: System Snapshot
         icon: mdi:home-battery
 
+      - type: glance
+        title: At a Glance
+        show_state: true
+        entities:
+          - entity: sensor.shunt_main_charge
+            name: SoC
+          - entity: sensor.shunt_main_power
+            name: Battery Power
+          - entity: sensor.gx_device_pv_power
+            name: PV Power
+          - entity: sensor.inverter_input_power_l1
+            name: Grid Power
+          - entity: sensor.gx_device_consumption_power_l1
+            name: Load Power
+          - entity: sensor.gx_device_system_state
+            name: System State
+
       - type: entities
         title: Battery Status
         show_header_toggle: false
@@ -24,6 +41,29 @@ views:
             name: Time To Go
           - entity: sensor.shunt_main_temperature
             name: Battery Temperature
+          - entity: sensor.shunt_main_capacity
+            name: Capacity
+
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.shunt_main_charge
+            name: State of Charge
+            min: 0
+            max: 100
+            severity:
+              red: 0
+              yellow: 25
+              green: 50
+          - type: gauge
+            entity: sensor.shunt_main_temperature
+            name: Battery Temp
+            min: -10
+            max: 60
+            severity:
+              green: 0
+              yellow: 35
+              red: 45
 
       - type: entities
         title: Solar Charger 226
@@ -35,6 +75,12 @@ views:
             name: Panel Current
           - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
             name: Panel Power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_state
+            name: Charger State
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_error_code
+            name: Error Code
+          - entity: binary_sensor.smartsolar_charger_mppt_100_30_id_279_load_state
+            name: Load Enabled
 
       - type: entities
         title: Solar Charger 224
@@ -46,13 +92,33 @@ views:
             name: Panel Current
           - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
             name: Panel Power
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_state
+            name: Charger State
+          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_error_code
+            name: Error Code
+          - entity: binary_sensor.smartsolar_charger_mppt_100_30_id_278_load_state
+            name: Load Enabled
 
       - type: entities
-        title: Total System
+        title: GX System
         show_header_toggle: false
         entities:
           - entity: sensor.gx_device_pv_power
             name: DC PV Power (System)
+          - entity: sensor.gx_device_pv_current
+            name: PV Current
+          - entity: sensor.gx_device_pv_energy
+            name: PV Energy
+          - entity: sensor.gx_device_dc_battery_power
+            name: DC Battery Power
+          - entity: sensor.gx_device_dc_battery_voltage
+            name: DC Battery Voltage
+          - entity: sensor.gx_device_dc_battery_current
+            name: DC Battery Current
+          - entity: sensor.gx_device_ac_active_input_source
+            name: Active AC Input
+          - entity: sensor.gx_device_system_state
+            name: System State
 
       - type: entities
         title: Grid and Load
@@ -62,6 +128,40 @@ views:
             name: Grid Power L1
           - entity: sensor.gx_device_consumption_power_l1
             name: AC Consumption L1
+          - entity: sensor.gx_device_consumption_current_l1
+            name: AC Consumption Current L1
+          - entity: sensor.inverter_input_voltage_l1
+            name: Grid Voltage L1
+          - entity: sensor.inverter_input_frequency_l1
+            name: Grid Frequency L1
+
+      - type: entities
+        title: Quick Control
+        show_header_toggle: false
+        entities:
+          - entity: select.inverter
+            name: Inverter Mode
+          - entity: number.inverter_current_limit
+            name: Inverter Current Limit
+          - entity: switch.inverter_0_powerassist_enabled
+            name: PowerAssist
+          - entity: switch.inverter_control_ignore_ac_in_1
+            name: Ignore AC-in-1
+
+      - type: entities
+        title: Critical Alarms
+        show_header_toggle: false
+        entities:
+          - entity: sensor.inverter_low_battery_alarm
+            name: Low Battery Alarm
+          - entity: sensor.inverter_grid_lost_alarm
+            name: Grid Lost Alarm
+          - entity: sensor.inverter_overload_alarm
+            name: Overload Alarm
+          - entity: sensor.inverter_high_temperature_alarm
+            name: High Temp Alarm
+          - entity: sensor.gx_device_dynamic_ess_error
+            name: Dynamic ESS Error
 
   - title: Inverter & VE.Bus
     path: inverter
@@ -72,16 +172,58 @@ views:
         icon: mdi:transmission-tower
 
       - type: entities
-        title: VE.Bus Control
+        title: Inverter Control
         show_header_toggle: false
         entities:
-          - entity: select.inverter_mode
+          - entity: select.inverter
             name: Mode
+          - entity: number.inverter_current_limit
+            name: Current Limit
+          - entity: number.inverter_assist_current_boost_factor
+            name: Assist Boost Factor
+          - entity: switch.inverter_0_powerassist_enabled
+            name: PowerAssist
+          - entity: switch.inverter_control_ignore_ac_in_1
+            name: Ignore AC-in-1
           - entity: sensor.inverter_state
             name: Inverter State
+          - entity: binary_sensor.inverter_connected
+            name: Connected
 
       - type: entities
-        title: BMS and Charge Control
+        title: AC Side
+        show_header_toggle: false
+        entities:
+          - entity: sensor.inverter_active_ac_input
+            name: Active AC Input
+          - entity: sensor.inverter_input_power_l1
+            name: Input Power L1
+          - entity: sensor.inverter_input_voltage_l1
+            name: Input Voltage L1
+          - entity: sensor.inverter_input_current_l1
+            name: Input Current L1
+          - entity: sensor.inverter_output_power_l1
+            name: Output Power L1
+          - entity: sensor.inverter_output_voltage_l1
+            name: Output Voltage L1
+          - entity: sensor.inverter_output_current_l1
+            name: Output Current L1
+
+      - type: entities
+        title: DC Side and Thermal
+        show_header_toggle: false
+        entities:
+          - entity: sensor.inverter_dc_power
+            name: DC Power
+          - entity: sensor.inverter_dc_voltage
+            name: DC Voltage
+          - entity: sensor.inverter_dc_current
+            name: DC Current
+          - entity: sensor.inverter_dc_temperature
+            name: DC Temperature
+
+      - type: entities
+        title: Inverter Alarms
         show_header_toggle: false
         entities:
           - entity: sensor.inverter_low_battery_alarm
@@ -90,6 +232,18 @@ views:
             name: Grid Lost Alarm
           - entity: sensor.inverter_overload_alarm
             name: Overload Alarm
+          - entity: sensor.inverter_high_dc_current_alarm
+            name: High DC Current Alarm
+          - entity: sensor.inverter_high_dc_voltage_alarm
+            name: High DC Voltage Alarm
+          - entity: sensor.inverter_high_temperature_alarm
+            name: High Temperature Alarm
+          - entity: sensor.inverter_ripple_alarm
+            name: Ripple Alarm
+          - entity: sensor.inverter_voltage_sensor_alarm
+            name: Voltage Sensor Alarm
+          - entity: sensor.inverter_temperature_sensor_alarm
+            name: Temperature Sensor Alarm
 
   - title: Trends
     path: trends
@@ -105,6 +259,8 @@ views:
         entities:
           - entity: sensor.shunt_main_power
             name: Battery Power
+          - entity: sensor.gx_device_dc_battery_power
+            name: GX Battery Power
 
       - type: history-graph
         title: Solar Generation (24h)
@@ -125,6 +281,8 @@ views:
             name: Grid Power
           - entity: sensor.gx_device_consumption_power_l1
             name: AC Consumption
+          - entity: sensor.inverter_output_power_l1
+            name: Inverter Output Power
 
       - type: history-graph
         title: Battery State of Charge (24h)
@@ -161,3 +319,16 @@ views:
             name: Solar 226 Current
           - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
             name: Solar 224 Current
+
+      - type: history-graph
+        title: Inverter Voltage and Frequency (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.inverter_input_voltage_l1
+            name: Grid Voltage
+          - entity: sensor.inverter_output_voltage_l1
+            name: Output Voltage
+          - entity: sensor.inverter_input_frequency_l1
+            name: Grid Frequency
+          - entity: sensor.inverter_output_frequency_l1
+            name: Output Frequency
