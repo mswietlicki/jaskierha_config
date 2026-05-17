@@ -281,3 +281,28 @@
         target:
           entity_id: switch.water_heater_relay
   mode: single
+
+- id: floorheating_auto_off_without_ac_input
+  alias: Floor Heating - Auto Disable Without AC Input
+  description: Turn off floor heating after 5 minutes unless the inverter reports an active AC input.
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.floorheating
+    to: 'on'
+    for:
+      minutes: 5
+  conditions:
+  - condition: state
+    entity_id: switch.floorheating
+    state: 'on'
+  - condition: template
+    value_template: >
+      {% set ac_input = states('sensor.inverter_active_ac_input') | lower | trim %}
+      {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
+      {{ ac_input in inactive or ac_input.startswith('no ') }}
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.floorheating
+  mode: single
