@@ -22,7 +22,7 @@
   mode: single
 - id: '1772611103694'
   alias: Temperature - Freezing Warning/Error
-  description: Warn before freezing, alert on freeze, and notify on recovery.
+  description: Warn before freezing and alert on freeze.
   triggers:
   - trigger: numeric_state
     entity_id:
@@ -41,10 +41,6 @@
   - trigger: numeric_state
     entity_id:
     - sensor.sensor_internal_temperature
-    above: 4
-    for:
-      minutes: 5
-    id: recovered
   conditions: []
   actions:
   - choose:
@@ -67,16 +63,6 @@
           title: "Temperature Error - Freezing Risk"
           message: >
             Freezing detected. Internal temperature is {{ states('sensor.sensor_internal_temperature') }} °C
-
-    - conditions:
-      - condition: trigger
-        id: recovered
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Temperature Recovery"
-          message: >
-            Temperature recovered to {{ states('sensor.sensor_internal_temperature') }} °C
   mode: queued
   max: 5
 - id: '1776195340767'
@@ -162,8 +148,9 @@
   conditions:
   - condition: template
     value_template: >
-      {% set val = trigger.to_state.state | lower %}
-      {{ val not in ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable'] }}
+      {% set val = trigger.to_state.state | lower | trim %}
+      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+      {{ val not in benign and not val.startswith('no ') }}
   actions:
   - action: notify.notify
     data:
@@ -183,8 +170,9 @@
   conditions:
   - condition: template
     value_template: >
-      {% set val = trigger.to_state.state | lower %}
-      {{ val not in ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable'] }}
+      {% set val = trigger.to_state.state | lower | trim %}
+      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+      {{ val not in benign and not val.startswith('no ') }}
   actions:
   - action: notify.notify
     data:
@@ -203,8 +191,9 @@
   conditions:
   - condition: template
     value_template: >
-      {% set val = trigger.to_state.state | lower %}
-      {{ val not in ['0', 'none', 'ok', 'normal', 'unknown', 'unavailable'] }}
+      {% set val = trigger.to_state.state | lower | trim %}
+      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+      {{ val not in benign and not val.startswith('no ') }}
   actions:
   - action: notify.notify
     data:
@@ -224,8 +213,9 @@
   conditions:
   - condition: template
     value_template: >
-      {% set val = trigger.to_state.state | lower %}
-      {{ val not in ['on', 'running', 'normal', 'ok', 'unknown', 'unavailable'] }}
+      {% set val = trigger.to_state.state | lower | trim %}
+      {% set benign = ['on', 'running', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+      {{ val not in benign and not val.startswith('no ') }}
   actions:
   - action: notify.notify
     data:
