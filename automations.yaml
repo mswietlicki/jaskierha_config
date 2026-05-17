@@ -38,9 +38,6 @@
     for:
       minutes: 2
     id: critical
-  - trigger: numeric_state
-    entity_id:
-    - sensor.sensor_internal_temperature
   conditions: []
   actions:
   - choose:
