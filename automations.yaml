@@ -306,3 +306,25 @@
     target:
       entity_id: switch.floorheating
   mode: single
+
+- id: floorheating_turn_off_when_ac_input_inactive
+  alias: Floor Heating - Disable On Inactive AC Input
+  description: Turn off floor heating when the inverter AC input becomes inactive.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.inverter_active_ac_input
+  conditions:
+  - condition: state
+    entity_id: switch.floorheating
+    state: 'on'
+  - condition: template
+    value_template: >
+      {% set ac_input = trigger.to_state.state | lower | trim %}
+      {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
+      {{ ac_input in inactive or ac_input.startswith('no ') }}
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.floorheating
+  mode: single
