@@ -136,3 +136,20 @@ template:
                   'Off': 'off'
                 } %}
                 {{ map.get(option, option) }}
+
+    switch:
+      - name: Inverter Power
+        unique_id: victron_inverter_power_switch
+        state: "{{ states('select.inverter') | lower == 'on' }}"
+        turn_on:
+          - service: select.select_option
+            target:
+              entity_id: select.inverter
+            data:
+              option: On
+        turn_off:
+          - service: select.select_option
+            target:
+              entity_id: select.inverter
+            data:
+              option: Off
