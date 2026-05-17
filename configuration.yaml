@@ -12,6 +12,10 @@ scene: !include scenes.yaml
 
 modbus: !include_dir_merge_list modbus
 
+sensor:
+  - platform: torque
+    email: jaskier
+    
 lovelace:
   dashboards:
     victron-dashboard:
