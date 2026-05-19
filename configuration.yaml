@@ -117,6 +117,7 @@ template:
           {% if voltage is none %}
             {{ none }}
           {% else %}
+            {# Standard 12V lead-acid resting voltage reference: 11.8V empty, 12.8V full #}
             {% set empty_soc_voltage = 11.8 %}
             {% set full_soc_voltage = 12.8 %}
             {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage - empty_soc_voltage)) * 100 %}
