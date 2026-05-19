@@ -136,6 +136,29 @@ views:
             name: Grid Frequency L1
 
       - type: entities
+        title: Orion XS
+        show_header_toggle: false
+        entities:
+          - entity: switch.orion_xs
+            name: Enabled
+          - entity: sensor.orion_xs_state
+            name: State
+          - entity: number.orion_xs_charge_current_limit
+            name: Charge Current Limit
+          - entity: sensor.orion_xs_input_voltage
+            name: Input Voltage
+          - entity: sensor.orion_xs_input_current
+            name: Input Current
+          - entity: sensor.orion_xs_input_power
+            name: Input Power
+          - entity: sensor.orion_xs_dc_output_voltage
+            name: Output Voltage
+          - entity: sensor.orion_xs_dc_output_current
+            name: Output Current
+          - entity: sensor.orion_xs_dc_output_power
+            name: Output Power
+
+      - type: entities
         title: Quick Control
         show_header_toggle: false
         entities:
@@ -283,6 +306,15 @@ views:
             name: AC Consumption
           - entity: sensor.inverter_output_power_l1
             name: Inverter Output Power
+
+      - type: history-graph
+        title: Orion XS Power (24h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.orion_xs_input_power
+            name: Orion Input Power
+          - entity: sensor.orion_xs_dc_output_power
+            name: Orion Output Power
 
       - type: history-graph
         title: Battery State of Charge (24h)
