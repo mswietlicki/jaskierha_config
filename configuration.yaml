@@ -111,10 +111,12 @@ template:
         unit_of_measurement: "%"
         device_class: battery
         state_class: measurement
-        availability: "{{ states('sensor.orion_xs_input_voltage') not in ['unknown', 'unavailable', 'none', ''] }}"
+        availability: "{{ states('sensor.orion_xs_input_voltage') | float(none) is not none }}"
         state: >
           {% set voltage = states('sensor.orion_xs_input_voltage') | float(0) %}
-          {% set soc = ((voltage - 11.8) / 1.0) * 100 %}
+          {% set min_voltage = 11.8 %}
+          {% set max_voltage = 12.8 %}
+          {% set soc = ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100 %}
           {{ [0, [soc, 100] | min] | max | round(0) }}
 
     select:
