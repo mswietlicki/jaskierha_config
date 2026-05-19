@@ -117,7 +117,7 @@ template:
           {% if voltage is none %}
             {{ none }}
           {% else %}
-            {# Standard 12V lead-acid resting reference: 11.8V empty, 12.8V full; estimates are less accurate during active charge/discharge #}
+            {# Approximate 12V lead-acid resting reference: 11.8V empty, 12.8V full; calibrate thresholds for battery chemistry/age and load profile #}
             {% set empty_soc_voltage = 11.8 %}
             {% set full_soc_voltage = 12.8 %}
             {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage - empty_soc_voltage)) * 100 %}
