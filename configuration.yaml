@@ -106,6 +106,17 @@ template:
             Unknown
           {% endif %}
 
+      - name: Orion XS Input Battery State of Charge
+        unique_id: orion_xs_input_battery_state_of_charge
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        availability: "{{ states('sensor.orion_xs_input_voltage') not in ['unknown', 'unavailable', 'none', ''] }}"
+        state: >
+          {% set voltage = states('sensor.orion_xs_input_voltage') | float(0) %}
+          {% set soc = ((voltage - 11.8) / 1.0) * 100 %}
+          {{ [0, [soc, 100] | min] | max | round(0) }}
+
     select:
       - name: Inverter Mode
         unique_id: victron_inverter_mode_control
