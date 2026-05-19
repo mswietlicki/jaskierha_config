@@ -113,11 +113,15 @@ template:
         state_class: measurement
         availability: "{{ states('sensor.orion_xs_input_voltage') | float(none) is not none }}"
         state: >
-          {% set voltage = states('sensor.orion_xs_input_voltage') | float(0) %}
-          {% set min_voltage = 11.8 %}
-          {% set max_voltage = 12.8 %}
-          {% set soc = ((voltage - min_voltage) / (max_voltage - min_voltage)) * 100 %}
-          {{ [0, [soc, 100] | min] | max | round(0) }}
+          {% set voltage = states('sensor.orion_xs_input_voltage') | float(none) %}
+          {% if voltage is none %}
+            {{ none }}
+          {% else %}
+            {% set empty_soc_voltage = 11.8 %}
+            {% set full_soc_voltage = 12.8 %}
+            {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage - empty_soc_voltage)) * 100 %}
+            {{ [0, [soc, 100] | min] | max | round(0) }}
+          {% endif %}
 
     select:
       - name: Inverter Mode
