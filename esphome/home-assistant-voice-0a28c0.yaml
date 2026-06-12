@@ -19,6 +19,7 @@ wifi:
 micro_wake_word:
   models:
     - model: jaskier.json
+      id: jaskier
   on_wake_word_detected:
     - logger.log: "Wake word detected!"
 
