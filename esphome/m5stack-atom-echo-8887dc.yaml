@@ -17,16 +17,18 @@ wifi:
 
 remote_receiver:
   pin:
-    number: GPIO1
+    # Grove signal pin on Atom Echo (primary candidate for IR receiver input)
+    number: GPIO26
     inverted: true
   dump: all
-  rmt_symbols: 128
+  rmt_symbols: 256
   tolerance: 25%
   filter: 50us
   idle: 4ms
 
-# GPIO2 output
-remote_transmitter:
-  pin: GPIO2
-  carrier_duty_percent: 50%
+# Keep transmit disabled while learning/decoding remote codes.
+# Enable after receiver pin/protocol is confirmed, then set to your real IR TX pin.
+# remote_transmitter:
+#   pin: GPIO2
+#   carrier_duty_percent: 50%
 
