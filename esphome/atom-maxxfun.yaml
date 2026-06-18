@@ -1,6 +1,6 @@
 substitutions:
   name: "atom-maxxfun"
-  friendly_name: M5Stack Atom Echo
+  friendly_name: MaxxFan Remote
 esphome:
   name: ${name}
   name_add_mac_suffix: false
