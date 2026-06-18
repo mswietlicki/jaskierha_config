@@ -140,3 +140,49 @@ script:
           fan_exhaust: false
           auto_mode: true
           auto_temperature: 72  # 22 deg C
+
+button:
+  - platform: template
+    name: "MaxxFan Off"
+    on_press:
+      - script.execute: maxxfan_off
+
+  - platform: template
+    name: "MaxxFan Out Low"
+    on_press:
+      - script.execute: maxxfan_out_low
+
+  - platform: template
+    name: "MaxxFan Out Mid"
+    on_press:
+      - script.execute: maxxfan_out_mid
+
+  - platform: template
+    name: "MaxxFan Out Full"
+    on_press:
+      - script.execute: maxxfan_out_full
+
+  - platform: template
+    name: "MaxxFan Out Auto 22C"
+    on_press:
+      - script.execute: maxxfan_out_auto_22c
+
+  - platform: template
+    name: "MaxxFan In Low"
+    on_press:
+      - script.execute: maxxfan_in_low
+
+  - platform: template
+    name: "MaxxFan In Mid"
+    on_press:
+      - script.execute: maxxfan_in_mid
+
+  - platform: template
+    name: "MaxxFan In Full"
+    on_press:
+      - script.execute: maxxfan_in_full
+
+  - platform: template
+    name: "MaxxFan In Auto 22C"
+    on_press:
+      - script.execute: maxxfan_in_auto_22c
