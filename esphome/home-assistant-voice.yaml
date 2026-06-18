@@ -3,7 +3,6 @@ substitutions:
   friendly_name: Home Assistant Voice
 packages:
   Nabu Casa.Home Assistant Voice PE: github://esphome/home-assistant-voice-pe/home-assistant-voice.yaml
-  # grove-power: github://esphome/home-assistant-voice-pe/modules/grove-power.yaml
 esphome:
   name: ${name}
   name_add_mac_suffix: false
@@ -22,19 +21,3 @@ micro_wake_word:
       id: jaskier
   on_wake_word_detected:
     - logger.log: "Wake word detected!"
-
-# remote_receiver:
-#   pin:
-#     number: GPIO1
-#     inverted: true
-#   dump: all
-#   rmt_symbols: 128
-#   tolerance: 25%
-#   filter: 50us
-#   idle: 4ms
-
-# # GPIO2 output
-# remote_transmitter:
-#   pin: GPIO2
-#   carrier_duty_percent: 50%
-
