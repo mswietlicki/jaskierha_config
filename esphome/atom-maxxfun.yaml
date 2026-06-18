@@ -1,5 +1,5 @@
 substitutions:
-  name: m5stack-atom-echo-8887dc
+  name: "atom-maxxfun"
   friendly_name: M5Stack Atom Echo
 esphome:
   name: ${name}
@@ -11,6 +11,9 @@ esp32:
   framework:
     type: esp-idf
 
+ota:
+  platform: esphome
+  
 api:
   encryption:
     key: mbfqgtsjasGjpl4NMO5kkNw+pXD9JRXF/hAQ0VtF2LQ=
