@@ -22,20 +22,118 @@ wifi:
 logger:
   level: DEBUG
 
+external_components:
+  - source: github://brown-studios/esphome-maxxfan-protocol@main
+    components: [ maxxfan_protocol ]
+
+maxxfan_protocol:
+
 remote_receiver:
+  id: ir_receiver
   pin:
-    # Grove signal pin on Atom Echo (primary candidate for IR receiver input)
-    number: GPIO26
+    number: GPIO32
     inverted: true
-  dump: all
+  dump: maxxfan
   rmt_symbols: 256
   tolerance: 25%
   filter: 50us
   idle: 4ms
+  on_maxxfan:
+    then:
+      - lambda: |-
+          ESP_LOGI("maxxfan", "fan_on=%d exhaust=%d cover_open=%d auto=%d speed=%d auto_temp=%dF",
+            x.fan_on, x.fan_exhaust, x.cover_open, x.auto_mode, x.fan_speed, x.auto_temperature);
 
-# Keep transmit disabled while learning/decoding remote codes.
-# Enable after receiver pin/protocol is confirmed, then set to your real IR TX pin.
-# remote_transmitter:
-#   pin: GPIO2
-#   carrier_duty_percent: 50%
+remote_transmitter:
+  id: ir_transmitter
+  pin: GPIO26
+  carrier_duty_percent: 50%
 
+script:
+  # Fan off, lid closed
+  - id: maxxfan_off
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: false
+          cover_open: false
+          fan_exhaust: true
+          fan_speed: 10
+
+  # --- AIR OUT (exhaust) ---
+
+  - id: maxxfan_out_low
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: true
+          fan_speed: 30
+
+  - id: maxxfan_out_mid
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: true
+          fan_speed: 60
+
+  - id: maxxfan_out_full
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: true
+          fan_speed: 100
+
+  # Auto thermostat, 22C (72F), exhaust
+  - id: maxxfan_out_auto_22c
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          fan_exhaust: true
+          auto_mode: true
+          auto_temperature: 72  # 22 deg C
+
+  # --- AIR IN (intake) ---
+
+  - id: maxxfan_in_low
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: false
+          fan_speed: 30
+
+  - id: maxxfan_in_mid
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: false
+          fan_speed: 60
+
+  - id: maxxfan_in_full
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          cover_open: true
+          fan_exhaust: false
+          fan_speed: 100
+
+  # Auto thermostat, 22C (72F), intake
+  - id: maxxfan_in_auto_22c
+    then:
+      - remote_transmitter.transmit_maxxfan:
+          transmitter_id: ir_transmitter
+          fan_on: true
+          fan_exhaust: false
+          auto_mode: true
+          auto_temperature: 72  # 22 deg C
