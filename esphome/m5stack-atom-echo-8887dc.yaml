@@ -1,0 +1,32 @@
+substitutions:
+  name: m5stack-atom-echo-8887dc
+  friendly_name: M5Stack Atom Echo
+packages:
+  grove-power: github://esphome/home-assistant-voice-pe/modules/grove-power.yaml
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+api:
+  encryption:
+    key: mbfqgtsjasGjpl4NMO5kkNw+pXD9JRXF/hAQ0VtF2LQ=
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+remote_receiver:
+  pin:
+    number: GPIO1
+    inverted: true
+  dump: all
+  rmt_symbols: 128
+  tolerance: 25%
+  filter: 50us
+  idle: 4ms
+
+# GPIO2 output
+remote_transmitter:
+  pin: GPIO2
+  carrier_duty_percent: 50%
+
