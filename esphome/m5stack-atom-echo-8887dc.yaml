@@ -1,8 +1,6 @@
 substitutions:
   name: m5stack-atom-echo-8887dc
   friendly_name: M5Stack Atom Echo
-packages:
-  grove-power: github://esphome/home-assistant-voice-pe/modules/grove-power.yaml
 esphome:
   name: ${name}
   name_add_mac_suffix: false
