@@ -88,3 +88,5 @@ image/
 !www/
 !packages/
 !modbus/
+!secrets.yaml.example
+!setup-secrets.sh
