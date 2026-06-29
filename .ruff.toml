@@ -1,0 +1,78 @@
+# This file was added by Code Editor for Home Assistant workspaces.
+# It teaches Ruff about names that Home Assistant and Pyscript provide at
+# runtime, so they are not reported as undefined variables.
+builtins = [
+  # Pyscript helper namespaces and function prefixes.
+  "state",
+  "service",
+  "event",
+  "log",
+  "task",
+  "pyscript",
+
+  # Pyscript decorators.
+  "event_trigger",
+  "mqtt_trigger",
+  "pyscript_compile",
+  "pyscript_executor",
+  "state_active",
+  "state_trigger",
+  "task_unique",
+  "time_active",
+  "time_trigger",
+  "webhook_trigger",
+
+  # Home Assistant python_script sandbox globals.
+  "data",
+  "datetime",
+  "dt_util",
+  "hass",
+  "logger",
+  "output",
+  "time",
+
+  # Common Home Assistant service and entity domains used as Pyscript globals.
+  "alarm_control_panel",
+  "automation",
+  "binary_sensor",
+  "button",
+  "calendar",
+  "camera",
+  "climate",
+  "cover",
+  "device_tracker",
+  "fan",
+  "humidifier",
+  "input_boolean",
+  "input_datetime",
+  "input_number",
+  "input_select",
+  "input_text",
+  "light",
+  "lock",
+  "media_player",
+  "notify",
+  "number",
+  "person",
+  "persistent_notification",
+  "remote",
+  "scene",
+  "script",
+  "select",
+  "sensor",
+  "switch",
+  "timer",
+  "todo",
+  "vacuum",
+  "water_heater",
+  "weather",
+  "zone",
+]
+
+[lint]
+# Pyscript files commonly use wildcard imports and runtime-provided globals.
+# These ignores reduce false positives without disabling Ruff for other files.
+
+[lint.per-file-ignores]
+"pyscript/*.py" = ["F403", "F405"]
+"pyscript/**/*.py" = ["F403", "F405"]
