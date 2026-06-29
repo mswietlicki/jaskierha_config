@@ -150,7 +150,9 @@
         {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
         {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-    - action: notify.msphone29
+    - action: notify.send_message
+      target:
+        entity_id: notify.msphone29
       data:
         title: "Victron Inverter Alarm"
         message: >
@@ -173,7 +175,9 @@
         {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
         {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-    - action: notify.msphone29
+    - action: notify.send_message
+      target:
+        entity_id: notify.msphone29
       data:
         title: "Victron Dynamic ESS Error"
         message: "Dynamic ESS error: {{ trigger.to_state.state }}"
@@ -195,7 +199,9 @@
         {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
         {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-    - action: notify.msphone29
+    - action: notify.send_message
+      target:
+        entity_id: notify.msphone29
       data:
         title: "Victron SmartSolar Warning"
         message: >
@@ -218,7 +224,9 @@
         {% set benign = ['on', 'running', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
         {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-    - action: notify.msphone29
+    - action: notify.send_message
+      target:
+        entity_id: notify.msphone29
       data:
         title: "Victron GX System Warning"
         message: "GX system state changed: {{ trigger.to_state.state }}"
