@@ -1,159 +1,160 @@
-- id: '1772610742505'
+- id: "1772610742505"
   alias: Light press notification
-  description: ''
+  description: ""
   triggers:
-  - device_id: 3f67873a70ae0f4c20e5a1579d7b3604
-    domain: zha
-    type: remote_button_short_press
-    subtype: button
-    trigger: device
-  - device_id: 6929468e394bf280185ad4d26eff8c4d
-    domain: zha
-    type: remote_button_short_press
-    subtype: button
-    trigger: device
+    - device_id: 3f67873a70ae0f4c20e5a1579d7b3604
+      domain: zha
+      type: remote_button_short_press
+      subtype: button
+      trigger: device
+    - device_id: 6929468e394bf280185ad4d26eff8c4d
+      domain: zha
+      type: remote_button_short_press
+      subtype: button
+      trigger: device
   conditions: []
   actions:
-  - action: switch.toggle
-    metadata: {}
-    target:
-      entity_id: switch.relay_0
-    data: {}
+    - action: switch.toggle
+      metadata: {}
+      target:
+        entity_id: switch.relay_0
+      data: {}
   mode: single
-- id: '1772611103694'
+- id: "1772611103694"
   alias: Temperature - Freezing Warning/Error
   description: Warn before freezing and alert on freeze.
   triggers:
-  - trigger: numeric_state
-    entity_id:
-    - sensor.sensor_internal_temperature
-    below: 3
-    for:
-      minutes: 5
-    id: warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.sensor_internal_temperature
-    below: 0
-    for:
-      minutes: 2
-    id: critical
+    - trigger: numeric_state
+      entity_id:
+        - sensor.sensor_internal_temperature
+      below: 3
+      for:
+        minutes: 5
+      id: warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.sensor_internal_temperature
+      below: 0
+      for:
+        minutes: 2
+      id: critical
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: warning
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Temperature Warning"
-          message: >
-            Internal temperature is low: {{ states('sensor.sensor_internal_temperature') }} °C
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: warning
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Temperature Warning"
+                message: >
+                  Internal temperature is low: {{ states('sensor.sensor_internal_temperature') }} °C
 
-    - conditions:
-      - condition: trigger
-        id: critical
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Temperature Error - Freezing Risk"
-          message: >
-            Freezing detected. Internal temperature is {{ states('sensor.sensor_internal_temperature') }} °C
+        - conditions:
+            - condition: trigger
+              id: critical
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Temperature Error - Freezing Risk"
+                message: >
+                  Freezing detected. Internal temperature is {{ states('sensor.sensor_internal_temperature') }} °C
   mode: queued
   max: 5
-- id: '1776195340767'
+- id: "1776195340767"
   alias: Victron - Battery Warning/Error
   description: Notify on low battery voltage and low battery charge.
   triggers:
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_dc_bus_voltage
-    below: 12.8
-    id: voltage_warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_dc_bus_voltage
-    below: 12.2
-    id: voltage_error
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_charge
-    below: 25
-    id: soc_warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_charge
-    below: 15
-    id: soc_error
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_dc_bus_voltage
+      below: 12.8
+      id: voltage_warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_dc_bus_voltage
+      below: 12.2
+      id: voltage_error
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_charge
+      below: 25
+      id: soc_warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_charge
+      below: 15
+      id: soc_error
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: voltage_warning
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Victron Battery Warning"
-          message: "Battery voltage low: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: voltage_warning
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Victron Battery Warning"
+                message: "Battery voltage low: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
 
-    - conditions:
-      - condition: trigger
-        id: voltage_error
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Victron Battery Error"
-          message: "Battery voltage critical: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
+        - conditions:
+            - condition: trigger
+              id: voltage_error
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Victron Battery Error"
+                message: "Battery voltage critical: {{ states('sensor.shunt_main_dc_bus_voltage') }} V"
 
-    - conditions:
-      - condition: trigger
-        id: soc_warning
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Victron Battery Warning"
-          message: "Battery charge low: {{ states('sensor.shunt_main_charge') }} %"
+        - conditions:
+            - condition: trigger
+              id: soc_warning
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Victron Battery Warning"
+                message: "Battery charge low: {{ states('sensor.shunt_main_charge') }} %"
 
-    - conditions:
-      - condition: trigger
-        id: soc_error
-      sequence:
-      - action: notify.notify
-        data:
-          title: "Victron Battery Error"
-          message: "Battery charge critical: {{ states('sensor.shunt_main_charge') }} %"
+        - conditions:
+            - condition: trigger
+              id: soc_error
+          sequence:
+            - action: notify.notify
+              data:
+                title: "Victron Battery Error"
+                message: "Battery charge critical: {{ states('sensor.shunt_main_charge') }} %"
   mode: single
 
 - id: victron_inverter_alarm_notifications
   alias: Victron - Inverter Alarm Warning/Error
   description: Notify when inverter alarm sensors report a non-OK state.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.inverter_grid_lost_alarm
-    - sensor.inverter_high_dc_current_alarm
-    - sensor.inverter_high_dc_voltage_alarm
-    - sensor.inverter_high_temperature_alarm
-    - sensor.inverter_low_battery_alarm
-    - sensor.inverter_overload_alarm
-    - sensor.inverter_phase_rotation_alarm
-    - sensor.inverter_ripple_alarm
-    - sensor.inverter_temperature_sensor_alarm
-    - sensor.inverter_voltage_sensor_alarm
+    - trigger: state
+      entity_id:
+        - sensor.inverter_grid_lost_alarm
+        - sensor.inverter_high_dc_current_alarm
+        - sensor.inverter_high_dc_voltage_alarm
+        - sensor.inverter_high_temperature_alarm
+        - sensor.inverter_low_battery_alarm
+        - sensor.inverter_overload_alarm
+        - sensor.inverter_phase_rotation_alarm
+        - sensor.inverter_ripple_alarm
+        - sensor.inverter_temperature_sensor_alarm
+        - sensor.inverter_voltage_sensor_alarm
   conditions:
-  - condition: template
-    value_template: >
-      {% set val = trigger.to_state.state | lower | trim %}
-      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
-      {{ val not in benign and not val.startswith('no ') }}
+    - condition: template
+      value_template: >
+        {% set val = trigger.to_state.state | lower | trim %}
+        {% set old_val = (trigger.from_state.state if trigger.from_state else 'unknown') | lower | trim %}
+        {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+        {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-  - action: notify.notify
-    data:
-      title: "Victron Inverter Alarm"
-      message: >
-        Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
+    - action: notify.msphone29
+      data:
+        title: "Victron Inverter Alarm"
+        message: >
+          Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
   mode: queued
   max: 20
 
@@ -161,42 +162,44 @@
   alias: Victron - Dynamic ESS Error Notification
   description: Notify when Dynamic ESS reports an error.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.gx_device_dynamic_ess_error
+    - trigger: state
+      entity_id:
+        - sensor.gx_device_dynamic_ess_error
   conditions:
-  - condition: template
-    value_template: >
-      {% set val = trigger.to_state.state | lower | trim %}
-      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
-      {{ val not in benign and not val.startswith('no ') }}
+    - condition: template
+      value_template: >
+        {% set val = trigger.to_state.state | lower | trim %}
+        {% set old_val = (trigger.from_state.state if trigger.from_state else 'unknown') | lower | trim %}
+        {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+        {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-  - action: notify.notify
-    data:
-      title: "Victron Dynamic ESS Error"
-      message: "Dynamic ESS error: {{ trigger.to_state.state }}"
+    - action: notify.msphone29
+      data:
+        title: "Victron Dynamic ESS Error"
+        message: "Dynamic ESS error: {{ trigger.to_state.state }}"
   mode: single
 
 - id: victron_solar_charger_error_notifications
   alias: Victron - Solar Charger Error Notifications
   description: Notify when SmartSolar chargers report non-zero error code.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
-    - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
+    - trigger: state
+      entity_id:
+        - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
+        - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
   conditions:
-  - condition: template
-    value_template: >
-      {% set val = trigger.to_state.state | lower | trim %}
-      {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
-      {{ val not in benign and not val.startswith('no ') }}
+    - condition: template
+      value_template: >
+        {% set val = trigger.to_state.state | lower | trim %}
+        {% set old_val = (trigger.from_state.state if trigger.from_state else 'unknown') | lower | trim %}
+        {% set benign = ['0', 'off', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+        {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-  - action: notify.notify
-    data:
-      title: "Victron SmartSolar Warning"
-      message: >
-        SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
+    - action: notify.msphone29
+      data:
+        title: "Victron SmartSolar Warning"
+        message: >
+          SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}
   mode: queued
   max: 10
 
@@ -204,127 +207,128 @@
   alias: Victron - System State Warning
   description: Notify when GX system state leaves normal operating state.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.gx_device_system_state
+    - trigger: state
+      entity_id:
+        - sensor.gx_device_system_state
   conditions:
-  - condition: template
-    value_template: >
-      {% set val = trigger.to_state.state | lower | trim %}
-      {% set benign = ['on', 'running', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
-      {{ val not in benign and not val.startswith('no ') }}
+    - condition: template
+      value_template: >
+        {% set val = trigger.to_state.state | lower | trim %}
+        {% set old_val = (trigger.from_state.state if trigger.from_state else 'unknown') | lower | trim %}
+        {% set benign = ['on', 'running', 'normal', 'ok', 'none', 'unknown', 'unavailable', 'false', 'clear', 'no alert', 'no alarm', 'no error'] %}
+        {{ val not in benign and not val.startswith('no ') and old_val in benign }}
   actions:
-  - action: notify.notify
-    data:
-      title: "Victron GX System Warning"
-      message: "GX system state changed: {{ trigger.to_state.state }}"
+    - action: notify.msphone29
+      data:
+        title: "Victron GX System Warning"
+        message: "GX system state changed: {{ trigger.to_state.state }}"
   mode: single
 
 - id: water_mode_state_machine_transition
   alias: Water - Apply Target Mode
   description: Apply selected water mode with sequential valve transitions.
   triggers:
-  - trigger: state
-    entity_id:
-    - input_select.water_mode_target
+    - trigger: state
+      entity_id:
+        - input_select.water_mode_target
   conditions:
-  - condition: template
-    value_template: "{{ trigger.to_state is not none and trigger.from_state is not none and trigger.to_state.state != trigger.from_state.state }}"
+    - condition: template
+      value_template: "{{ trigger.to_state is not none and trigger.from_state is not none and trigger.to_state.state != trigger.from_state.state }}"
   actions:
-  - action: script.water_set_mode
-    data:
-      mode: "{{ trigger.to_state.state }}"
+    - action: script.water_set_mode
+      data:
+        mode: "{{ trigger.to_state.state }}"
   mode: queued
 
 - id: water_heating_control
   alias: Water - Heating Control
   description: Keep boiler temperature near the configured target using the water heater relay.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.boiler_temp
-    - input_boolean.water_heating_enabled
-    - input_number.water_heating_target_temp
-    - input_number.water_heating_hysteresis
-  - trigger: homeassistant
-    event: start
+    - trigger: state
+      entity_id:
+        - sensor.boiler_temp
+        - input_boolean.water_heating_enabled
+        - input_number.water_heating_target_temp
+        - input_number.water_heating_hysteresis
+    - trigger: homeassistant
+      event: start
   conditions: []
   actions:
-  - variables:
-      heating_enabled: "{{ is_state('input_boolean.water_heating_enabled', 'on') }}"
-      boiler_temp: "{{ states('sensor.boiler_temp') | float(none) }}"
-      target_temp: "{{ states('input_number.water_heating_target_temp') | float(45) }}"
-      hysteresis: "{{ states('input_number.water_heating_hysteresis') | float(3) }}"
-      lower_limit: "{{ target_temp - hysteresis }}"
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: "{{ not heating_enabled }}"
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_heater_relay
+    - variables:
+        heating_enabled: "{{ is_state('input_boolean.water_heating_enabled', 'on') }}"
+        boiler_temp: "{{ states('sensor.boiler_temp') | float(none) }}"
+        target_temp: "{{ states('input_number.water_heating_target_temp') | float(45) }}"
+        hysteresis: "{{ states('input_number.water_heating_hysteresis') | float(3) }}"
+        lower_limit: "{{ target_temp - hysteresis }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not heating_enabled }}"
+          sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: switch.water_heater_relay
 
-    - conditions:
-      - condition: template
-        value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp <= lower_limit }}"
-      sequence:
-      - action: switch.turn_on
-        target:
-          entity_id: switch.water_heater_relay
+        - conditions:
+            - condition: template
+              value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp <= lower_limit }}"
+          sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: switch.water_heater_relay
 
-    - conditions:
-      - condition: template
-        value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp >= target_temp }}"
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_heater_relay
+        - conditions:
+            - condition: template
+              value_template: "{{ heating_enabled and boiler_temp is not none and boiler_temp >= target_temp }}"
+          sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: switch.water_heater_relay
   mode: single
 
 - id: floorheating_auto_off_without_ac_input
   alias: Floor Heating - Auto Disable Without AC Input
   description: Turn off floor heating after 5 minutes unless the inverter reports an active AC input.
   triggers:
-  - trigger: state
-    entity_id:
-    - switch.floorheating
-    to: 'on'
-    for:
-      minutes: 5
+    - trigger: state
+      entity_id:
+        - switch.floorheating
+      to: "on"
+      for:
+        minutes: 5
   conditions:
-  - condition: state
-    entity_id: switch.floorheating
-    state: 'on'
-  - condition: template
-    value_template: >
-      {% set ac_input = states('sensor.inverter_active_ac_input') | lower | trim %}
-      {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
-      {{ ac_input in inactive or ac_input.startswith('no ') }}
-  actions:
-  - action: switch.turn_off
-    target:
+    - condition: state
       entity_id: switch.floorheating
+      state: "on"
+    - condition: template
+      value_template: >
+        {% set ac_input = states('sensor.inverter_active_ac_input') | lower | trim %}
+        {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
+        {{ ac_input in inactive or ac_input.startswith('no ') }}
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.floorheating
   mode: single
 
 - id: floorheating_turn_off_when_ac_input_inactive
   alias: Floor Heating - Disable On Inactive AC Input
   description: Turn off floor heating when the inverter AC input becomes inactive.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.inverter_active_ac_input
+    - trigger: state
+      entity_id:
+        - sensor.inverter_active_ac_input
   conditions:
-  - condition: state
-    entity_id: switch.floorheating
-    state: 'on'
-  - condition: template
-    value_template: >
-      {% set ac_input = trigger.to_state.state | lower | trim %}
-      {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
-      {{ ac_input in inactive or ac_input.startswith('no ') }}
-  actions:
-  - action: switch.turn_off
-    target:
+    - condition: state
       entity_id: switch.floorheating
+      state: "on"
+    - condition: template
+      value_template: >
+        {% set ac_input = trigger.to_state.state | lower | trim %}
+        {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %}
+        {{ ac_input in inactive or ac_input.startswith('no ') }}
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.floorheating
   mode: single
