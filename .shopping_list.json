@@ -2,7 +2,7 @@
   {
     "name": "Olej do kosiarki",
     "id": "3e371c72dd004c5ca775783eb30531af",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Zaczepy do szafek zwykle?",
@@ -12,7 +12,7 @@
   {
     "name": "Dyble i sruby haki",
     "id": "6bb9de6fc34b4d85ab5620dbb9c0488b",
-    "complete": false
+    "complete": true
   },
   {
     "name": "❗️KAWAAAAAA ☕️☕️☕️",
@@ -27,7 +27,7 @@
   {
     "name": "Listwa zasilająca (najlepiej dwie ) czarna z pstryczkiem",
     "id": "3e271a1903a44f45ab4da2ed213211cf",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Zaczepy do szafek ksztalt L",
@@ -37,27 +37,27 @@
   {
     "name": "Gwoździe rozne wielkości",
     "id": "9e44722f3d4548858111026bf8e8a930",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Listwa rozgałęziacz z pstryczkiem czarna",
     "id": "99fc7f94392847e0b1bb0d407d0e2dbb",
-    "complete": false
+    "complete": true
   },
   {
     "name": "GWOŹDZIE (dużo różnych gwoździ na dzialke)",
     "id": "f42d4abe80e746a4bd9dd83dfb71011a",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Gaśnica -pożądna (do domku na działce)",
     "id": "7a24d1c2bb964ed98830292ca97c790c",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Jedzienie dla kotow!!!",
     "id": "1bb918f725014380993f44167f34de27",
-    "complete": false
+    "complete": true
   },
   {
     "name": "Piwo:) 0.0",
@@ -108,5 +108,10 @@
     "name": "Mleko",
     "id": "3f040c122bc246d3a40854259e80edae",
     "complete": true
+  },
+  {
+    "name": "Cerata na lodowkę 76 x 46 cos na lodówkę co sie bedzie wygodnie myło i estetycznie wygladalo (zasłaniało zardzewiale elementy i latwo czyściło z kociego zarcia)",
+    "id": "f96c432c11274b05bebd1e920482e774",
+    "complete": false
   }
 ]
