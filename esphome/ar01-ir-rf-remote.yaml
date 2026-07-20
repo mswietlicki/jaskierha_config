@@ -3,7 +3,7 @@
 
 substitutions: 
   name: "ar01-ir-rf-remote" 
-  friendly_name: "IR/RF Remote"
+  friendly_name: "IR RF Remote"
   
 esphome: 
   name: ${name} 
@@ -56,12 +56,14 @@ remote_transmitter:
       number: GPIO25
       inverted: false
     carrier_duty_percent: 50%
+    non_blocking: false
 
   - id: rf_transmitter
     pin:
       number: GPIO18
       inverted: false
     carrier_duty_percent: 100%
+    non_blocking: false
 
 # ============================================================
 # AR01 V3 status LED
