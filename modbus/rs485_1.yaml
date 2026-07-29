@@ -9,7 +9,7 @@
     - name: "Boiler Temp"
       unique_id: boiler_temp
       slave: 50
-      address: 160        # 0x00A0
+      address: 160 # 0x00A0
       input_type: holding
       data_type: int16
       scale: 0.1
@@ -21,13 +21,26 @@
     - name: "Water Temp"
       unique_id: water_temp
       slave: 50
-      address: 161        # 0x00A1
+      address: 161 # 0x00A1
       input_type: holding
       data_type: int16
       scale: 0.1
       precision: 1
       unit_of_measurement: "°C"
       device_class: temperature
+      state_class: measurement
+
+    - name: "Water Height"
+      unique_id: water_height
+      slave: 1
+      address: 4 # 0x0004
+      input_type: holding
+      data_type: int16
+      scale: 0.1
+      precision: 1
+      scan_interval: 5
+      unit_of_measurement: "cm"
+      device_class: distance
       state_class: measurement
 
   switches:

@@ -89,3 +89,4 @@ image/
 !packages/
 !modbus/
 .shopping_list.json
+.ha_mcp/logs/mcp_usage.jsonl

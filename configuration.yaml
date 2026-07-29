@@ -89,6 +89,40 @@ template:
         state: "{{ is_state('input_select.water_mode_target', 'Grid') }}"
 
     sensor:
+      - name: "Water Tank Liters"
+        unique_id: water_tank_liters_rational
+        unit_of_measurement: "L"
+        device_class: water
+        state_class: measurement
+        icon: mdi:water
+        availability: >
+          {{ states('sensor.water_height')
+             not in ['unknown', 'unavailable', 'none', ''] }}
+        state: >
+          {% set h = states('sensor.water_height') | float(0) %}
+
+          {% if h <= 0 %}
+            0
+          {% elif h >= 55.8 %}
+            100
+          {% else %}
+            {% set numerator =
+              0.668752847 * h
+              - 0.0296241152 * h**2
+              + 0.00171244226 * h**3
+              - 0.0000722092929 * h**4
+              + 0.00000103272088 * h**5
+            %}
+
+            {% set denominator =
+              1
+              - 0.00347494792 * h
+              - 0.00156556425 * h**2
+              + 0.0000292356265 * h**3
+            %}
+
+            {{ (numerator / denominator) | round(1) }}
+          {% endif %}
       - name: VE.Bus Switch Position Mode
         unique_id: victron_vebus_switch_position_mode
         state: >
@@ -228,3 +262,109 @@ template:
         device_class: distance
         state_class: measurement
         state: "{{ state_attr('sensor.obd_trip_distance', 'current_trip_distance') | float(0) | round(2) }}"
+
+  - sensor:
+      - name: "EWD108 Fix Status"
+        unique_id: ewd108_fix_status
+        state: >
+          {% set v = states('sensor.ewd108_position_valid') | int(-1) %}
+          {% if v == 1 %}
+            Valid
+          {% elif v == 0 %}
+            Invalid
+          {% else %}
+            Unknown
+          {% endif %}
+
+      - name: "EWD108 Longitude Direction"
+        unique_id: ewd108_longitude_direction
+        state: >
+          {% set v = states('sensor.ewd108_longitude_direction_raw') | int(0) %}
+          {% if v == 69 %}
+            E
+          {% elif v == 87 %}
+            W
+          {% else %}
+            Unknown
+          {% endif %}
+
+      - name: "EWD108 Latitude Direction"
+        unique_id: ewd108_latitude_direction
+        state: >
+          {% set v = states('sensor.ewd108_latitude_direction_raw') | int(0) %}
+          {% if v == 78 %}
+            N
+          {% elif v == 83 %}
+            S
+          {% else %}
+            Unknown
+          {% endif %}
+
+      - name: "EWD108 Signed Longitude"
+        unique_id: ewd108_signed_longitude
+        unit_of_measurement: "°"
+        state: >
+          {% set lon = states('sensor.ewd108_longitude') | float(0) %}
+          {% set dir = states('sensor.ewd108_longitude_direction') %}
+          {% if dir == 'W' %}
+            {{ -lon }}
+          {% else %}
+            {{ lon }}
+          {% endif %}
+
+      - name: "EWD108 Signed Latitude"
+        unique_id: ewd108_signed_latitude
+        unit_of_measurement: "°"
+        state: >
+          {% set lat = states('sensor.ewd108_latitude') | float(0) %}
+          {% set dir = states('sensor.ewd108_latitude_direction') %}
+          {% if dir == 'S' %}
+            {{ -lat }}
+          {% else %}
+            {{ lat }}
+          {% endif %}
+
+      - name: "EWD108 Speed Over Ground kmh"
+        unique_id: ewd108_speed_over_ground_kmh
+        unit_of_measurement: "km/h"
+        state: >
+          {{ (states('sensor.ewd108_speed_over_ground') | float(0) * 1.852) | round(2) }}
+
+      - name: "EWD108 GNSS UTC Time"
+        unique_id: ewd108_gnss_utc_time
+        state: >
+          {% set y = states('sensor.ewd108_year') | int(0) %}
+          {% set mo = states('sensor.ewd108_month') | int(0) %}
+          {% set d = states('sensor.ewd108_day') | int(0) %}
+          {% set h = states('sensor.ewd108_hour_utc') | int(0) %}
+          {% set mi = states('sensor.ewd108_minute_utc') | int(0) %}
+          {% set s = states('sensor.ewd108_second_utc') | int(0) %}
+          {% if y > 2000 and mo > 0 and d > 0 %}
+            {{ "%04d-%02d-%02d %02d:%02d:%02d UTC" | format(y, mo, d, h, mi, s) }}
+          {% else %}
+            unknown
+          {% endif %}
+
+      - name: "EWD108 Antenna Mode"
+        unique_id: ewd108_antenna_mode
+        state: >
+          {% set v = states('sensor.ewd108_antenna_setting') | int(-1) %}
+          {% if v == 0 %}
+            Active
+          {% elif v == 1 %}
+            Passive
+          {% else %}
+            Unknown
+          {% endif %}
+
+      - name: "EWD108 Update Frequency Text"
+        unique_id: ewd108_update_frequency_text
+        state: >
+          {% set v = states('sensor.ewd108_update_frequency') | int(-1) %}
+          {% if v == 0 %}
+            1 Hz
+          {% elif v == 1 %}
+            10 Hz
+          {% else %}
+            Unknown
+          {% endif %}
