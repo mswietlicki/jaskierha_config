@@ -1,0 +1,51 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Choose Modbus hub",
+                "description": "Select an existing Modbus hub from configuration.yaml or continue with manual setup.",
+                "data": {
+                    "hub_source": "Hub source"
+                }
+            },
+            "connection": {
+                "title": "Connection and device",
+                "description": "Configure Modbus access for EWD108 (TCP, RTU-over-TCP, or serial). Help: {documentation_url}",
+                "data": {
+                    "connection_type": "Connection type",
+                    "serial_port": "Serial port",
+                    "host": "Host",
+                    "port": "TCP port",
+                    "delay": "Connection delay",
+                    "baudrate": "Baud rate",
+                    "bytesize": "Data bits",
+                    "parity": "Parity",
+                    "stopbits": "Stop bits",
+                    "slave_id": "Modbus slave ID",
+                    "scan_interval": "Polling interval (seconds)",
+                    "timeout": "Modbus timeout (seconds)",
+                    "set_ha_location": "Set Home Assistant location",
+                    "location_threshold_meters": "Location update threshold (meters)"
+                }
+            }
+        },
+        "error": {
+            "invalid_config": "One or more values are invalid.",
+            "connection": "Unable to communicate with the EWD108 over Modbus.",
+            "invalid_rmc": "Device replied, but the RMC payload could not be parsed.",
+            "unknown": "Unknown error occurred."
+        },
+        "abort": {
+            "already_configured": "This entry is already configured."
+        }
+    },
+    "selector": {
+        "connection_type": {
+            "options": {
+                "serial": "Serial RTU",
+                "tcp": "TCP",
+                "rtuovertcp": "RTU over TCP"
+            }
+        }
+    }
+}
