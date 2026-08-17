@@ -406,3 +406,77 @@
     data:
       option: Normal
   mode: single
+- id: '1786893093855'
+  alias: Turn On Air Compressor With Engine
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.jaskier_wican_obd_pro_engine_on
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    from:
+    to:
+    - 'on'
+  conditions:
+  - condition: switch.is_on
+    target:
+      entity_id: input_boolean.air_compressor_engine
+    options:
+      behavior: any
+      for: 00:00:00
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.relay_7
+    data: {}
+  mode: single
+- id: '1786893299082'
+  alias: Turn Off Air Compressor With Engine
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.jaskier_wican_obd_pro_engine_on
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    from:
+    - 'on'
+    to:
+  conditions:
+  - condition: switch.is_on
+    target:
+      entity_id: input_boolean.air_compressor_engine
+    options:
+      behavior: any
+      for: 00:00:00
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      entity_id: switch.relay_7
+    data: {}
+  mode: single
+- id: '1786996780821'
+  alias: Toggle Inverter Power On Double Press
+  description: This automation toggles the inverter power on double press of a remote
+    button.
+  triggers:
+  - device_id: 6929468e394bf280185ad4d26eff8c4d
+    domain: zha
+    type: remote_button_double_press
+    subtype: button
+    trigger: device
+  conditions: []
+  actions:
+  - action: switch.toggle
+    metadata: {}
+    target:
+      entity_id: switch.inverter_power
+    data: {}
+  mode: single
