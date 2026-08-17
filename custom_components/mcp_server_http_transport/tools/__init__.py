@@ -9,17 +9,52 @@ from ..json_utils import _HAJSONEncoder  # noqa: F401
 # Tool registry: name -> {"schema": {...}, "handler": callable}
 TOOLS: dict[str, dict[str, Any]] = {}
 
+# Reusable MCP ToolAnnotations (see spec §ToolAnnotations).
+ANNOTATION_READ_ONLY: dict[str, Any] = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": False,
+}
+ANNOTATION_IDEMPOTENT: dict[str, Any] = {
+    "readOnlyHint": False,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": False,
+}
+ANNOTATION_NON_IDEMPOTENT: dict[str, Any] = {
+    "readOnlyHint": False,
+    "destructiveHint": False,
+    "idempotentHint": False,
+    "openWorldHint": False,
+}
+ANNOTATION_DESTRUCTIVE: dict[str, Any] = {
+    "readOnlyHint": False,
+    "destructiveHint": True,
+    "idempotentHint": False,
+    "openWorldHint": False,
+}
 
-def register_tool(name: str, description: str, input_schema: dict[str, Any]):
+
+def register_tool(
+    name: str,
+    description: str,
+    input_schema: dict[str, Any],
+    annotations: dict[str, Any] | None = None,
+):
     """Decorator to register a tool with its schema and handler."""
 
     def decorator(func):
+        schema = {
+            "name": name,
+            "description": description,
+            "inputSchema": input_schema,
+        }
+        if annotations is not None:
+            schema["annotations"] = annotations
+
         TOOLS[name] = {
-            "schema": {
-                "name": name,
-                "description": description,
-                "inputSchema": input_schema,
-            },
+            "schema": schema,
             "handler": func,
         }
         return func
@@ -42,6 +77,7 @@ async def call_tool(hass: HomeAssistant, name: str, arguments: dict[str, Any]) -
 
 # Import submodules so tools auto-register via @register_tool
 from . import (  # noqa: E402
+    calendar,  # noqa: F401
     config,  # noqa: F401
     config_files,  # noqa: F401
     dashboards,  # noqa: F401
@@ -52,4 +88,5 @@ from . import (  # noqa: E402
     statistics,  # noqa: F401
     system,  # noqa: F401
     system_admin,  # noqa: F401
+    traces,  # noqa: F401
 )
