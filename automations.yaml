@@ -211,21 +211,16 @@
   max: 20
 - id: victron_dynamic_ess_error_notification
   alias: Victron - Dynamic ESS Error Notification
-  description: Notify when Dynamic ESS reports an error.
+  description: Notify when Dynamic ESS enters a real error state; ignore no_error,
+    unknown, and unavailable transitions.
   triggers:
   - trigger: state
     entity_id:
     - sensor.gx_device_dynamic_ess_error
-  conditions:
-  - condition: template
-    value_template: '{% set val = trigger.to_state.state | lower | trim %} {% set
-      old_val = (trigger.from_state.state if trigger.from_state else ''unknown'')
-      | lower | trim %} {% set benign = [''0'', ''off'', ''normal'', ''ok'', ''none'',
-      ''unknown'', ''unavailable'', ''false'', ''clear'', ''no alert'', ''no alarm'',
-      ''no error''] %} {{ val not in benign and not val.startswith(''no '') and old_val
-      in benign }}
-
-      '
+    not_to:
+    - no_error
+    - unknown
+    - unavailable
   actions:
   - action: notify.send_message
     continue_on_error: true
@@ -242,22 +237,17 @@
   mode: single
 - id: victron_solar_charger_error_notifications
   alias: Victron - Solar Charger Error Notifications
-  description: Notify when SmartSolar chargers report non-zero error code.
+  description: Notify when a SmartSolar charger enters a real error state; ignore
+    no_error, unknown, and unavailable transitions.
   triggers:
   - trigger: state
     entity_id:
     - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
     - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
-  conditions:
-  - condition: template
-    value_template: '{% set val = trigger.to_state.state | lower | trim %} {% set
-      old_val = (trigger.from_state.state if trigger.from_state else ''unknown'')
-      | lower | trim %} {% set benign = [''0'', ''off'', ''normal'', ''ok'', ''none'',
-      ''unknown'', ''unavailable'', ''false'', ''clear'', ''no alert'', ''no alarm'',
-      ''no error''] %} {{ val not in benign and not val.startswith(''no '') and old_val
-      in benign }}
-
-      '
+    not_to:
+    - no_error
+    - unknown
+    - unavailable
   actions:
   - action: notify.send_message
     continue_on_error: true
@@ -278,21 +268,12 @@
   max: 10
 - id: victron_system_state_warning
   alias: Victron - System State Warning
-  description: Notify when GX system state leaves normal operating state.
+  description: Notify only when the GX system state enters the fault state.
   triggers:
   - trigger: state
     entity_id:
     - sensor.gx_device_system_state
-  conditions:
-  - condition: template
-    value_template: '{% set val = trigger.to_state.state | lower | trim %} {% set
-      old_val = (trigger.from_state.state if trigger.from_state else ''unknown'')
-      | lower | trim %} {% set benign = [''on'', ''running'', ''normal'', ''ok'',
-      ''none'', ''unknown'', ''unavailable'', ''false'', ''clear'', ''no alert'',
-      ''no alarm'', ''no error''] %} {{ val not in benign and not val.startswith(''no
-      '') and old_val in benign }}
-
-      '
+    to: fault
   actions:
   - action: notify.send_message
     continue_on_error: true
