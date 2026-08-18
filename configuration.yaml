@@ -32,7 +32,6 @@ input_select:
       - Pump Filling
       - Grid Filling
       - Grid
-    initial: Normal
     icon: mdi:water-sync
 
   water_mode_current:
@@ -42,7 +41,7 @@ input_select:
       - Pump Filling
       - Grid Filling
       - Grid
-    initial: Normal
+      - Fault
     icon: mdi:water-check
 
 input_boolean:
@@ -57,7 +56,6 @@ input_number:
     min: 30
     max: 80
     step: 0.5
-    initial: 45
     unit_of_measurement: "°C"
     icon: mdi:thermometer-water
 
@@ -66,7 +64,6 @@ input_number:
     min: 1
     max: 15
     step: 0.5
-    initial: 3
     unit_of_measurement: "°C"
     icon: mdi:delta
 
@@ -211,58 +208,6 @@ template:
             data:
               option: "off"
 
-  - trigger:
-      - platform: state
-        entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
-      - platform: state
-        entity_id: sensor.jaskier_wican_obd_pro_30_warmupssincecodeclear
-    sensor:
-      - name: OBD Trip Distance
-        unique_id: jaskier_obd_trip_distance
-        unit_of_measurement: "km"
-        device_class: distance
-        state_class: measurement
-        state: >
-          {% set distance = states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear') | float(0) %}
-          {% set warmups = states('sensor.jaskier_wican_obd_pro_30_warmupssincecodeclear') | int(0) %}
-          {% set last_warmups = this.attributes.get('last_warmups', warmups) | int(0) %}
-          {% set baseline = this.attributes.get('baseline_distance', distance) | float(0) %}
-          {% set previous_trip = this.state | float(0) %}
-          {% if warmups != last_warmups %}
-            {{ [distance - baseline, 0] | max | round(2) }}
-          {% else %}
-            {{ previous_trip | round(2) }}
-          {% endif %}
-        attributes:
-          current_trip_distance: >
-            {% set distance = states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear') | float(0) %}
-            {% set warmups = states('sensor.jaskier_wican_obd_pro_30_warmupssincecodeclear') | int(0) %}
-            {% set last_warmups = this.attributes.get('last_warmups', warmups) | int(0) %}
-            {% set baseline = this.attributes.get('baseline_distance', distance) | float(0) %}
-            {% if warmups != last_warmups %}
-              0
-            {% else %}
-              {{ [distance - baseline, 0] | max | round(2) }}
-            {% endif %}
-          baseline_distance: >
-            {% set distance = states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear') | float(0) %}
-            {% set warmups = states('sensor.jaskier_wican_obd_pro_30_warmupssincecodeclear') | int(0) %}
-            {% set last_warmups = this.attributes.get('last_warmups', warmups) | int(0) %}
-            {% set baseline = this.attributes.get('baseline_distance', distance) | float(0) %}
-            {% if warmups != last_warmups %}
-              {{ distance }}
-            {% else %}
-              {{ baseline }}
-            {% endif %}
-          last_warmups: "{{ states('sensor.jaskier_wican_obd_pro_30_warmupssincecodeclear') | int(0) }}"
-
-      - name: OBD Current Trip Distance
-        unique_id: jaskier_obd_current_trip_distance
-        unit_of_measurement: "km"
-        device_class: distance
-        state_class: measurement
-        state: "{{ state_attr('sensor.obd_trip_distance', 'current_trip_distance') | float(0) | round(2) }}"
-
   - sensor:
       - name: "EWD108 Fix Status"
         unique_id: ewd108_fix_status
@@ -303,6 +248,9 @@ template:
       - name: "EWD108 Signed Longitude"
         unique_id: ewd108_signed_longitude
         unit_of_measurement: "°"
+        availability: >
+          {{ states('sensor.ewd108_longitude') | is_number and
+             states('sensor.ewd108_longitude_direction') in ['E', 'W'] }}
         state: >
           {% set lon = states('sensor.ewd108_longitude') | float(0) %}
           {% set dir = states('sensor.ewd108_longitude_direction') %}
@@ -315,6 +263,9 @@ template:
       - name: "EWD108 Signed Latitude"
         unique_id: ewd108_signed_latitude
         unit_of_measurement: "°"
+        availability: >
+          {{ states('sensor.ewd108_latitude') | is_number and
+             states('sensor.ewd108_latitude_direction') in ['N', 'S'] }}
         state: >
           {% set lat = states('sensor.ewd108_latitude') | float(0) %}
           {% set dir = states('sensor.ewd108_latitude_direction') %}
@@ -327,11 +278,22 @@ template:
       - name: "EWD108 Speed Over Ground kmh"
         unique_id: ewd108_speed_over_ground_kmh
         unit_of_measurement: "km/h"
+        device_class: speed
+        state_class: measurement
+        availability: "{{ states('sensor.ewd108_speed_over_ground') | is_number }}"
         state: >
           {{ (states('sensor.ewd108_speed_over_ground') | float(0) * 1.852) | round(2) }}
 
       - name: "EWD108 GNSS UTC Time"
         unique_id: ewd108_gnss_utc_time
+        device_class: timestamp
+        availability: >
+          {{ states('sensor.ewd108_year') | int(0) > 2000 and
+             states('sensor.ewd108_month') | int(0) in range(1, 13) and
+             states('sensor.ewd108_day') | int(0) in range(1, 32) and
+             states('sensor.ewd108_hour_utc') | int(-1) in range(0, 24) and
+             states('sensor.ewd108_minute_utc') | int(-1) in range(0, 60) and
+             states('sensor.ewd108_second_utc') | int(-1) in range(0, 60) }}
         state: >
           {% set y = states('sensor.ewd108_year') | int(0) %}
           {% set mo = states('sensor.ewd108_month') | int(0) %}
@@ -339,11 +301,7 @@ template:
           {% set h = states('sensor.ewd108_hour_utc') | int(0) %}
           {% set mi = states('sensor.ewd108_minute_utc') | int(0) %}
           {% set s = states('sensor.ewd108_second_utc') | int(0) %}
-          {% if y > 2000 and mo > 0 and d > 0 %}
-            {{ "%04d-%02d-%02d %02d:%02d:%02d UTC" | format(y, mo, d, h, mi, s) }}
-          {% else %}
-            unknown
-          {% endif %}
+          {{ "%04d-%02d-%02dT%02d:%02d:%02d+00:00" | format(y, mo, d, h, mi, s) }}
 
       - name: "EWD108 Antenna Mode"
         unique_id: ewd108_antenna_mode

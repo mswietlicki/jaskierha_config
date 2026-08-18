@@ -3,364 +3,568 @@ views:
   - title: Overview
     path: overview
     icon: mdi:flash
-    cards:
-      - type: heading
-        heading: System Snapshot
-        icon: mdi:home-battery
-
-      - type: glance
-        title: At a Glance
-        show_state: true
-        entities:
-          - entity: sensor.shunt_main_charge
-            name: SoC
-          - entity: sensor.shunt_main_power
-            name: Battery Power
-          - entity: sensor.gx_device_pv_power
-            name: PV Power
-          - entity: sensor.inverter_input_power_l1
-            name: Grid Power
-          - entity: sensor.gx_device_consumption_power_l1
-            name: Load Power
-          - entity: sensor.gx_device_system_state
-            name: System State
-
-      - type: entities
-        title: Battery Status
-        show_header_toggle: false
-        entities:
-          - entity: sensor.shunt_main_charge
-            name: State of Charge
-          - entity: sensor.shunt_main_dc_bus_voltage
-            name: Voltage
-          - entity: sensor.shunt_main_dc_bus_current
-            name: Current
-          - entity: sensor.shunt_main_power
-            name: Power
-          - entity: sensor.shunt_main_time_to_go
-            name: Time To Go
-          - entity: sensor.shunt_main_temperature
-            name: Battery Temperature
-          - entity: sensor.shunt_main_capacity
-            name: Capacity
-
-      - type: horizontal-stack
+    type: sections
+    max_columns: 4
+    sections:
+      - type: grid
         cards:
-          - type: gauge
+          - type: heading
+            heading: System Snapshot
+            icon: mdi:home-battery
+          - type: tile
             entity: sensor.shunt_main_charge
             name: State of Charge
-            min: 0
-            max: 100
-            severity:
-              red: 0
-              yellow: 25
-              green: 50
-          - type: gauge
-            entity: sensor.shunt_main_temperature
-            name: Battery Temp
-            min: -10
-            max: 60
-            severity:
-              green: 0
-              yellow: 35
-              red: 45
-
-      - type: entities
-        title: Solar Charger 226
-        show_header_toggle: false
-        entities:
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
-            name: Panel Voltage
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_dc_battery_bus_current
-            name: Panel Current
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
-            name: Panel Power
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_state
-            name: Charger State
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_error_code
-            name: Error Code
-          - entity: binary_sensor.smartsolar_charger_mppt_100_30_id_279_load_state
-            name: Load Enabled
-
-      - type: entities
-        title: Solar Charger 224
-        show_header_toggle: false
-        entities:
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
-            name: Panel Voltage
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
-            name: Panel Current
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
-            name: Panel Power
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_state
-            name: Charger State
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_error_code
-            name: Error Code
-          - entity: binary_sensor.smartsolar_charger_mppt_100_30_id_278_load_state
-            name: Load Enabled
-
-      - type: entities
-        title: GX System
-        show_header_toggle: false
-        entities:
-          - entity: sensor.gx_device_pv_power
-            name: DC PV Power (System)
-          - entity: sensor.gx_device_pv_current
-            name: PV Current
-          - entity: sensor.gx_device_pv_energy
-            name: PV Energy
-          - entity: sensor.gx_device_dc_battery_power
-            name: DC Battery Power
-          - entity: sensor.gx_device_dc_battery_voltage
-            name: DC Battery Voltage
-          - entity: sensor.gx_device_dc_battery_current
-            name: DC Battery Current
-          - entity: sensor.gx_device_ac_active_input_source
-            name: Active AC Input
-          - entity: sensor.gx_device_system_state
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.shunt_main_power
+            name: Battery Power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.gx_device_pv_power
+            name: PV Power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.gx_device_consumption_power_l1
+            name: AC Load
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.gx_device_system_state
             name: System State
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.gx_device_ac_active_input_source
+            name: Active AC Input
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: Grid and Load
-        show_header_toggle: false
-        entities:
-          - entity: sensor.inverter_input_power_l1
-            name: Grid Power L1
-          - entity: sensor.gx_device_consumption_power_l1
-            name: AC Consumption L1
-          - entity: sensor.gx_device_consumption_current_l1
-            name: AC Consumption Current L1
-          - entity: sensor.inverter_input_voltage_l1
-            name: Grid Voltage L1
-          - entity: sensor.inverter_input_frequency_l1
-            name: Grid Frequency L1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery
+            icon: mdi:battery-heart-variant
+          - type: tile
+            entity: sensor.shunt_main_dc_bus_voltage
+            name: Voltage
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.shunt_main_dc_bus_current
+            name: Current
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.shunt_main_temperature
+            name: Temperature
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.shunt_main_time_to_go
+            name: Time to Go
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.shunt_main_capacity
+            name: Remaining Capacity
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: Orion XS
-        show_header_toggle: false
-        entities:
-          - entity: switch.orion_xs
-            name: Enabled
-          - entity: sensor.orion_xs_state
+      - type: grid
+        cards:
+          - type: heading
+            heading: Solar
+            icon: mdi:solar-power-variant
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
+            name: Charger 226 Power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
+            name: Charger 224 Power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
+            name: Charger 226 Voltage
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
+            name: Charger 224 Voltage
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_279_state
+            name: Charger 226 State
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.smartsolar_charger_mppt_100_30_id_278_state
+            name: Charger 224 State
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: binary_sensor.smartsolar_charger_mppt_100_30_id_279_load_state
+            name: Charger 226 Load
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: binary_sensor.smartsolar_charger_mppt_100_30_id_278_load_state
+            name: Charger 224 Load
+            grid_options:
+              columns: 6
+              rows: 1
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: Orion XS
+            icon: mdi:car-electric
+          - type: tile
+            entity: switch.orion_xs
+            name: Charger
+            features:
+              - type: toggle
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.orion_xs_state
             name: State
-          - entity: number.orion_xs_charge_current_limit
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: number.orion_xs_charge_current_limit
             name: Charge Current Limit
-          - entity: sensor.orion_xs_input_voltage
-            name: Input Voltage
-          - entity: sensor.orion_xs_input_current
-            name: Input Current
-          - entity: sensor.orion_xs_input_power
+            features:
+              - type: numeric-input
+                style: buttons
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: sensor.orion_xs_input_power
             name: Input Power
-          - entity: sensor.orion_xs_dc_output_voltage
-            name: Output Voltage
-          - entity: sensor.orion_xs_dc_output_current
-            name: Output Current
-          - entity: sensor.orion_xs_dc_output_power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.orion_xs_dc_output_power
             name: Output Power
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.orion_xs_input_voltage
+            name: Input Voltage
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.orion_xs_dc_output_voltage
+            name: Output Voltage
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: Quick Control
-        show_header_toggle: false
-        entities:
-          - entity: select.inverter
-            name: Inverter Mode
-          - entity: number.inverter_current_limit
-            name: Inverter Current Limit
-          - entity: switch.inverter_0_powerassist_enabled
+      - type: grid
+        cards:
+          - type: heading
+            heading: Inverter Controls
+            icon: mdi:tune-variant
+          - type: tile
+            entity: binary_sensor.inverter_connected
+            name: Connected
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: select.inverter
+            name: Mode
+            features:
+              - type: select-options
+            grid_options:
+              columns: 12
+              rows: 2
+          - type: tile
+            entity: number.inverter_current_limit
+            name: Current Limit
+            features:
+              - type: numeric-input
+                style: buttons
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: switch.inverter_0_powerassist_enabled
             name: PowerAssist
-          - entity: switch.inverter_control_ignore_ac_in_1
+            features:
+              - type: toggle
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: switch.inverter_control_ignore_ac_in_1
             name: Ignore AC-in-1
+            features:
+              - type: toggle
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: Critical Alarms
-        show_header_toggle: false
-        entities:
-          - entity: sensor.inverter_low_battery_alarm
-            name: Low Battery Alarm
-          - entity: sensor.inverter_grid_lost_alarm
-            name: Grid Lost Alarm
-          - entity: sensor.inverter_overload_alarm
-            name: Overload Alarm
-          - entity: sensor.inverter_high_temperature_alarm
-            name: High Temp Alarm
-          - entity: sensor.gx_device_dynamic_ess_error
-            name: Dynamic ESS Error
+      - type: grid
+        cards:
+          - type: heading
+            heading: Critical Alarms
+            icon: mdi:alert-decagram
+          - type: tile
+            entity: sensor.inverter_low_battery_alarm
+            name: Low Battery
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_grid_lost_alarm
+            name: Grid Lost
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_overload_alarm
+            name: Overload
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_high_temperature_alarm
+            name: High Temperature
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.gx_device_dynamic_ess_error
+            name: Dynamic ESS
+            grid_options:
+              columns: 12
+              rows: 1
 
   - title: Inverter & VE.Bus
     path: inverter
     icon: mdi:power
-    cards:
-      - type: heading
-        heading: Inverter Control and Status
-        icon: mdi:transmission-tower
-
-      - type: entities
-        title: Inverter Control
-        show_header_toggle: false
-        entities:
-          - entity: select.inverter
-            name: Mode
-          - entity: number.inverter_current_limit
-            name: Current Limit
-          - entity: number.inverter_assist_current_boost_factor
-            name: Assist Boost Factor
-          - entity: switch.inverter_0_powerassist_enabled
-            name: PowerAssist
-          - entity: switch.inverter_control_ignore_ac_in_1
-            name: Ignore AC-in-1
-          - entity: sensor.inverter_state
-            name: Inverter State
-          - entity: binary_sensor.inverter_connected
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Control and Status
+            icon: mdi:transmission-tower
+          - type: tile
+            entity: binary_sensor.inverter_connected
             name: Connected
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_state
+            name: State
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: select.inverter
+            name: Mode
+            features:
+              - type: select-options
+            grid_options:
+              columns: 12
+              rows: 2
+          - type: tile
+            entity: number.inverter_current_limit
+            name: Current Limit
+            features:
+              - type: numeric-input
+                style: buttons
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: number.inverter_assist_current_boost_factor
+            name: Assist Boost Factor
+            features:
+              - type: numeric-input
+                style: buttons
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: switch.inverter_0_powerassist_enabled
+            name: PowerAssist
+            features:
+              - type: toggle
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: switch.inverter_control_ignore_ac_in_1
+            name: Ignore AC-in-1
+            features:
+              - type: toggle
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: AC Side
-        show_header_toggle: false
-        entities:
-          - entity: sensor.inverter_active_ac_input
+      - type: grid
+        cards:
+          - type: heading
+            heading: AC and DC Measurements
+            icon: mdi:sine-wave
+          - type: tile
+            entity: sensor.inverter_active_ac_input
             name: Active AC Input
-          - entity: sensor.inverter_input_power_l1
-            name: Input Power L1
-          - entity: sensor.inverter_input_voltage_l1
-            name: Input Voltage L1
-          - entity: sensor.inverter_input_current_l1
-            name: Input Current L1
-          - entity: sensor.inverter_output_power_l1
-            name: Output Power L1
-          - entity: sensor.inverter_output_voltage_l1
-            name: Output Voltage L1
-          - entity: sensor.inverter_output_current_l1
-            name: Output Current L1
-
-      - type: entities
-        title: DC Side and Thermal
-        show_header_toggle: false
-        entities:
-          - entity: sensor.inverter_dc_power
+            visibility: &inverter_connected
+              - condition: state
+                entity: binary_sensor.inverter_connected
+                state: 'on'
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_input_power_l1
+            name: Input Power
+            visibility: *inverter_connected
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.inverter_output_power_l1
+            name: Output Power
+            visibility: *inverter_connected
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: sensor.inverter_input_voltage_l1
+            name: Input Voltage
+            visibility: *inverter_connected
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_output_voltage_l1
+            name: Output Voltage
+            visibility: *inverter_connected
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_dc_power
             name: DC Power
-          - entity: sensor.inverter_dc_voltage
-            name: DC Voltage
-          - entity: sensor.inverter_dc_current
-            name: DC Current
-          - entity: sensor.inverter_dc_temperature
+            visibility: *inverter_connected
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_dc_temperature
             name: DC Temperature
+            visibility: *inverter_connected
+            grid_options:
+              columns: 6
+              rows: 1
 
-      - type: entities
-        title: Inverter Alarms
-        show_header_toggle: false
-        entities:
-          - entity: sensor.inverter_low_battery_alarm
-            name: Low Battery Alarm
-          - entity: sensor.inverter_grid_lost_alarm
-            name: Grid Lost Alarm
-          - entity: sensor.inverter_overload_alarm
-            name: Overload Alarm
-          - entity: sensor.inverter_high_dc_current_alarm
-            name: High DC Current Alarm
-          - entity: sensor.inverter_high_dc_voltage_alarm
-            name: High DC Voltage Alarm
-          - entity: sensor.inverter_high_temperature_alarm
-            name: High Temperature Alarm
-          - entity: sensor.inverter_ripple_alarm
-            name: Ripple Alarm
-          - entity: sensor.inverter_voltage_sensor_alarm
-            name: Voltage Sensor Alarm
-          - entity: sensor.inverter_temperature_sensor_alarm
-            name: Temperature Sensor Alarm
+      - type: grid
+        cards:
+          - type: heading
+            heading: Inverter Alarms
+            icon: mdi:alert-outline
+          - type: tile
+            entity: sensor.inverter_low_battery_alarm
+            name: Low Battery
+            grid_options: &half_tile
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: sensor.inverter_grid_lost_alarm
+            name: Grid Lost
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_overload_alarm
+            name: Overload
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_high_dc_current_alarm
+            name: High DC Current
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_high_dc_voltage_alarm
+            name: High DC Voltage
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_high_temperature_alarm
+            name: High Temperature
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_ripple_alarm
+            name: Ripple
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_voltage_sensor_alarm
+            name: Voltage Sensor
+            grid_options: *half_tile
+          - type: tile
+            entity: sensor.inverter_temperature_sensor_alarm
+            name: Temperature Sensor
+            grid_options: *half_tile
 
   - title: Trends
     path: trends
     icon: mdi:chart-line
-    cards:
-      - type: heading
-        heading: Power and Energy Trends
-        icon: mdi:chart-box
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Power Trends
+            icon: mdi:chart-box
+          - type: history-graph
+            title: Battery Power
+            hours_to_show: 24
+            entities:
+              - entity: sensor.shunt_main_power
+                name: Battery Power
+              - entity: sensor.gx_device_dc_battery_power
+                name: GX Battery Power
+            grid_options:
+              columns: full
+              rows: 5
+          - type: history-graph
+            title: Solar Generation
+            hours_to_show: 24
+            entities:
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
+                name: Charger 226
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
+                name: Charger 224
+              - entity: sensor.gx_device_pv_power
+                name: Total PV
+            grid_options:
+              columns: full
+              rows: 5
+          - type: history-graph
+            title: Grid and Load
+            hours_to_show: 24
+            entities:
+              - entity: sensor.inverter_input_power_l1
+                name: Grid Power
+              - entity: sensor.gx_device_consumption_power_l1
+                name: AC Consumption
+              - entity: sensor.inverter_output_power_l1
+                name: Inverter Output
+            grid_options:
+              columns: full
+              rows: 5
 
-      - type: history-graph
-        title: Battery Power (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.shunt_main_power
-            name: Battery Power
-          - entity: sensor.gx_device_dc_battery_power
-            name: GX Battery Power
-
-      - type: history-graph
-        title: Solar Generation (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
-            name: Solar 226 Power
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
-            name: Solar 224 Power
-          - entity: sensor.gx_device_pv_power
-            name: Total DC PV Power
-
-      - type: history-graph
-        title: Grid and Load Power (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.inverter_input_power_l1
-            name: Grid Power
-          - entity: sensor.gx_device_consumption_power_l1
-            name: AC Consumption
-          - entity: sensor.inverter_output_power_l1
-            name: Inverter Output Power
-
-      - type: history-graph
-        title: Orion XS Power (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.orion_xs_input_power
-            name: Orion Input Power
-          - entity: sensor.orion_xs_dc_output_power
-            name: Orion Output Power
-
-      - type: history-graph
-        title: Battery State of Charge (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.shunt_main_charge
-            name: State of Charge
-
-      - type: history-graph
-        title: Battery Voltages (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.shunt_main_dc_bus_voltage
-            name: Battery Voltage
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
-            name: Solar 226 Panel Voltage
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
-            name: Solar 224 Panel Voltage
-
-      - type: history-graph
-        title: Temperatures (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.shunt_main_temperature
-            name: Battery Temperature
-
-      - type: history-graph
-        title: Battery Current (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.shunt_main_dc_bus_current
-            name: Battery Current
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_279_dc_battery_bus_current
-            name: Solar 226 Current
-          - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
-            name: Solar 224 Current
-
-      - type: history-graph
-        title: Inverter Voltage and Frequency (24h)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.inverter_input_voltage_l1
-            name: Grid Voltage
-          - entity: sensor.inverter_output_voltage_l1
-            name: Output Voltage
-          - entity: sensor.inverter_input_frequency_l1
-            name: Grid Frequency
-          - entity: sensor.inverter_output_frequency_l1
-            name: Output Frequency
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery and Charging Trends
+            icon: mdi:battery-clock
+          - type: history-graph
+            title: Battery State of Charge
+            hours_to_show: 24
+            entities:
+              - entity: sensor.shunt_main_charge
+                name: State of Charge
+            grid_options:
+              columns: full
+              rows: 5
+          - type: history-graph
+            title: Battery and Panel Voltages
+            hours_to_show: 24
+            entities:
+              - entity: sensor.shunt_main_dc_bus_voltage
+                name: Battery
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
+                name: Charger 226 Panel
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
+                name: Charger 224 Panel
+            grid_options:
+              columns: full
+              rows: 5
+          - type: history-graph
+            title: Charging Current
+            hours_to_show: 24
+            entities:
+              - entity: sensor.shunt_main_dc_bus_current
+                name: Battery Current
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_279_dc_battery_bus_current
+                name: Charger 226
+              - entity: sensor.smartsolar_charger_mppt_100_30_id_278_dc_battery_bus_current
+                name: Charger 224
+            grid_options:
+              columns: full
+              rows: 5

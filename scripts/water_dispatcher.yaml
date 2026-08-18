@@ -8,6 +8,10 @@ water_set_mode:
         description: Target water mode.
         example: Grid Filling
     sequence:
+      - condition: state
+        entity_id: input_boolean.water_maintenance
+        state: "off"
+        note: Direct service overrides are active while Water Maintenance is on.
       - variables:
           target_mode: "{{ mode }}"
           current_mode: "{{ states('input_select.water_mode_current') }}"
@@ -114,3 +118,16 @@ water_set_mode:
               - action: script.water_transition_grid_to_grid_filling
                 data:
                   pump_was_on: "{{ pump_was_on }}"
+        default:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.water_pump_relay
+          - action: persistent_notification.create
+            data:
+              notification_id: water_mode_transition_fault
+              title: Water transition blocked
+              message: >-
+                No safe transition exists from {{ current_mode }} to {{ target_mode }}.
+                The water pump was stopped; inspect the valve states before retrying.
+          - stop: Unsupported water-mode transition.
+            error: true
