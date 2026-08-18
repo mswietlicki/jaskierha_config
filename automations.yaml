@@ -131,7 +131,8 @@
   mode: single
 - id: victron_inverter_alarm_notifications
   alias: Victron - Inverter Alarm Warning/Error
-  description: Notify when inverter alarm sensors report a non-OK state.
+  description: Notify only when an inverter alarm sensor enters warning or alarm;
+    ignore no_alarm, unknown, and unavailable transitions.
   triggers:
   - trigger: state
     entity_id:
@@ -145,16 +146,22 @@
     - sensor.inverter_ripple_alarm
     - sensor.inverter_temperature_sensor_alarm
     - sensor.inverter_voltage_sensor_alarm
-  conditions:
-  - condition: template
-    value_template: '{% set val = trigger.to_state.state | lower | trim %} {% set
-      old_val = (trigger.from_state.state if trigger.from_state else ''unknown'')
-      | lower | trim %} {% set benign = [''0'', ''off'', ''normal'', ''ok'', ''none'',
-      ''unknown'', ''unavailable'', ''false'', ''clear'', ''no alert'', ''no alarm'',
-      ''no error''] %} {{ val not in benign and not val.startswith(''no '') and old_val
-      in benign }}
-
-      '
+    to: warning
+    id: warning
+  - trigger: state
+    entity_id:
+    - sensor.inverter_grid_lost_alarm
+    - sensor.inverter_high_dc_current_alarm
+    - sensor.inverter_high_dc_voltage_alarm
+    - sensor.inverter_high_temperature_alarm
+    - sensor.inverter_low_battery_alarm
+    - sensor.inverter_overload_alarm
+    - sensor.inverter_phase_rotation_alarm
+    - sensor.inverter_ripple_alarm
+    - sensor.inverter_temperature_sensor_alarm
+    - sensor.inverter_voltage_sensor_alarm
+    to: alarm
+    id: alarm
   actions:
   - action: notify.send_message
     target:
