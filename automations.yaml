@@ -299,7 +299,6 @@
   - condition: state
     entity_id: input_boolean.water_maintenance
     state: 'off'
-    note: Maintenance mode suppresses normal water-mode transitions.
   - condition: template
     value_template: '{{ trigger.to_state is not none and trigger.from_state is not
       none and trigger.to_state.state != trigger.from_state.state }}'
@@ -321,7 +320,10 @@
     - input_number.water_heating_hysteresis
   - trigger: homeassistant
     event: start
-  conditions: []
+  conditions:
+  - condition: state
+    entity_id: input_boolean.water_maintenance
+    state: 'off'
   actions:
   - variables:
       heating_enabled: '{{ is_state(''input_boolean.water_heating_enabled'', ''on'')
@@ -405,11 +407,10 @@
   mode: single
 - id: update_ha_location_from_ewd108
   alias: Update Home Assistant Location from EWD108
-  mode: single
-  trigger:
-  - platform: time_pattern
-    minutes: /5
-  condition:
+  triggers:
+  - minutes: /5
+    trigger: time_pattern
+  conditions:
   - condition: state
     entity_id: sensor.ewd108_fix_status
     state: Valid
@@ -440,11 +441,12 @@
     - condition: zone
       entity_id: device_tracker.jaskier_gps
       zone: zone.home
-  action:
-  - service: homeassistant.set_location
+  actions:
+  - action: homeassistant.set_location
     data:
       latitude: '{{ states(''sensor.ewd108_signed_latitude'') | float }}'
       longitude: '{{ states(''sensor.ewd108_signed_longitude'') | float }}'
+  mode: single
 - id: '1783884443396'
   alias: Set Normal Water Mode is Tank is full
   description: ''
@@ -457,7 +459,6 @@
   - condition: state
     entity_id: input_boolean.water_maintenance
     state: 'off'
-    note: Do not change the selected water mode during maintenance.
   - condition: or
     conditions:
     - condition: state
@@ -481,15 +482,9 @@
   description: ''
   triggers:
   - trigger: state
-    entity_id:
-    - binary_sensor.jaskier_wican_obd_pro_engine_on
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
-    from:
-    to:
-    - 'on'
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    to: 'on'
+    for: 00:01:00
   - trigger: state
     entity_id: input_boolean.air_compressor_engine
     to: 'on'
@@ -513,23 +508,12 @@
   description: ''
   triggers:
   - trigger: state
-    entity_id:
-    - binary_sensor.jaskier_wican_obd_pro_engine_on
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-    from:
-    - 'on'
-    to:
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    from: 'on'
   - trigger: state
     entity_id: input_boolean.air_compressor_engine
     to: 'off'
-  conditions:
-  - condition: state
-    entity_id: input_boolean.water_maintenance
-    state: 'off'
-    note: Maintenance mode leaves the heater relay under direct service control.
+  conditions: []
   actions:
   - action: switch.turn_off
     metadata: {}
@@ -555,6 +539,131 @@
       entity_id: switch.inverter_power
     data: {}
   mode: single
+- id: '1787035861878'
+  alias: Jaskier Trip - Capture Start
+  description: Capture the OBD odometer, time, and EWD108 position when Jaskier's
+    engine starts. This baseline drives the current-trip distance and the completed
+    trip record.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    from: 'off'
+    to: 'on'
+    id: engine_started
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+      state:
+      - unknown
+      - unavailable
+  actions:
+  - variables:
+      start_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
+        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
+        }}{% else %}Unknown{% endif %}'
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_trip_start_odometer
+    data:
+      value: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
+        | float }}'
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.jaskier_trip_started_at
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.jaskier_trip_start_location
+    data:
+      value: '{{ start_location }}'
+  mode: restart
+- id: '1787035862435'
+  alias: Jaskier Trip - Record End
+  description: At engine-off, pulse the completed distance for history graphs and
+    add a dated trip with EWD108 endpoints to the Jaskier Trips calendar.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    from: 'on'
+    to: 'off'
+    id: engine_stopped
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+      state:
+      - unknown
+      - unavailable
+  - condition: numeric_state
+    entity_id: input_number.jaskier_trip_start_odometer
+    above: 0
+  actions:
+  - variables:
+      start_odometer: '{{ states(''input_number.jaskier_trip_start_odometer'') | float(0)
+        }}'
+      end_odometer: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
+        | float(0) }}'
+      trip_distance: '{{ ([end_odometer - start_odometer, 0] | max) | round(1) }}'
+      start_time: '{{ states(''input_datetime.jaskier_trip_started_at'') }}'
+      end_time: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      start_location: '{{ states(''input_text.jaskier_trip_start_location'') }}'
+      end_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
+        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
+        }}{% else %}Unknown{% endif %}'
+  - condition: template
+    value_template: '{{ trip_distance | float(0) >= 0.1 }}'
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_completed_trip_pulse
+    data:
+      value: '{{ trip_distance }}'
+  - action: calendar.create_event
+    target:
+      entity_id: calendar.jaskier_trips
+    data:
+      summary: Jaskier trip — {{ trip_distance }} km
+      start_date_time: '{{ start_time }}'
+      end_date_time: '{{ end_time }}'
+      location: '{{ end_location }}'
+      description: 'Distance: {{ trip_distance }} km
+
+        Start: {{ start_location }}
+
+        End: {{ end_location }}
+
+        Route: https://www.google.com/maps/dir/?api=1&origin={{ start_location }}&destination={{
+        end_location }}'
+  - delay:
+      minutes: 1
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_completed_trip_pulse
+    data:
+      value: 0
+  mode: queued
+  max: 5
+- id: '1787036121051'
+  alias: Jaskier Trip - Reset Pulse After Restart
+  description: Guarantee the completed-trip entity returns to zero if Home Assistant
+    restarted during its one-minute pulse.
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_completed_trip_pulse
+    data:
+      value: 0
+  mode: single
 - id: '1787042217987'
   alias: Water - Maintenance Gate
   description: Suppress normal water and hot-water automation during service overrides.
@@ -572,8 +681,6 @@
   - trigger: homeassistant
     event: start
     id: startup
-    note: Re-assert the maintenance safety gate after a restart if the helper restored
-      on.
   conditions: []
   actions:
   - choose:
@@ -606,16 +713,12 @@
           - script.water_transition_pump_filling_to_grid
           - script.water_transition_pump_filling_to_grid_filling
           - script.water_transition_pump_filling_to_normal
-        note: Cancel any transition already in progress before direct service control
-          begins.
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.water_heating_enabled
-        note: Automatic hot water must be explicitly re-enabled after maintenance.
       - action: switch.turn_off
         target:
           entity_id: switch.water_heater_relay
-        note: Start heater service work from a known safe off state.
       - action: persistent_notification.create
         data:
           notification_id: water_maintenance_active
@@ -766,7 +869,6 @@
   - condition: state
     entity_id: input_boolean.water_maintenance
     state: 'off'
-    note: Preserve direct service overrides across a restart.
   actions:
   - wait_template: >-
       {{ has_value('switch.water_pump_relay') and

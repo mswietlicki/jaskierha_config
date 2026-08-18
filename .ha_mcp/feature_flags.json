@@ -1,4 +1,8 @@
 {
   "enable_tool_search": false,
-  "enable_mandatory_bps": true
+  "enable_mandatory_bps": true,
+  "enable_beta_features": true,
+  "enable_yaml_config_editing": true,
+  "enable_filesystem_tools": true,
+  "enable_dashboard_screenshot": false
 }
