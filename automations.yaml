@@ -1,962 +1,993 @@
-- id: '1772610742505'
+- id: "1772610742505"
   alias: Toggle Light on Button Press
   description: Toggle the main light when either ZHA button sends a short-press command.
   triggers:
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_ieee: e4:56:ac:ff:fe:61:3b:4f
-      command: toggle
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_ieee: e4:56:ac:ff:fe:56:8b:8c
-      command: toggle
+    - trigger: event
+      event_type: zha_event
+      event_data:
+        device_ieee: e4:56:ac:ff:fe:61:3b:4f
+        command: toggle
+    - trigger: event
+      event_type: zha_event
+      event_data:
+        device_ieee: e4:56:ac:ff:fe:56:8b:8c
+        command: toggle
   conditions: []
   actions:
-  - action: light.toggle
-    metadata: {}
-    target:
-      entity_id: light.relay_0
-    data: {}
+    - action: light.toggle
+      metadata: {}
+      target:
+        entity_id: light.relay_0
+      data: {}
   mode: single
-- id: '1772611103694'
+- id: "1772611103694"
   alias: Temperature - Freezing Warning/Error
   description: Warn before freezing and alert on freeze.
   triggers:
-  - trigger: numeric_state
-    entity_id:
-    - sensor.sensor_internal_temperature
-    below: 3
-    for:
-      minutes: 5
-    id: warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.sensor_internal_temperature
-    below: 0
-    for:
-      minutes: 2
-    id: critical
+    - trigger: numeric_state
+      entity_id:
+        - sensor.sensor_internal_temperature
+      below: 3
+      for:
+        minutes: 5
+      id: warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.sensor_internal_temperature
+      below: 0
+      for:
+        minutes: 2
+      id: critical
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: warning
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Temperature Warning
-          message: 'Internal temperature is low: {{ states(''sensor.sensor_internal_temperature'')
-            }} °C
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: warning
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Temperature Warning
+                message:
+                  "Internal temperature is low: {{ states('sensor.sensor_internal_temperature')
+                  }} °C
 
-            '
-    - conditions:
-      - condition: trigger
-        id: critical
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Temperature Error - Freezing Risk
-          message: 'Freezing detected. Internal temperature is {{ states(''sensor.sensor_internal_temperature'')
-            }} °C
+                  "
+        - conditions:
+            - condition: trigger
+              id: critical
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Temperature Error - Freezing Risk
+                message:
+                  "Freezing detected. Internal temperature is {{ states('sensor.sensor_internal_temperature')
+                  }} °C
 
-            '
+                  "
   mode: queued
   max: 5
-- id: '1776195340767'
+- id: "1776195340767"
   alias: Victron - Battery Warning/Error
   description: Notify on low battery voltage and low battery charge.
   triggers:
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_dc_bus_voltage
-    above: 12.2
-    below: 12.8
-    for:
-      minutes: 2
-    id: voltage_warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_dc_bus_voltage
-    below: 12.2
-    for:
-      minutes: 2
-    id: voltage_error
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_charge
-    above: 15
-    below: 25
-    for:
-      minutes: 2
-    id: soc_warning
-  - trigger: numeric_state
-    entity_id:
-    - sensor.shunt_main_charge
-    below: 15
-    for:
-      minutes: 2
-    id: soc_error
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_dc_bus_voltage
+      above: 12.2
+      below: 12.8
+      for:
+        minutes: 2
+      id: voltage_warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_dc_bus_voltage
+      below: 12.2
+      for:
+        minutes: 2
+      id: voltage_error
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_charge
+      above: 15
+      below: 25
+      for:
+        minutes: 2
+      id: soc_warning
+    - trigger: numeric_state
+      entity_id:
+        - sensor.shunt_main_charge
+      below: 15
+      for:
+        minutes: 2
+      id: soc_error
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: voltage_warning
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Victron Battery Warning
-          message: 'Battery voltage low: {{ states(''sensor.shunt_main_dc_bus_voltage'')
-            }} V'
-    - conditions:
-      - condition: trigger
-        id: voltage_error
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Victron Battery Error
-          message: 'Battery voltage critical: {{ states(''sensor.shunt_main_dc_bus_voltage'')
-            }} V'
-    - conditions:
-      - condition: trigger
-        id: soc_warning
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Victron Battery Warning
-          message: 'Battery charge low: {{ states(''sensor.shunt_main_charge'') }}
-            %'
-    - conditions:
-      - condition: trigger
-        id: soc_error
-      sequence:
-      - action: notify.notify
-        continue_on_error: true
-        data:
-          title: Victron Battery Error
-          message: 'Battery charge critical: {{ states(''sensor.shunt_main_charge'')
-            }} %'
-  - action: persistent_notification.create
-    data:
-      notification_id: victron_battery_alert
-      title: Victron Battery Alert
-      message: >-
-        {% if trigger.id.startswith('voltage') %}
-          Battery voltage is {{ states('sensor.shunt_main_dc_bus_voltage') }} V
-          ({{ 'critical' if trigger.id == 'voltage_error' else 'warning' }}).
-        {% else %}
-          Battery charge is {{ states('sensor.shunt_main_charge') }}%
-          ({{ 'critical' if trigger.id == 'soc_error' else 'warning' }}).
-        {% endif %}
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: voltage_warning
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Victron Battery Warning
+                message:
+                  "Battery voltage low: {{ states('sensor.shunt_main_dc_bus_voltage')
+                  }} V"
+        - conditions:
+            - condition: trigger
+              id: voltage_error
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Victron Battery Error
+                message:
+                  "Battery voltage critical: {{ states('sensor.shunt_main_dc_bus_voltage')
+                  }} V"
+        - conditions:
+            - condition: trigger
+              id: soc_warning
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Victron Battery Warning
+                message:
+                  "Battery charge low: {{ states('sensor.shunt_main_charge') }}
+                  %"
+        - conditions:
+            - condition: trigger
+              id: soc_error
+          sequence:
+            - action: notify.notify
+              continue_on_error: true
+              data:
+                title: Victron Battery Error
+                message:
+                  "Battery charge critical: {{ states('sensor.shunt_main_charge')
+                  }} %"
+    - action: persistent_notification.create
+      data:
+        notification_id: victron_battery_alert
+        title: Victron Battery Alert
+        message: >-
+          {% if trigger.id.startswith('voltage') %}
+            Battery voltage is {{ states('sensor.shunt_main_dc_bus_voltage') }} V
+            ({{ 'critical' if trigger.id == 'voltage_error' else 'warning' }}).
+          {% else %}
+            Battery charge is {{ states('sensor.shunt_main_charge') }}%
+            ({{ 'critical' if trigger.id == 'soc_error' else 'warning' }}).
+          {% endif %}
   mode: queued
   max: 10
 - id: victron_inverter_alarm_notifications
   alias: Victron - Inverter Alarm Warning/Error
-  description: Notify only when an inverter alarm sensor enters warning or alarm;
+  description:
+    Notify only when an inverter alarm sensor enters warning or alarm;
     ignore no_alarm, unknown, and unavailable transitions.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.inverter_grid_lost_alarm
-    - sensor.inverter_high_dc_current_alarm
-    - sensor.inverter_high_dc_voltage_alarm
-    - sensor.inverter_high_temperature_alarm
-    - sensor.inverter_low_battery_alarm
-    - sensor.inverter_overload_alarm
-    - sensor.inverter_phase_rotation_alarm
-    - sensor.inverter_ripple_alarm
-    - sensor.inverter_temperature_sensor_alarm
-    - sensor.inverter_voltage_sensor_alarm
-    to: warning
-    id: warning
-  - trigger: state
-    entity_id:
-    - sensor.inverter_grid_lost_alarm
-    - sensor.inverter_high_dc_current_alarm
-    - sensor.inverter_high_dc_voltage_alarm
-    - sensor.inverter_high_temperature_alarm
-    - sensor.inverter_low_battery_alarm
-    - sensor.inverter_overload_alarm
-    - sensor.inverter_phase_rotation_alarm
-    - sensor.inverter_ripple_alarm
-    - sensor.inverter_temperature_sensor_alarm
-    - sensor.inverter_voltage_sensor_alarm
-    to: alarm
-    id: alarm
+    - trigger: state
+      entity_id:
+        - sensor.inverter_grid_lost_alarm
+        - sensor.inverter_high_dc_current_alarm
+        - sensor.inverter_high_dc_voltage_alarm
+        - sensor.inverter_high_temperature_alarm
+        - sensor.inverter_low_battery_alarm
+        - sensor.inverter_overload_alarm
+        - sensor.inverter_phase_rotation_alarm
+        - sensor.inverter_ripple_alarm
+        - sensor.inverter_temperature_sensor_alarm
+        - sensor.inverter_voltage_sensor_alarm
+      to: warning
+      id: warning
+    - trigger: state
+      entity_id:
+        - sensor.inverter_grid_lost_alarm
+        - sensor.inverter_high_dc_current_alarm
+        - sensor.inverter_high_dc_voltage_alarm
+        - sensor.inverter_high_temperature_alarm
+        - sensor.inverter_low_battery_alarm
+        - sensor.inverter_overload_alarm
+        - sensor.inverter_phase_rotation_alarm
+        - sensor.inverter_ripple_alarm
+        - sensor.inverter_temperature_sensor_alarm
+        - sensor.inverter_voltage_sensor_alarm
+      to: alarm
+      id: alarm
   actions:
-  - action: notify.send_message
-    continue_on_error: true
-    target:
-      entity_id: notify.msphone29
-    data:
-      title: Victron Inverter Alarm
-      message: 'Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state
-        }}
+    - action: notify.send_message
+      continue_on_error: true
+      target:
+        entity_id: notify.msphone29
+      data:
+        title: Victron Inverter Alarm
+        message:
+          "Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state
+          }}
 
-        '
-  - action: persistent_notification.create
-    data:
-      notification_id: victron_inverter_alarm
-      title: Victron Inverter Alarm
-      message: 'Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}'
+          "
+    - action: persistent_notification.create
+      data:
+        notification_id: victron_inverter_alarm
+        title: Victron Inverter Alarm
+        message: "Inverter alarm on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}"
   mode: queued
   max: 20
 - id: victron_dynamic_ess_error_notification
   alias: Victron - Dynamic ESS Error Notification
-  description: Notify when Dynamic ESS enters a real error state; ignore no_error,
+  description:
+    Notify when Dynamic ESS enters a real error state; ignore no_error,
     unknown, and unavailable transitions.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.gx_device_dynamic_ess_error
-    not_to:
-    - no_error
-    - unknown
-    - unavailable
+    - trigger: state
+      entity_id:
+        - sensor.gx_device_dynamic_ess_error
+      not_to:
+        - no_error
+        - unknown
+        - unavailable
   actions:
-  - action: notify.send_message
-    continue_on_error: true
-    target:
-      entity_id: notify.msphone29
-    data:
-      title: Victron Dynamic ESS Error
-      message: 'Dynamic ESS error: {{ trigger.to_state.state }}'
-  - action: persistent_notification.create
-    data:
-      notification_id: victron_dynamic_ess_error
-      title: Victron Dynamic ESS Error
-      message: 'Dynamic ESS error: {{ trigger.to_state.state }}'
+    - action: notify.send_message
+      continue_on_error: true
+      target:
+        entity_id: notify.msphone29
+      data:
+        title: Victron Dynamic ESS Error
+        message: "Dynamic ESS error: {{ trigger.to_state.state }}"
+    - action: persistent_notification.create
+      data:
+        notification_id: victron_dynamic_ess_error
+        title: Victron Dynamic ESS Error
+        message: "Dynamic ESS error: {{ trigger.to_state.state }}"
   mode: single
 - id: victron_solar_charger_error_notifications
   alias: Victron - Solar Charger Error Notifications
-  description: Notify when a SmartSolar charger enters a real error state; ignore
+  description:
+    Notify when a SmartSolar charger enters a real error state; ignore
     no_error, unknown, and unavailable transitions.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
-    - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
-    not_to:
-    - no_error
-    - unknown
-    - unavailable
+    - trigger: state
+      entity_id:
+        - sensor.smartsolar_charger_mppt_100_30_id_278_error_code
+        - sensor.smartsolar_charger_mppt_100_30_id_279_error_code
+      not_to:
+        - no_error
+        - unknown
+        - unavailable
   actions:
-  - action: notify.send_message
-    continue_on_error: true
-    target:
-      entity_id: notify.msphone29
-    data:
-      title: Victron SmartSolar Warning
-      message: 'SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state
-        }}
+    - action: notify.send_message
+      continue_on_error: true
+      target:
+        entity_id: notify.msphone29
+      data:
+        title: Victron SmartSolar Warning
+        message:
+          "SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state
+          }}
 
-        '
-  - action: persistent_notification.create
-    data:
-      notification_id: victron_solar_charger_error
-      title: Victron SmartSolar Warning
-      message: 'SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}'
+          "
+    - action: persistent_notification.create
+      data:
+        notification_id: victron_solar_charger_error
+        title: Victron SmartSolar Warning
+        message: "SmartSolar charger issue on {{ trigger.to_state.name }}: {{ trigger.to_state.state }}"
   mode: queued
   max: 10
 - id: victron_system_state_warning
   alias: Victron - System State Warning
   description: Notify only when the GX system state enters the fault state.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.gx_device_system_state
-    to: fault
+    - trigger: state
+      entity_id:
+        - sensor.gx_device_system_state
+      to: fault
   actions:
-  - action: notify.send_message
-    continue_on_error: true
-    target:
-      entity_id: notify.msphone29
-    data:
-      title: Victron GX System Warning
-      message: 'GX system state changed: {{ trigger.to_state.state }}'
-  - action: persistent_notification.create
-    data:
-      notification_id: victron_system_state_warning
-      title: Victron GX System Warning
-      message: 'GX system state changed: {{ trigger.to_state.state }}'
+    - action: notify.send_message
+      continue_on_error: true
+      target:
+        entity_id: notify.msphone29
+      data:
+        title: Victron GX System Warning
+        message: "GX system state changed: {{ trigger.to_state.state }}"
+    - action: persistent_notification.create
+      data:
+        notification_id: victron_system_state_warning
+        title: Victron GX System Warning
+        message: "GX system state changed: {{ trigger.to_state.state }}"
   mode: single
 - id: water_mode_state_machine_transition
   alias: Water - Apply Target Mode
   description: Apply selected water mode with sequential valve transitions.
   triggers:
-  - trigger: state
-    entity_id:
-    - input_select.water_mode_target
+    - trigger: state
+      entity_id:
+        - input_select.water_mode_target
   conditions:
-  - condition: state
-    entity_id: input_boolean.water_maintenance
-    state: 'off'
-  - condition: template
-    value_template: '{{ trigger.to_state is not none and trigger.from_state is not
-      none and trigger.to_state.state != trigger.from_state.state }}'
+    - condition: state
+      entity_id: input_boolean.water_maintenance
+      state: "off"
+    - condition: template
+      value_template:
+        "{{ trigger.to_state is not none and trigger.from_state is not
+        none and trigger.to_state.state != trigger.from_state.state }}"
   actions:
-  - action: script.water_set_mode
-    data:
-      mode: '{{ trigger.to_state.state }}'
+    - action: script.water_set_mode
+      data:
+        mode: "{{ trigger.to_state.state }}"
   mode: queued
 - id: water_heating_control
   alias: Water - Heating Control
-  description: Keep boiler temperature near the configured target using the water
+  description:
+    Keep boiler temperature near the configured target using the water
     heater relay.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.boiler_temp
-    - input_boolean.water_heating_enabled
-    - input_number.water_heating_target_temp
-    - input_number.water_heating_hysteresis
-  - trigger: homeassistant
-    event: start
+    - trigger: state
+      entity_id:
+        - sensor.boiler_temp
+        - input_boolean.water_heating_enabled
+        - input_number.water_heating_target_temp
+        - input_number.water_heating_hysteresis
+    - trigger: homeassistant
+      event: start
   conditions:
-  - condition: state
-    entity_id: input_boolean.water_maintenance
-    state: 'off'
+    - condition: state
+      entity_id: input_boolean.water_maintenance
+      state: "off"
   actions:
-  - variables:
-      heating_enabled: '{{ is_state(''input_boolean.water_heating_enabled'', ''on'')
-        }}'
-      boiler_temp: '{{ states(''sensor.boiler_temp'') | float(none) }}'
-      target_temp: '{{ states(''input_number.water_heating_target_temp'') | float(45)
-        }}'
-      hysteresis: '{{ states(''input_number.water_heating_hysteresis'') | float(3)
-        }}'
-      lower_limit: '{{ target_temp - hysteresis }}'
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ not heating_enabled }}'
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_heater_relay
-    - conditions:
-      - condition: template
-        value_template: '{{ heating_enabled and boiler_temp is not none and boiler_temp
-          <= lower_limit }}'
-      sequence:
-      - action: switch.turn_on
-        target:
-          entity_id: switch.water_heater_relay
-    - conditions:
-      - condition: template
-        value_template: '{{ heating_enabled and boiler_temp is not none and boiler_temp
-          >= target_temp }}'
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_heater_relay
+    - variables:
+        heating_enabled:
+          "{{ is_state('input_boolean.water_heating_enabled', 'on')
+          }}"
+        boiler_temp: "{{ states('sensor.boiler_temp') | float(none) }}"
+        target_temp:
+          "{{ states('input_number.water_heating_target_temp') | float(45)
+          }}"
+        hysteresis:
+          "{{ states('input_number.water_heating_hysteresis') | float(3)
+          }}"
+        lower_limit: "{{ target_temp - hysteresis }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not heating_enabled }}"
+          sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: switch.water_heater_relay
+        - conditions:
+            - condition: template
+              value_template:
+                "{{ heating_enabled and boiler_temp is not none and boiler_temp
+                <= lower_limit }}"
+          sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: switch.water_heater_relay
+        - conditions:
+            - condition: template
+              value_template:
+                "{{ heating_enabled and boiler_temp is not none and boiler_temp
+                >= target_temp }}"
+          sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: switch.water_heater_relay
   mode: single
 - id: floorheating_auto_off_without_ac_input
   alias: Floor Heating - Auto Disable Without AC Input
-  description: Turn off floor heating after 5 minutes unless the inverter reports
+  description:
+    Turn off floor heating after 5 minutes unless the inverter reports
     an active AC input.
   triggers:
-  - trigger: state
-    entity_id:
-    - switch.floorheating
-    to: 'on'
-    for:
-      minutes: 5
+    - trigger: state
+      entity_id:
+        - switch.floorheating
+      to: "on"
+      for:
+        minutes: 5
   conditions:
-  - condition: state
-    entity_id: switch.floorheating
-    state: 'on'
-  - condition: numeric_state
-    entity_id: sensor.inverter_input_power_l1
-    below: 500
-  actions:
-  - action: switch.turn_off
-    target:
+    - condition: state
       entity_id: switch.floorheating
+      state: "on"
+    - condition: numeric_state
+      entity_id: sensor.inverter_input_power_l1
+      below: 500
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.floorheating
   mode: single
 - id: floorheating_turn_off_when_ac_input_inactive
   alias: Floor Heating - Disable On Inactive AC Input
   description: Turn off floor heating when the inverter AC input becomes inactive.
   triggers:
-  - trigger: state
-    entity_id:
-    - sensor.inverter_active_ac_input
+    - trigger: state
+      entity_id:
+        - sensor.inverter_active_ac_input
   conditions:
-  - condition: state
-    entity_id: switch.floorheating
-    state: 'on'
-  - condition: template
-    value_template: '{% set ac_input = trigger.to_state.state | lower | trim %} {%
-      set inactive = [''0'', ''off'', ''none'', ''disconnected'', ''not available'',
-      ''unknown'', ''unavailable'', ''false'', ''no input''] %} {{ ac_input in inactive
-      or ac_input.startswith(''no '') }}
-
-      '
-  actions:
-  - action: switch.turn_off
-    target:
+    - condition: state
       entity_id: switch.floorheating
+      state: "on"
+    - condition: template
+      value_template:
+        "{% set ac_input = trigger.to_state.state | lower | trim %} {%
+        set inactive = ['0', 'off', 'none', 'disconnected', 'not available',
+        'unknown', 'unavailable', 'false', 'no input'] %} {{ ac_input in inactive
+        or ac_input.startswith('no ') }}
+
+        "
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.floorheating
   mode: single
 - id: update_ha_location_from_ewd108
   alias: Update Home Assistant Location from EWD108
   triggers:
-  - minutes: /5
-    trigger: time_pattern
+    - minutes: /5
+      trigger: time_pattern
   conditions:
-  - condition: state
-    entity_id: sensor.ewd108_fix_status
-    state: Valid
-  - condition: numeric_state
-    entity_id: sensor.ewd108_signed_latitude
-    above: -90
-    below: 90
-  - condition: numeric_state
-    entity_id: sensor.ewd108_signed_longitude
-    above: -180
-    below: 180
-  - condition: or
-    conditions:
+    - condition: state
+      entity_id: sensor.ewd108_fix_status
+      state: Valid
     - condition: numeric_state
       entity_id: sensor.ewd108_signed_latitude
-      above: 0.000001
-    - condition: numeric_state
-      entity_id: sensor.ewd108_signed_latitude
-      below: -0.000001
+      above: -90
+      below: 90
     - condition: numeric_state
       entity_id: sensor.ewd108_signed_longitude
-      above: 0.000001
-    - condition: numeric_state
-      entity_id: sensor.ewd108_signed_longitude
-      below: -0.000001
-  - condition: not
-    conditions:
-    - condition: zone
-      entity_id: device_tracker.jaskier_gps
-      zone: zone.home
+      above: -180
+      below: 180
+    - condition: or
+      conditions:
+        - condition: numeric_state
+          entity_id: sensor.ewd108_signed_latitude
+          above: 0.000001
+        - condition: numeric_state
+          entity_id: sensor.ewd108_signed_latitude
+          below: -0.000001
+        - condition: numeric_state
+          entity_id: sensor.ewd108_signed_longitude
+          above: 0.000001
+        - condition: numeric_state
+          entity_id: sensor.ewd108_signed_longitude
+          below: -0.000001
+    - condition: not
+      conditions:
+        - condition: zone
+          entity_id: device_tracker.jaskier_gps
+          zone: zone.home
   actions:
-  - action: homeassistant.set_location
-    data:
-      latitude: '{{ states(''sensor.ewd108_signed_latitude'') | float }}'
-      longitude: '{{ states(''sensor.ewd108_signed_longitude'') | float }}'
+    - action: homeassistant.set_location
+      data:
+        latitude: "{{ states('sensor.ewd108_signed_latitude') | float }}"
+        longitude: "{{ states('sensor.ewd108_signed_longitude') | float }}"
   mode: single
-- id: '1783884443396'
+- id: "1783884443396"
   alias: Set Normal Water Mode is Tank is full
-  description: ''
+  description: ""
   triggers:
-  - trigger: numeric_state
-    entity_id:
-    - sensor.water_height
-    above: 55
+    - trigger: numeric_state
+      entity_id:
+        - sensor.water_height
+      above: 55
   conditions:
-  - condition: state
-    entity_id: input_boolean.water_maintenance
-    state: 'off'
-  - condition: or
-    conditions:
     - condition: state
-      entity_id: input_select.water_mode_current
-      state:
-      - Pump Filling
-    - condition: state
-      entity_id: input_select.water_mode_current
-      state:
-      - Grid Filling
+      entity_id: input_boolean.water_maintenance
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.water_mode_current
+          state:
+            - Pump Filling
+        - condition: state
+          entity_id: input_select.water_mode_current
+          state:
+            - Grid Filling
   actions:
-  - action: input_select.select_option
-    metadata: {}
-    target:
-      entity_id: input_select.water_mode_target
-    data:
-      option: Normal
+    - action: input_select.select_option
+      metadata: {}
+      target:
+        entity_id: input_select.water_mode_target
+      data:
+        option: Normal
   mode: single
-- id: '1786893093855'
+- id: "1786893093855"
   alias: Turn On Air Compressor With Engine
-  description: ''
+  description: ""
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    to: 'on'
-    for: 00:01:00
-  - trigger: state
-    entity_id: input_boolean.air_compressor_engine
-    to: 'on'
+    - trigger: state
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      to: "on"
+      for: 00:01:00
+    - trigger: state
+      entity_id: input_boolean.air_compressor_engine
+      to: "on"
   conditions:
-  - condition: state
-    entity_id: input_boolean.air_compressor_engine
-    state: 'on'
-  - condition: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    state: 'on'
-    for: 00:01:00
+    - condition: state
+      entity_id: input_boolean.air_compressor_engine
+      state: "on"
+    - condition: state
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      state: "on"
+      for: 00:01:00
   actions:
-  - action: switch.turn_on
-    metadata: {}
-    target:
-      entity_id: switch.relay_7
-    data: {}
+    - action: switch.turn_on
+      metadata: {}
+      target:
+        entity_id: switch.relay_7
+      data: {}
   mode: restart
-- id: '1786893299082'
+- id: "1786893299082"
   alias: Turn Off Air Compressor With Engine
-  description: ''
+  description: ""
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    from: 'on'
-  - trigger: state
-    entity_id: input_boolean.air_compressor_engine
-    to: 'off'
+    - trigger: state
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      from: "on"
+    - trigger: state
+      entity_id: input_boolean.air_compressor_engine
+      to: "off"
   conditions: []
   actions:
-  - action: switch.turn_off
-    metadata: {}
-    target:
-      entity_id: switch.relay_7
-    data: {}
+    - action: switch.turn_off
+      metadata: {}
+      target:
+        entity_id: switch.relay_7
+      data: {}
   mode: restart
-- id: '1786996780821'
+- id: "1786996780821"
   alias: Toggle Inverter Power On Double Press
-  description: This automation toggles the inverter power on double press of a remote
+  description:
+    This automation toggles the inverter power on double press of a remote
     button.
   triggers:
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_ieee: e4:56:ac:ff:fe:56:8b:8c
-      command: 'on'
+    - trigger: event
+      event_type: zha_event
+      event_data:
+        device_ieee: e4:56:ac:ff:fe:56:8b:8c
+        command: "on"
   conditions: []
   actions:
-  - action: switch.toggle
-    metadata: {}
-    target:
-      entity_id: switch.inverter_power
-    data: {}
+    - action: switch.toggle
+      metadata: {}
+      target:
+        entity_id: switch.inverter_power
+      data: {}
   mode: single
-- id: '1787035861878'
+- id: "1787035861878"
   alias: Jaskier Trip - Capture Start
-  description: Capture the OBD odometer, time, and EWD108 position when Jaskier's
+  description:
+    Capture the OBD odometer, time, and EWD108 position when Jaskier's
     engine starts. This baseline drives the current-trip distance and the completed
     trip record.
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    from: 'off'
-    to: 'on'
-    id: engine_started
+    - trigger: state
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      from: "off"
+      to: "on"
+      id: engine_started
   conditions:
-  - condition: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    state: 'on'
-  - condition: not
-    conditions:
     - condition: state
-      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
-      state:
-      - unknown
-      - unavailable
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      state: "on"
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+          state:
+            - unknown
+            - unavailable
   actions:
-  - variables:
-      start_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
-        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
-        }}{% else %}Unknown{% endif %}'
-  - action: input_number.set_value
-    target:
-      entity_id: input_number.jaskier_trip_start_odometer
-    data:
-      value: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
-        | float }}'
-  - action: input_datetime.set_datetime
-    target:
-      entity_id: input_datetime.jaskier_trip_started_at
-    data:
-      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
-  - action: input_text.set_value
-    target:
-      entity_id: input_text.jaskier_trip_start_location
-    data:
-      value: '{{ start_location }}'
+    - variables:
+        start_location:
+          "{% if is_state('sensor.ewd108_fix_status', 'Valid') %}{{
+          states('sensor.ewd108_signed_latitude') }},{{ states('sensor.ewd108_signed_longitude')
+          }}{% else %}Unknown{% endif %}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.jaskier_trip_start_odometer
+      data:
+        value:
+          "{{ states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear')
+          | float }}"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.jaskier_trip_started_at
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.jaskier_trip_start_location
+      data:
+        value: "{{ start_location }}"
   mode: restart
-- id: '1787035862435'
+- id: "1787035862435"
   alias: Jaskier Trip - Record End
-  description: At engine-off, pulse the completed distance for history graphs and
+  description:
+    At engine-off, pulse the completed distance for history graphs and
     add a dated trip with EWD108 endpoints to the Jaskier Trips calendar.
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
-    from: 'on'
-    to: 'off'
-    id: engine_stopped
+    - trigger: state
+      entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+      from: "on"
+      to: "off"
+      id: engine_stopped
   conditions:
-  - condition: not
-    conditions:
-    - condition: state
-      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
-      state:
-      - unknown
-      - unavailable
-  - condition: numeric_state
-    entity_id: input_number.jaskier_trip_start_odometer
-    above: 0
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+          state:
+            - unknown
+            - unavailable
+    - condition: numeric_state
+      entity_id: input_number.jaskier_trip_start_odometer
+      above: 0
   actions:
-  - variables:
-      start_odometer: '{{ states(''input_number.jaskier_trip_start_odometer'') | float(0)
-        }}'
-      end_odometer: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
-        | float(0) }}'
-      trip_distance: '{{ ([end_odometer - start_odometer, 0] | max) | round(1) }}'
-      start_time: '{{ states(''input_datetime.jaskier_trip_started_at'') }}'
-      end_time: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
-      start_location: '{{ states(''input_text.jaskier_trip_start_location'') }}'
-      end_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
-        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
-        }}{% else %}Unknown{% endif %}'
-  - condition: template
-    value_template: '{{ trip_distance | float(0) >= 0.1 }}'
-  - action: input_number.set_value
-    target:
-      entity_id: input_number.jaskier_completed_trip_pulse
-    data:
-      value: '{{ trip_distance }}'
-  - action: calendar.create_event
-    target:
-      entity_id: calendar.jaskier_trips
-    data:
-      summary: Jaskier trip — {{ trip_distance }} km
-      start_date_time: '{{ start_time }}'
-      end_date_time: '{{ end_time }}'
-      location: '{{ end_location }}'
-      description: 'Distance: {{ trip_distance }} km
+    - variables:
+        start_odometer:
+          "{{ states('input_number.jaskier_trip_start_odometer') | float(0)
+          }}"
+        end_odometer:
+          "{{ states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear')
+          | float(0) }}"
+        trip_distance: "{{ ([end_odometer - start_odometer, 0] | max) | round(1) }}"
+        start_time: "{{ states('input_datetime.jaskier_trip_started_at') }}"
+        end_time: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        start_location: "{{ states('input_text.jaskier_trip_start_location') }}"
+        end_location: "{% if is_state('sensor.ewd108_fix_status', 'Valid') %}{{
+          states('sensor.ewd108_signed_latitude') }},{{ states('sensor.ewd108_signed_longitude')
+          }}{% else %}Unknown{% endif %}"
+    - condition: template
+      value_template: "{{ trip_distance | float(0) >= 0.1 }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.jaskier_completed_trip_pulse
+      data:
+        value: "{{ trip_distance }}"
+    - action: calendar.create_event
+      target:
+        entity_id: calendar.jaskier_trips
+      data:
+        summary: Jaskier trip — {{ trip_distance }} km
+        start_date_time: "{{ start_time }}"
+        end_date_time: "{{ end_time }}"
+        location: "{{ end_location }}"
+        description: "Distance: {{ trip_distance }} km
 
-        Start: {{ start_location }}
+          Start: {{ start_location }}
 
-        End: {{ end_location }}
+          End: {{ end_location }}
 
-        Route: https://www.google.com/maps/dir/?api=1&origin={{ start_location }}&destination={{
-        end_location }}'
-  - delay:
-      minutes: 1
-  - action: input_number.set_value
-    target:
-      entity_id: input_number.jaskier_completed_trip_pulse
-    data:
-      value: 0
+          Route: https://www.google.com/maps/dir/?api=1&origin={{ start_location }}&destination={{
+          end_location }}"
+    - delay:
+        minutes: 1
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.jaskier_completed_trip_pulse
+      data:
+        value: 0
   mode: queued
   max: 5
-- id: '1787036121051'
+- id: "1787036121051"
   alias: Jaskier Trip - Reset Pulse After Restart
-  description: Guarantee the completed-trip entity returns to zero if Home Assistant
+  description:
+    Guarantee the completed-trip entity returns to zero if Home Assistant
     restarted during its one-minute pulse.
   triggers:
-  - trigger: homeassistant
-    event: start
+    - trigger: homeassistant
+      event: start
   conditions: []
   actions:
-  - action: input_number.set_value
-    target:
-      entity_id: input_number.jaskier_completed_trip_pulse
-    data:
-      value: 0
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.jaskier_completed_trip_pulse
+      data:
+        value: 0
   mode: single
-- id: '1787042217987'
+- id: "1787042217987"
   alias: Water - Maintenance Gate
-  description: Suppress normal water and hot-water automation during service overrides.
+  description:
+    Suppress normal water and hot-water automation during service overrides.
     Stop active transitions on entry and only leave maintenance when physical states
     match a known water mode.
   triggers:
-  - trigger: state
-    entity_id: input_boolean.water_maintenance
-    to: 'on'
-    id: enabled
-  - trigger: state
-    entity_id: input_boolean.water_maintenance
-    to: 'off'
-    id: disabled
-  - trigger: homeassistant
-    event: start
-    id: startup
+    - trigger: state
+      entity_id: input_boolean.water_maintenance
+      to: "on"
+      id: enabled
+    - trigger: state
+      entity_id: input_boolean.water_maintenance
+      to: "off"
+      id: disabled
+    - trigger: homeassistant
+      event: start
+      id: startup
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - enabled
-        - startup
-      - condition: state
-        entity_id: input_boolean.water_maintenance
-        state: 'on'
-      sequence:
-      - action: script.turn_off
-        target:
-          entity_id:
-          - script.water_mode_grid
-          - script.water_mode_grid_filling
-          - script.water_mode_normal
-          - script.water_mode_pump_filling
-          - script.water_set_mode
-          - script.water_transition_grid_filling_to_grid
-          - script.water_transition_grid_to_grid_filling
-          - script.water_transition_grid_to_normal
-          - script.water_transition_grid_to_pump_filling
-          - script.water_transition_grid_filling_to_normal
-          - script.water_transition_grid_filling_to_pump_filling
-          - script.water_transition_normal_to_grid
-          - script.water_transition_normal_to_grid_filling
-          - script.water_transition_normal_to_pump_filling
-          - script.water_transition_pump_filling_to_grid
-          - script.water_transition_pump_filling_to_grid_filling
-          - script.water_transition_pump_filling_to_normal
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.water_heating_enabled
-      - action: switch.turn_off
-        target:
-          entity_id: switch.water_heater_relay
-      - action: persistent_notification.create
-        data:
-          notification_id: water_maintenance_active
-          title: Water Maintenance active
-          message: Normal water-mode transitions, tank-full mode changes, and automatic
-            hot-water control are suppressed. Use only the manual controls on the Water
-            Maintenance view.
-    - conditions:
-      - condition: trigger
-        id: disabled
-      sequence:
-      - choose:
+    - choose:
         - conditions:
-          - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_tank
-            state: 'off'
+            - condition: trigger
+              id:
+                - enabled
+                - startup
+            - condition: state
+              entity_id: input_boolean.water_maintenance
+              state: "on"
           sequence:
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_current
-            data:
-              option: Normal
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_target
-            data:
-              option: Normal
+            - action: script.turn_off
+              target:
+                entity_id:
+                  - script.water_mode_grid
+                  - script.water_mode_grid_filling
+                  - script.water_mode_normal
+                  - script.water_mode_pump_filling
+                  - script.water_set_mode
+                  - script.water_transition_grid_filling_to_grid
+                  - script.water_transition_grid_to_grid_filling
+                  - script.water_transition_grid_to_normal
+                  - script.water_transition_grid_to_pump_filling
+                  - script.water_transition_grid_filling_to_normal
+                  - script.water_transition_grid_filling_to_pump_filling
+                  - script.water_transition_normal_to_grid
+                  - script.water_transition_normal_to_grid_filling
+                  - script.water_transition_normal_to_pump_filling
+                  - script.water_transition_pump_filling_to_grid
+                  - script.water_transition_pump_filling_to_grid_filling
+                  - script.water_transition_pump_filling_to_normal
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.water_heating_enabled
+            - action: switch.turn_off
+              target:
+                entity_id: switch.water_heater_relay
+            - action: persistent_notification.create
+              data:
+                notification_id: water_maintenance_active
+                title: Water Maintenance active
+                message:
+                  Normal water-mode transitions, tank-full mode changes, and automatic
+                  hot-water control are suppressed. Use only the manual controls on the Water
+                  Maintenance view.
         - conditions:
-          - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_tank
-            state: 'off'
+            - condition: trigger
+              id: disabled
           sequence:
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_current
-            data:
-              option: Pump Filling
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_target
-            data:
-              option: Pump Filling
-        - conditions:
-          - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_tank
-            state: 'off'
-          sequence:
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_current
-            data:
-              option: Grid Filling
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_target
-            data:
-              option: Grid Filling
-        - conditions:
-          - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_tank
-            state: 'on'
-          sequence:
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_current
-            data:
-              option: Grid
-          - action: input_select.select_option
-            target:
-              entity_id: input_select.water_mode_target
-            data:
-              option: Grid
-        default:
-        - action: persistent_notification.create
-          data:
-            notification_id: water_maintenance_exit_blocked
-            title: Water Maintenance exit blocked
-            message: Pump and valve states do not match a known water mode. Maintenance
-              has been re-enabled; correct the manual switch states before trying again.
-        - action: input_boolean.turn_on
-          target:
-            entity_id: input_boolean.water_maintenance
-        - stop: Physical water state is not a recognized mode.
-          error: true
-      - action: persistent_notification.dismiss
-        data:
-          notification_id: water_maintenance_active
-      - action: persistent_notification.dismiss
-        data:
-          notification_id: water_maintenance_exit_blocked
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: switch.water_pump_relay
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_pump_overwrite
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_loop
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_grid
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_tank
+                      state: "off"
+                  sequence:
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_current
+                      data:
+                        option: Normal
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_target
+                      data:
+                        option: Normal
+                - conditions:
+                    - condition: state
+                      entity_id: switch.water_pump_relay
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_pump_overwrite
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_loop
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_grid
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_tank
+                      state: "off"
+                  sequence:
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_current
+                      data:
+                        option: Pump Filling
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_target
+                      data:
+                        option: Pump Filling
+                - conditions:
+                    - condition: state
+                      entity_id: switch.water_pump_relay
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_pump_overwrite
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_loop
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_grid
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_tank
+                      state: "off"
+                  sequence:
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_current
+                      data:
+                        option: Grid Filling
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_target
+                      data:
+                        option: Grid Filling
+                - conditions:
+                    - condition: state
+                      entity_id: switch.water_pump_relay
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_pump_overwrite
+                      state: "off"
+                    - condition: state
+                      entity_id: switch.water_valve_loop
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_grid
+                      state: "on"
+                    - condition: state
+                      entity_id: switch.water_valve_tank
+                      state: "on"
+                  sequence:
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_current
+                      data:
+                        option: Grid
+                    - action: input_select.select_option
+                      target:
+                        entity_id: input_select.water_mode_target
+                      data:
+                        option: Grid
+              default:
+                - action: persistent_notification.create
+                  data:
+                    notification_id: water_maintenance_exit_blocked
+                    title: Water Maintenance exit blocked
+                    message:
+                      Pump and valve states do not match a known water mode. Maintenance
+                      has been re-enabled; correct the manual switch states before trying again.
+                - action: input_boolean.turn_on
+                  target:
+                    entity_id: input_boolean.water_maintenance
+                - stop: Physical water state is not a recognized mode.
+                  error: true
+            - action: persistent_notification.dismiss
+              data:
+                notification_id: water_maintenance_active
+            - action: persistent_notification.dismiss
+              data:
+                notification_id: water_maintenance_exit_blocked
   mode: queued
   max: 3
 - id: water_mode_reconcile_on_start
   alias: Water - Reconcile Mode on Start
   description: Restore the logical water mode from the physical pump and valve states.
   triggers:
-  - trigger: homeassistant
-    event: start
+    - trigger: homeassistant
+      event: start
   conditions:
-  - condition: state
-    entity_id: input_boolean.water_maintenance
-    state: 'off'
+    - condition: state
+      entity_id: input_boolean.water_maintenance
+      state: "off"
   actions:
-  - wait_template: >-
-      {{ has_value('switch.water_pump_relay') and
-         has_value('switch.water_valve_pump_overwrite') and
-         has_value('switch.water_valve_loop') and
-         has_value('switch.water_valve_grid') and
-         has_value('switch.water_valve_tank') }}
-    timeout: 00:02:00
-    continue_on_timeout: false
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: >-
-          {{ is_state('switch.water_pump_relay', 'on') and
-             is_state('switch.water_valve_pump_overwrite', 'off') and
-             is_state('switch.water_valve_loop', 'off') and
-             is_state('switch.water_valve_grid', 'off') and
-             is_state('switch.water_valve_tank', 'off') }}
-      sequence:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.water_mode_current
-          - input_select.water_mode_target
-        data:
-          option: Normal
-    - conditions:
-      - condition: template
-        value_template: >-
-          {{ is_state('switch.water_pump_relay', 'on') and
-             is_state('switch.water_valve_pump_overwrite', 'on') and
-             is_state('switch.water_valve_loop', 'on') and
-             is_state('switch.water_valve_grid', 'on') and
-             is_state('switch.water_valve_tank', 'off') }}
-      sequence:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.water_mode_current
-          - input_select.water_mode_target
-        data:
-          option: Pump Filling
-    - conditions:
-      - condition: template
-        value_template: >-
-          {{ is_state('switch.water_pump_relay', 'off') and
-             is_state('switch.water_valve_pump_overwrite', 'off') and
-             is_state('switch.water_valve_loop', 'on') and
-             is_state('switch.water_valve_grid', 'on') and
-             is_state('switch.water_valve_tank', 'off') }}
-      sequence:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.water_mode_current
-          - input_select.water_mode_target
-        data:
-          option: Grid Filling
-    - conditions:
-      - condition: template
-        value_template: >-
-          {{ is_state('switch.water_pump_relay', 'off') and
-             is_state('switch.water_valve_pump_overwrite', 'off') and
-             is_state('switch.water_valve_loop', 'on') and
-             is_state('switch.water_valve_grid', 'on') and
-             is_state('switch.water_valve_tank', 'on') }}
-      sequence:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.water_mode_current
-          - input_select.water_mode_target
-        data:
-          option: Grid
-    default:
-    - action: switch.turn_off
-      target:
-        entity_id: switch.water_pump_relay
-    - action: input_select.select_option
-      target:
-        entity_id: input_select.water_mode_current
-      data:
-        option: Fault
-    - action: persistent_notification.create
-      data:
-        notification_id: water_mode_fault
-        title: Water mode fault
-        message: >-
-          Pump and valve states do not match a known water mode. The water pump
-          was stopped; inspect the valve states before selecting another mode.
+    - wait_template: >-
+        {{ has_value('switch.water_pump_relay') and
+           has_value('switch.water_valve_pump_overwrite') and
+           has_value('switch.water_valve_loop') and
+           has_value('switch.water_valve_grid') and
+           has_value('switch.water_valve_tank') }}
+      timeout: 00:02:00
+      continue_on_timeout: false
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{ is_state('switch.water_pump_relay', 'on') and
+                   is_state('switch.water_valve_pump_overwrite', 'off') and
+                   is_state('switch.water_valve_loop', 'off') and
+                   is_state('switch.water_valve_grid', 'off') and
+                   is_state('switch.water_valve_tank', 'off') }}
+          sequence:
+            - action: input_select.select_option
+              target:
+                entity_id:
+                  - input_select.water_mode_current
+                  - input_select.water_mode_target
+              data:
+                option: Normal
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{ is_state('switch.water_pump_relay', 'on') and
+                   is_state('switch.water_valve_pump_overwrite', 'on') and
+                   is_state('switch.water_valve_loop', 'on') and
+                   is_state('switch.water_valve_grid', 'on') and
+                   is_state('switch.water_valve_tank', 'off') }}
+          sequence:
+            - action: input_select.select_option
+              target:
+                entity_id:
+                  - input_select.water_mode_current
+                  - input_select.water_mode_target
+              data:
+                option: Pump Filling
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{ is_state('switch.water_pump_relay', 'off') and
+                   is_state('switch.water_valve_pump_overwrite', 'off') and
+                   is_state('switch.water_valve_loop', 'on') and
+                   is_state('switch.water_valve_grid', 'on') and
+                   is_state('switch.water_valve_tank', 'off') }}
+          sequence:
+            - action: input_select.select_option
+              target:
+                entity_id:
+                  - input_select.water_mode_current
+                  - input_select.water_mode_target
+              data:
+                option: Grid Filling
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{ is_state('switch.water_pump_relay', 'off') and
+                   is_state('switch.water_valve_pump_overwrite', 'off') and
+                   is_state('switch.water_valve_loop', 'on') and
+                   is_state('switch.water_valve_grid', 'on') and
+                   is_state('switch.water_valve_tank', 'on') }}
+          sequence:
+            - action: input_select.select_option
+              target:
+                entity_id:
+                  - input_select.water_mode_current
+                  - input_select.water_mode_target
+              data:
+                option: Grid
+      default:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.water_pump_relay
+        - action: input_select.select_option
+          target:
+            entity_id: input_select.water_mode_current
+          data:
+            option: Fault
+        - action: persistent_notification.create
+          data:
+            notification_id: water_mode_fault
+            title: Water mode fault
+            message: >-
+              Pump and valve states do not match a known water mode. The water pump
+              was stopped; inspect the valve states before selecting another mode.
   mode: single
