@@ -1,0 +1,51 @@
+# ha_mcp_backup
+schema_version: 1
+domain: automation
+entity_id: '1787035861878'
+captured: '2026-10-12T08:39:21.447322+00:00'
+tool: ha_config_set_automation
+config:
+  id: '1787035861878'
+  alias: Jaskier Trip - Capture Start
+  description: Capture the OBD odometer, time, and EWD108 position when Jaskier's
+    engine starts. This baseline drives the current-trip distance and the completed
+    trip record.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    from: 'off'
+    to: 'on'
+    id: engine_started
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+      state:
+      - unknown
+      - unavailable
+  actions:
+  - variables:
+      start_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
+        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
+        }}{% else %}Unknown{% endif %}'
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_trip_start_odometer
+    data:
+      value: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
+        | float }}'
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.jaskier_trip_started_at
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.jaskier_trip_start_location
+    data:
+      value: '{{ start_location }}'
+  mode: restart

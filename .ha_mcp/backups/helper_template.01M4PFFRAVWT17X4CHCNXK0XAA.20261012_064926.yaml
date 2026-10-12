@@ -1,0 +1,24 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_template
+entity_id: 01M4PFFRAVWT17X4CHCNXK0XAA
+captured: '2026-10-12T06:49:26.051884+00:00'
+tool: ha_config_set_helper
+config:
+  entry_id: 01M4PFFRAVWT17X4CHCNXK0XAA
+  options:
+    name: Floor Heating Temperature Safe
+    state: "{% set ns = namespace(count=0, ok=true) %}\n{% for e in ['sensor.sensor_internal_temperature',\
+      \ 'sensor.presents_sensor_zg_204zx_temperature'] %}\n  {% set s = states[e]\
+      \ %}\n  {% if s is not none and is_number(s.state) %}\n    {% set ns.count =\
+      \ ns.count + 1 %}\n    {% if not (-30 <= s.state | float < 26) or (now() - s.last_reported).total_seconds()\
+      \ > 7200 %}\n      {% set ns.ok = false %}\n    {% endif %}\n  {% elif s is\
+      \ not none and s.state not in ['unknown', 'unavailable'] %}\n    {% set ns.ok\
+      \ = false %}\n  {% endif %}\n{% endfor %}\n{{ ns.count > 0 and ns.ok and is_number(states('sensor.floor_heating_temperature'))\
+      \ }}"
+    template_type: binary_sensor
+  entities:
+  - entity_id: binary_sensor.floor_heating_temperature_safe
+    unique_id: 01M4PFFRAVWT17X4CHCNXK0XAA
+    name: null
+    original_name: Floor Heating Temperature Safe

@@ -1,0 +1,55 @@
+# ha_mcp_backup
+schema_version: 1
+domain: file
+entity_id: modbus/rs485_3.yaml
+captured: '2026-10-12T08:43:20.573130+00:00'
+tool: ha_write_file
+config: "- name: rs485_3\n  type: rtuovertcp\n  host: 192.168.88.20\n  port: 502\n\
+  \  delay: 1\n  timeout: 1\n\n  sensors:\n    # ===== EWD108-GN05 GNSS =====\n\n\
+  \    - name: \"EWD108 Position Valid\"\n      unique_id: ewd108_position_valid\n\
+  \      slave: 16\n      address: 200       # 0x00C8 / 40200\n      input_type: holding\n\
+  \      data_type: uint16\n      scan_interval: 5\n\n    - name: \"EWD108 Year\"\n\
+  \      unique_id: ewd108_year\n      slave: 16\n      address: 201       # 0x00C9\
+  \ / 40201\n      input_type: holding\n      data_type: uint16\n      scan_interval:\
+  \ 30\n\n    - name: \"EWD108 Month\"\n      unique_id: ewd108_month\n      slave:\
+  \ 16\n      address: 202       # 0x00CA / 40202\n      input_type: holding\n   \
+  \   data_type: uint16\n      scan_interval: 30\n\n    - name: \"EWD108 Day\"\n \
+  \     unique_id: ewd108_day\n      slave: 16\n      address: 203       # 0x00CB\
+  \ / 40203\n      input_type: holding\n      data_type: uint16\n      scan_interval:\
+  \ 30\n\n    - name: \"EWD108 Hour UTC\"\n      unique_id: ewd108_hour_utc\n    \
+  \  slave: 16\n      address: 204       # 0x00CC / 40204\n      input_type: holding\n\
+  \      data_type: uint16\n      scan_interval: 10\n\n    - name: \"EWD108 Minute\
+  \ UTC\"\n      unique_id: ewd108_minute_utc\n      slave: 16\n      address: 205\
+  \       # 0x00CD / 40205\n      input_type: holding\n      data_type: uint16\n \
+  \     scan_interval: 10\n\n    - name: \"EWD108 Second UTC\"\n      unique_id: ewd108_second_utc\n\
+  \      slave: 16\n      address: 206       # 0x00CE / 40206\n      input_type: holding\n\
+  \      data_type: uint16\n      scan_interval: 10\n\n    - name: \"EWD108 Longitude\
+  \ Direction Raw\"\n      unique_id: ewd108_longitude_direction_raw\n      slave:\
+  \ 16\n      address: 207       # 0x00CF / 40207\n      input_type: holding\n   \
+  \   data_type: uint16\n      scan_interval: 5\n\n    - name: \"EWD108 Longitude\"\
+  \n      unique_id: ewd108_longitude\n      slave: 16\n      address: 208       #\
+  \ 0x00D0 / 40208, uses 2 registers\n      input_type: holding\n      data_type:\
+  \ float32\n      precision: 6\n      unit_of_measurement: \"\xB0\"\n      scan_interval:\
+  \ 5\n\n    - name: \"EWD108 Latitude Direction Raw\"\n      unique_id: ewd108_latitude_direction_raw\n\
+  \      slave: 16\n      address: 210       # 0x00D2 / 40210\n      input_type: holding\n\
+  \      data_type: uint16\n      scan_interval: 5\n\n    - name: \"EWD108 Latitude\"\
+  \n      unique_id: ewd108_latitude\n      slave: 16\n      address: 211       #\
+  \ 0x00D3 / 40211, uses 2 registers\n      input_type: holding\n      data_type:\
+  \ float32\n      precision: 6\n      unit_of_measurement: \"\xB0\"\n      scan_interval:\
+  \ 5\n\n    - name: \"EWD108 Speed Over Ground\"\n      unique_id: ewd108_speed_over_ground\n\
+  \      slave: 16\n      address: 213       # 0x00D5 / 40213, uses 2 registers\n\
+  \      input_type: holding\n      data_type: float32\n      precision: 2\n     \
+  \ unit_of_measurement: \"kn\"\n      scan_interval: 5\n\n    - name: \"EWD108 Course\
+  \ Over Ground\"\n      unique_id: ewd108_course_over_ground\n      slave: 16\n \
+  \     address: 215       # 0x00D7 / 40215, uses 2 registers\n      input_type: holding\n\
+  \      data_type: float32\n      precision: 2\n      unit_of_measurement: \"\xB0\
+  \"\n      scan_interval: 5\n\n    - name: \"EWD108 Antenna Setting\"\n      unique_id:\
+  \ ewd108_antenna_setting\n      slave: 16\n      address: 217       # 0x00D9 / 40217\n\
+  \      input_type: holding\n      data_type: uint16\n      scan_interval: 60\n\n\
+  \    - name: \"EWD108 Satellite System\"\n      unique_id: ewd108_satellite_system\n\
+  \      slave: 16\n      address: 218       # 0x00DA / 40218\n      input_type: holding\n\
+  \      data_type: uint16\n      scan_interval: 60\n\n    - name: \"EWD108 Update\
+  \ Frequency\"\n      unique_id: ewd108_update_frequency\n      slave: 16\n     \
+  \ address: 219       # 0x00DB / 40219\n      input_type: holding\n      data_type:\
+  \ uint16\n      scan_interval: 60\n"
+kind: text

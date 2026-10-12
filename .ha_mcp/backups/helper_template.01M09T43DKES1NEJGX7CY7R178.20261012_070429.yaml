@@ -1,0 +1,22 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_template
+entity_id: 01M09T43DKES1NEJGX7CY7R178
+captured: '2026-10-12T07:04:29.291415+00:00'
+tool: ha_config_set_helper
+config:
+  entry_id: 01M09T43DKES1NEJGX7CY7R178
+  options:
+    additional_options:
+      availability: '{{ is_state(''sensor.ewd108_fix_status'', ''Valid'') and has_value(''sensor.ewd108_signed_latitude'')
+        and has_value(''sensor.ewd108_signed_longitude'') }}'
+      location_accuracy: '10'
+    latitude: '{{ states(''sensor.ewd108_signed_latitude'') }}'
+    longitude: '{{ states(''sensor.ewd108_signed_longitude'') }}'
+    name: Jaskier GPS
+    template_type: device_tracker
+  entities:
+  - entity_id: device_tracker.jaskier_gps
+    unique_id: 01M09T43DKES1NEJGX7CY7R178
+    name: null
+    original_name: Jaskier GPS

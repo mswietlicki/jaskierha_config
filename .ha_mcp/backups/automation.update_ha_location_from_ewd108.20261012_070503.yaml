@@ -1,0 +1,49 @@
+# ha_mcp_backup
+schema_version: 1
+domain: automation
+entity_id: update_ha_location_from_ewd108
+captured: '2026-10-12T07:05:03.861831+00:00'
+tool: ha_config_set_automation
+config:
+  id: update_ha_location_from_ewd108
+  alias: Update Home Assistant Location from EWD108
+  triggers:
+  - minutes: /5
+    trigger: time_pattern
+  conditions:
+  - condition: state
+    entity_id: sensor.ewd108_fix_status
+    state: Valid
+  - condition: numeric_state
+    entity_id: sensor.ewd108_signed_latitude
+    above: -90
+    below: 90
+  - condition: numeric_state
+    entity_id: sensor.ewd108_signed_longitude
+    above: -180
+    below: 180
+  - condition: or
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.ewd108_signed_latitude
+      above: 1.0e-06
+    - condition: numeric_state
+      entity_id: sensor.ewd108_signed_latitude
+      below: -1.0e-06
+    - condition: numeric_state
+      entity_id: sensor.ewd108_signed_longitude
+      above: 1.0e-06
+    - condition: numeric_state
+      entity_id: sensor.ewd108_signed_longitude
+      below: -1.0e-06
+  - condition: not
+    conditions:
+    - condition: zone
+      entity_id: device_tracker.jaskier_gps
+      zone: zone.home
+  actions:
+  - action: homeassistant.set_location
+    data:
+      latitude: '{{ states(''sensor.ewd108_signed_latitude'') | float }}'
+      longitude: '{{ states(''sensor.ewd108_signed_longitude'') | float }}'
+  mode: single

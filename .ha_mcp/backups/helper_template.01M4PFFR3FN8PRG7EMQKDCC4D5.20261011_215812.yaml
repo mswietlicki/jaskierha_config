@@ -1,0 +1,28 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_template
+entity_id: 01M4PFFR3FN8PRG7EMQKDCC4D5
+captured: '2026-10-11T21:58:12.483046+00:00'
+tool: ha_config_set_helper
+config:
+  entry_id: 01M4PFFR3FN8PRG7EMQKDCC4D5
+  options:
+    template_type: binary_sensor
+    name: Shore Power Available
+    state: "{% set v = states('sensor.inverter_input_voltage_l1') | float(none) %}\n\
+      {% set hz = states('sensor.inverter_input_frequency_l1') | float(none) %}\n\
+      {% set voltage = states.sensor.inverter_input_voltage_l1 %}\n{{ is_state('binary_sensor.inverter_connected',\
+      \ 'on')\n   and is_state('sensor.inverter_state_of_ignore_ac_in_1', 'off')\n\
+      \   and states('sensor.inverter_active_ac_input') in ['shore_power', 'grid',\
+      \ 'unknown']\n   and v is not none and 190 <= v <= 255\n   and hz is not none\
+      \ and 45 <= hz <= 55\n   and voltage is defined and (now() - voltage.last_reported).total_seconds()\
+      \ < 300 }}"
+    device_class: power
+    additional_options:
+      delay_on:
+        seconds: 60
+  entities:
+  - entity_id: binary_sensor.shore_power_available
+    unique_id: 01M4PFFR3FN8PRG7EMQKDCC4D5
+    name: null
+    original_name: Shore Power Available

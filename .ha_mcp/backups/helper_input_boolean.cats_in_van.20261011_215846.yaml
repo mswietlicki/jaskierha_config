@@ -1,0 +1,10 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_input_boolean
+entity_id: cats_in_van
+captured: '2026-10-11T21:58:46.251547+00:00'
+tool: ha_config_set_helper
+config:
+  id: cats_in_van
+  name: Cats In Van
+  icon: mdi:cat

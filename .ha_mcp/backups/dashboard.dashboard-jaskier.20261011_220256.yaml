@@ -1,0 +1,683 @@
+# ha_mcp_backup
+schema_version: 1
+domain: dashboard
+entity_id: dashboard-jaskier
+captured: '2026-10-11T22:02:56.470380+00:00'
+tool: ha_config_set_dashboard
+config:
+  views:
+  - type: sections
+    sections:
+    - type: grid
+      cards:
+      - type: heading
+        heading: Control
+        heading_style: title
+      - type: tile
+        entity: light.relay_0
+        name: "\u015Awiat\u0142o"
+        icon: mdi:lightbulb
+        features:
+        - type: toggle
+      - type: tile
+        entity: switch.inverter_power
+        icon: mdi:current-ac
+        features:
+        - type: toggle
+      - type: tile
+        entity: button.ir_rf_remote_maxxfan_off
+        hide_state: false
+        vertical: false
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.ir_rf_remote_maxxfan_off
+        features_position: bottom
+        name: MaxxFan off
+        state_content: state
+        hold_action:
+          action: more-info
+      - type: tile
+        entity: button.ir_rf_remote_maxxfan_in_low
+        hide_state: false
+        vertical: false
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.ir_rf_remote_maxxfan_in_low
+        features_position: bottom
+        name: MaxxFan low
+        state_content: state
+        hold_action:
+          action: more-info
+      - type: tile
+        entity: button.ir_rf_remote_gajowa_gate
+        name: Gajowa Gate
+        hide_state: false
+        vertical: false
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.ir_rf_remote_gajowa_gate
+        features_position: bottom
+        state_content: state
+        hold_action:
+          action: more-info
+      - type: tile
+        entity: switch.relay_7
+        vertical: false
+        tap_action:
+          action: toggle
+        features_position: bottom
+        name: Air compressor
+      - type: tile
+        entity: lock.jaskier_back_door_lock_door_lock
+        features:
+        - type: lock-commands
+      - type: tile
+        entity: switch.water_pump_relay
+      - type: tile
+        entity: sensor.water_tank_liters
+        show_entity_picture: false
+        hide_state: false
+        vertical: false
+        features_position: inline
+    - type: grid
+      cards:
+      - type: heading
+        heading: Energy
+        heading_style: title
+      - type: tile
+        entity: sensor.shunt_main_charge
+        grid_options:
+          columns: 6
+          rows: 2
+        name: Battery Charge
+        features:
+        - type: trend-graph
+          hours_to_show: 1
+      - type: tile
+        entity: sensor.shunt_main_power
+        grid_options:
+          columns: 6
+          rows: 2
+        name: Main Power
+        features:
+        - type: trend-graph
+          hours_to_show: 1
+      - type: tile
+        entity: sensor.gx_device_pv_power
+        name: Solar
+        features:
+        - type: trend-graph
+          hours_to_show: 1
+      - type: tile
+        entity: sensor.orion_xs_input_battery_state_of_charge
+        name: Car AUX Battery
+        features:
+        - type: trend-graph
+          hours_to_show: 1
+      - type: tile
+        entity: sensor.jaskier_wican_obd_pro_batt_voltage
+        features:
+        - type: trend-graph
+          hours_to_show: 6
+      - type: tile
+        entity: binary_sensor.jaskier_wican_obd_pro_engine_on
+        name: Engine
+        color: accent
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+    - type: grid
+      cards:
+      - type: heading
+        heading: Vehicle
+        heading_style: title
+      - type: gauge
+        entity: sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2
+        name: Speed
+        max: 140
+        needle: true
+        severity:
+          green: 50
+          yellow: 80
+          red: 100
+        grid_options:
+          columns: 6
+          rows: auto
+      - type: gauge
+        entity: sensor.jaskier_wican_obd_pro_0c_enginerpm_2
+        max: 5000
+        severity:
+          green: 1000
+          yellow: 2500
+          red: 4000
+        needle: true
+        grid_options:
+          columns: 6
+          rows: auto
+    - type: grid
+      cards:
+      - type: heading
+        heading: Weather
+        heading_style: title
+      - show_current: true
+        show_forecast: true
+        type: weather-forecast
+        entity: weather.forecast_home
+        forecast_type: hourly
+      - show_current: false
+        show_forecast: true
+        type: weather-forecast
+        entity: weather.forecast_home
+        forecast_type: daily
+        grid_options:
+          columns: full
+          rows: auto
+        forecast_slots: 5
+    header: {}
+    show_icon_and_title: false
+    background:
+      opacity: 33
+      alignment: center
+      size: cover
+      repeat: no-repeat
+      attachment: fixed
+    cards: []
+    max_columns: 4
+    dense_section_placement: false
+    title: Main
+    icon: mdi:van-utility
+    path: main
+  - type: sections
+    max_columns: 4
+    title: Zadania
+    path: zadania
+    sections:
+    - type: grid
+      cards:
+      - type: heading
+        icon: mdi:basket
+        heading_style: title
+        heading: Zakupy
+      - display_order: none
+        type: todo-list
+        entity: todo.shopping_list
+        hide_completed: true
+      - display_order: none
+        type: todo-list
+        entity: todo.zakupy_jaskier
+        title: Zakupy do Jaskra
+        hide_completed: true
+    - type: grid
+      cards:
+      - type: heading
+        heading_style: title
+        heading: Jaskier Prace
+        icon: mdi:tools
+      - display_order: none
+        type: todo-list
+        entity: todo.jaskier
+    show_icon_and_title: true
+    icon: mdi:calendar-check
+    cards: []
+  - type: sections
+    max_columns: 4
+    title: Energy
+    path: energy
+    icon: mdi:flash
+    sections:
+    - type: grid
+      cards:
+      - type: heading
+        icon: mdi:battery
+        heading: Main Battery
+        heading_style: title
+      - type: tile
+        entity: sensor.gx_device_dc_battery_charge
+        name: Charge
+        features:
+        - type: trend-graph
+          hours_to_show: 24
+        grid_options:
+          columns: 4
+          rows: 2
+      - type: tile
+        entity: sensor.gx_device_dc_battery_voltage
+        name: Voltage
+        features:
+        - type: trend-graph
+          hours_to_show: 24
+        grid_options:
+          columns: 4
+          rows: 2
+      - chart_type: line
+        period: hour
+        type: statistics-graph
+        entities:
+        - sensor.gx_device_dc_battery_charge
+        stat_types:
+        - mean
+        - min
+        - max
+      - type: statistics-graph
+        entities:
+        - sensor.gx_device_dc_battery_power
+      - type: statistics-graph
+        entities:
+        - sensor.gx_device_dc_battery_discharge_energy
+        days_to_show: 30
+        period: day
+        chart_type: bar-stack
+        stat_types:
+        - change
+    - type: grid
+      cards:
+      - type: heading
+        icon: mdi:solar-panel
+        heading: Solar
+        heading_style: title
+      - type: tile
+        entity: sensor.gx_device_pv_power
+        name: PV Power
+        features:
+        - type: trend-graph
+          hours_to_show: 24
+        grid_options:
+          columns: 4
+          rows: 2
+      - type: tile
+        entity: sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage
+        name: Roof Voltage
+        grid_options:
+          columns: 4
+          rows: 1
+      - type: tile
+        entity: sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage
+        name: Aux Voltage
+        grid_options:
+          columns: 4
+          rows: 1
+      - type: statistics-graph
+        entities:
+        - sensor.gx_device_pv_power
+        - sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power
+        - sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power
+      - chart_type: bar-stack
+        period: day
+        type: statistics-graph
+        entities:
+        - sensor.smartsolar_charger_mppt_100_30_id_278_yield_today
+        - sensor.smartsolar_charger_mppt_100_30_id_279_yield_today
+        stat_types:
+        - state
+        days_to_show: 30
+    - type: grid
+      cards:
+      - type: heading
+        heading: Inverter
+        heading_style: title
+      - type: tile
+        entity: select.inverter_mode
+        name: Mode
+        features:
+        - type: select-options
+        grid_options:
+          columns: 4
+          rows: 2
+      - type: tile
+        entity: sensor.inverter_dc_power
+        name: DC Power
+        features:
+        - type: trend-graph
+          hours_to_show: 6
+        grid_options:
+          columns: 4
+          rows: 2
+      - type: tile
+        entity: sensor.inverter_energy_from_inverter_to_ac_out
+        name: Energy to AC Out
+        grid_options:
+          columns: 4
+          rows: 1
+      - type: statistics-graph
+        entities:
+        - sensor.inverter_dc_power
+      - type: statistics-graph
+        entities:
+        - sensor.inverter_output_power_l1
+    - type: grid
+      cards:
+      - type: heading
+        heading: Car Batteries
+        heading_style: title
+        icon: fa6-solid:car-battery
+      - type: tile
+        entity: switch.front_controller_starter_battery_charger
+        name:
+          type: entity
+        vertical: false
+        features:
+        - type: toggle
+        features_position: bottom
+    show_icon_and_title: true
+    cards: []
+  - type: sections
+    max_columns: 3
+    title: Trips
+    path: trips
+    icon: mdi:map-marker-path
+    show_icon_and_title: true
+    cards: []
+    sections:
+    - type: grid
+      column_span: 2
+      cards:
+      - type: heading
+        heading: Current location and recent route
+        heading_style: title
+        icon: mdi:map-marker-path
+      - type: map
+        entities:
+        - entity: device_tracker.jaskier_gps
+          name: Jaskier
+          label_mode: icon
+        show_all: false
+        auto_fit: true
+        hours_to_show: 24
+        theme_mode: auto
+        grid_options:
+          columns: full
+          rows: 8
+    - type: grid
+      cards:
+      - type: heading
+        heading: Current trip
+        heading_style: title
+        icon: mdi:van-utility
+      - type: tile
+        entity: binary_sensor.jaskier_wican_obd_pro_engine_on
+        name: Engine
+        color: accent
+        grid_options:
+          columns: 6
+      - type: tile
+        entity: sensor.jaskier_current_trip_distance
+        name: Distance
+        icon: mdi:map-marker-distance
+        grid_options:
+          columns: 6
+      - type: tile
+        entity: sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2
+        name: OBD speed
+        grid_options:
+          columns: 6
+      - type: tile
+        entity: sensor.ewd108_speed_over_ground_kmh
+        name: GPS speed
+        grid_options:
+          columns: 6
+      - type: tile
+        entity: device_tracker.jaskier_gps
+        name: Jaskier GPS
+        icon: mdi:crosshairs-gps
+        grid_options:
+          columns: full
+    - type: grid
+      cards:
+      - type: heading
+        heading: Completed trips
+        heading_style: title
+        icon: mdi:timeline-check
+      - type: calendar
+        title: Trip list
+        initial_view: listWeek
+        entities:
+        - calendar.jaskier_trips
+        grid_options:
+          columns: full
+          rows: 6
+      - type: statistics-graph
+        title: Completed trip pulses
+        entities:
+        - entity: sensor.jaskier_completed_trip_distance
+          name: Completed trip
+        days_to_show: 7
+        period: hour
+        chart_type: bar
+        stat_types:
+        - max
+        grid_options:
+          columns: full
+          rows: 5
+      column_span: 2
+  - type: sections
+    max_columns: 4
+    title: Climate
+    path: climate
+    icon: mdi:home-thermometer
+    show_icon_and_title: true
+    sections:
+    - type: grid
+      cards:
+      - type: heading
+        heading: Air Temperature
+        heading_style: title
+        icon: mdi:thermometer
+      - type: tile
+        entity: sensor.sensor_internal_temperature
+        name: Internal Air
+        icon: mdi:thermometer
+        features:
+        - type: trend-graph
+          hours_to_show: 24
+        grid_options:
+          columns: 6
+          rows: 2
+      - type: tile
+        entity: sensor.presents_sensor_zg_204zx_temperature
+        name: Living Area
+        icon: mdi:home-thermometer-outline
+        features:
+        - type: trend-graph
+          hours_to_show: 24
+        grid_options:
+          columns: 6
+          rows: 2
+      - type: history-graph
+        title: "Cabin Temperature \u2014 24 hours"
+        hours_to_show: 24
+        entities:
+        - entity: sensor.sensor_internal_temperature
+          name: Internal Air
+          color: '#6498ff'
+        - entity: sensor.presents_sensor_zg_204zx_temperature
+          name: Living Area
+          color: '#ff9800'
+        grid_options:
+          columns: full
+          rows: 5
+    - type: grid
+      cards:
+      - type: heading
+        heading: "Ogrzewanie pod\u0142ogowe"
+        heading_style: title
+        icon: mdi:heating-coil
+      - type: tile
+        entity: input_boolean.floor_heating_enabled
+        name: Ogrzewanie
+        grid_options:
+          columns: 12
+          rows: 1
+        features:
+        - type: toggle
+      - type: tile
+        entity: input_boolean.cats_in_van
+        name: Koty w samochodzie
+        grid_options:
+          columns: 12
+          rows: 1
+        icon: mdi:cat
+        features:
+        - type: toggle
+      - type: tile
+        entity: sensor.floor_heating_mode
+        name: Aktualny tryb
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: sensor.floor_heating_target_temperature
+        name: Temperatura docelowa
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: sensor.floor_heating_temperature
+        name: "\u015Arednia temperatura"
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: binary_sensor.shore_power_available
+        name: Shore Power
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: binary_sensor.floor_heating_occupied
+        name: "Obecno\u015B\u0107 (45 min)"
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: input_boolean.floor_heating_night_occupied
+        name: "Obecno\u015B\u0107 nocna"
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+      - type: entities
+        title: Ustawienia ogrzewania
+        show_header_toggle: false
+        entities:
+        - entity: input_select.floor_heating_override
+          name: "Wyb\xF3r trybu"
+        - entity: input_number.floor_heating_night_temperature
+          name: Noc
+        - entity: input_number.floor_heating_day_temperature
+          name: "Dzie\u0144"
+        - entity: input_number.floor_heating_idle_temperature
+          name: "Pusty samoch\xF3d"
+        grid_options:
+          columns: full
+          rows: auto
+      - type: tile
+        entity: climate.floor_heating
+        name: Termostat
+        grid_options:
+          columns: 12
+          rows: 1
+        state_content:
+        - hvac_action
+        - current_temperature
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+      - type: tile
+        entity: switch.floorheating
+        name: "Przeka\u017Anik grzania"
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+      - type: tile
+        entity: binary_sensor.floor_heating_temperature_safe
+        name: Temperatura wiarygodna
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: none
+        hold_action:
+          action: more-info
+      - type: markdown
+        content: "**Auto:** noc 22:00\u201308:00, dzie\u0144 przy obecno\u015Bci,\
+          \ idle po 45 min bez obecno\u015Bci. Nocna obecno\u015B\u0107 jest pami\u0119\
+          tana do rana. **Koty w samochodzie** utrzymuj\u0105 komfort bez wykrytego\
+          \ ruchu. R\u0119czny tryb ma pierwsze\u0144stwo.\n\nWy\u0142\u0105cz **Ogrzewanie**,\
+          \ aby zatrzyma\u0107 automatyk\u0119. Bez Shore Power grzanie pozostaje\
+          \ wy\u0142\u0105czone i wraca po pod\u0142\u0105czeniu, je\u015Bli Ogrzewanie\
+          \ jest w\u0142\u0105czone."
+        grid_options:
+          columns: full
+          rows: auto
+    - type: grid
+      cards:
+      - type: heading
+        heading: Ventilation
+        heading_style: title
+        icon: mdi:fan
+      - type: tile
+        entity: button.ir_rf_remote_maxxfan_off
+        name: MaxxFan off
+        icon: mdi:fan-off
+        hide_state: false
+        state_content: state
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.ir_rf_remote_maxxfan_off
+        hold_action:
+          action: more-info
+        grid_options:
+          columns: 6
+          rows: 1
+      - type: tile
+        entity: button.ir_rf_remote_maxxfan_in_low
+        name: MaxxFan low
+        icon: mdi:fan-speed-1
+        hide_state: false
+        state_content: state
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.ir_rf_remote_maxxfan_in_low
+        hold_action:
+          action: more-info
+        grid_options:
+          columns: 6
+          rows: 1
+    - type: grid
+      cards:
+      - type: heading
+        heading: Future Climate Equipment
+        heading_style: title
+        icon: mdi:progress-wrench
+      - type: markdown
+        content: "## \U0001F525 Diesel Heater\nReserved for future heater status and\
+          \ controls."
+        grid_options:
+          columns: 6
+          rows: 2
+      - type: markdown
+        content: "## \u2744\uFE0F Air Conditioner\nReserved for future cooling status\
+          \ and controls."
+        grid_options:
+          columns: 6
+          rows: 2
+    cards: []

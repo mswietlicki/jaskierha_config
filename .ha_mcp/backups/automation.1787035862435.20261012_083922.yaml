@@ -1,0 +1,73 @@
+# ha_mcp_backup
+schema_version: 1
+domain: automation
+entity_id: '1787035862435'
+captured: '2026-10-12T08:39:22.316387+00:00'
+tool: ha_config_set_automation
+config:
+  id: '1787035862435'
+  alias: Jaskier Trip - Record End
+  description: At engine-off, pulse the completed distance for history graphs and
+    add a dated trip with EWD108 endpoints to the Jaskier Trips calendar.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.jaskier_wican_obd_pro_engine_on
+    from: 'on'
+    to: 'off'
+    id: engine_stopped
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.jaskier_wican_obd_pro_31_distancesincecodeclear
+      state:
+      - unknown
+      - unavailable
+  - condition: numeric_state
+    entity_id: input_number.jaskier_trip_start_odometer
+    above: 0
+  actions:
+  - variables:
+      start_odometer: '{{ states(''input_number.jaskier_trip_start_odometer'') | float(0)
+        }}'
+      end_odometer: '{{ states(''sensor.jaskier_wican_obd_pro_31_distancesincecodeclear'')
+        | float(0) }}'
+      trip_distance: '{{ ([end_odometer - start_odometer, 0] | max) | round(1) }}'
+      start_time: '{{ states(''input_datetime.jaskier_trip_started_at'') }}'
+      end_time: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      start_location: '{{ states(''input_text.jaskier_trip_start_location'') }}'
+      end_location: '{% if is_state(''sensor.ewd108_fix_status'', ''Valid'') %}{{
+        states(''sensor.ewd108_signed_latitude'') }},{{ states(''sensor.ewd108_signed_longitude'')
+        }}{% else %}Unknown{% endif %}'
+  - condition: template
+    value_template: '{{ trip_distance | float(0) >= 0.1 }}'
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_completed_trip_pulse
+    data:
+      value: '{{ trip_distance }}'
+  - action: calendar.create_event
+    target:
+      entity_id: calendar.jaskier_trips
+    data:
+      summary: "Jaskier trip \u2014 {{ trip_distance }} km"
+      start_date_time: '{{ start_time }}'
+      end_date_time: '{{ end_time }}'
+      location: '{{ end_location }}'
+      description: 'Distance: {{ trip_distance }} km
+
+        Start: {{ start_location }}
+
+        End: {{ end_location }}
+
+        Route: https://www.google.com/maps/dir/?api=1&origin={{ start_location }}&destination={{
+        end_location }}'
+  - delay:
+      minutes: 1
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.jaskier_completed_trip_pulse
+    data:
+      value: 0
+  mode: queued
+  max: 5

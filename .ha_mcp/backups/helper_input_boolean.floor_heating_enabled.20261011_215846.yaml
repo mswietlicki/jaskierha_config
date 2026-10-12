@@ -1,0 +1,10 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_input_boolean
+entity_id: floor_heating_enabled
+captured: '2026-10-11T21:58:46.031326+00:00'
+tool: ha_config_set_helper
+config:
+  id: floor_heating_enabled
+  name: Floor Heating Enabled
+  icon: mdi:heating-coil

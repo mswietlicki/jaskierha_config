@@ -1,0 +1,12 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_input_text
+entity_id: input_text.jaskier_location_query
+captured: '2026-10-12T09:09:04.435742+00:00'
+tool: ha_remove_helpers_integrations
+config:
+  id: jaskier_location_query
+  name: Jaskier Location Query
+  max: 255
+  min: 0
+  mode: text

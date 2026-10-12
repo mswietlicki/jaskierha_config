@@ -1,0 +1,30 @@
+# ha_mcp_backup
+schema_version: 1
+domain: helper_template
+entity_id: 01M4PFFSDA6V5G6HAD5SHQ3ZAH
+captured: '2026-10-11T21:58:13.353985+00:00'
+tool: ha_config_set_helper
+config:
+  entry_id: 01M4PFFSDA6V5G6HAD5SHQ3ZAH
+  options:
+    template_type: switch
+    name: Floor Heating Protected Relay
+    value_template: '{{ is_state(''switch.floorheating'',''on'') }}'
+    turn_on:
+    - condition: state
+      entity_id: binary_sensor.floor_heating_permitted
+      state: 'on'
+    - action: switch.turn_on
+      target:
+        entity_id: switch.floorheating
+    turn_off:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.floorheating
+    additional_options:
+      availability: '{{ has_value(''switch.floorheating'') }}'
+  entities:
+  - entity_id: switch.floor_heating_protected_relay
+    unique_id: 01M4PFFSDA6V5G6HAD5SHQ3ZAH
+    name: null
+    original_name: Floor Heating Protected Relay

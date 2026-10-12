@@ -1,0 +1,105 @@
+# ha_mcp_backup
+schema_version: 1
+domain: yaml
+entity_id: configuration.yaml::template
+captured: '2026-10-12T08:45:34.946843+00:00'
+tool: ha_config_set_yaml
+config: "- binary_sensor:\n  - name: Water Mode Normal Selected\n    unique_id: water_mode_normal_selected\n\
+  \    state: \"{{ is_state('input_select.water_mode_target', 'Normal') }}\"\n\n \
+  \ - name: Water Mode Pump Filling Selected\n    unique_id: water_mode_pump_filling_selected\n\
+  \    state: \"{{ is_state('input_select.water_mode_target', 'Pump Filling') }}\"\
+  \n\n  - name: Water Mode Grid Filling Selected\n    unique_id: water_mode_grid_filling_selected\n\
+  \    state: \"{{ is_state('input_select.water_mode_target', 'Grid Filling') }}\"\
+  \n\n  - name: Water Mode Grid Selected\n    unique_id: water_mode_grid_selected\n\
+  \    state: \"{{ is_state('input_select.water_mode_target', 'Grid') }}\"\n\n  sensor:\n\
+  \  - name: \"Water Tank Liters\"\n    unique_id: water_tank_liters_rational\n  \
+  \  unit_of_measurement: \"L\"\n    device_class: water\n    state_class: measurement\n\
+  \    icon: mdi:water\n    availability: >\n      {{ states('sensor.water_height')\n\
+  \         not in ['unknown', 'unavailable', 'none', ''] }}\n    state: >\n     \
+  \ {% set h = states('sensor.water_height') | float(0) %}\n\n      {% if h <= 0 %}\n\
+  \        0\n      {% elif h >= 55.8 %}\n        100\n      {% else %}\n        {%\
+  \ set numerator =\n          0.668752847 * h\n          - 0.0296241152 * h**2\n\
+  \          + 0.00171244226 * h**3\n          - 0.0000722092929 * h**4\n        \
+  \  + 0.00000103272088 * h**5\n        %}\n\n        {% set denominator =\n     \
+  \     1\n          - 0.00347494792 * h\n          - 0.00156556425 * h**2\n     \
+  \     + 0.0000292356265 * h**3\n        %}\n\n        {{ (numerator / denominator)\
+  \ | round(1) }}\n      {% endif %}\n  - name: VE.Bus Switch Position Mode\n    unique_id:\
+  \ victron_vebus_switch_position_mode\n    state: >\n      {% set mode = states('select.inverter')\
+  \ | lower %}\n      {% if 'charger' in mode %}\n        Charger Only\n      {% elif\
+  \ 'inverter' in mode %}\n        Inverter Only\n      {% elif mode == 'on' %}\n\
+  \        On\n      {% elif mode == 'off' %}\n        Off\n      {% else %}\n   \
+  \     Unknown\n      {% endif %}\n\n  - name: Orion XS Input Battery State of Charge\n\
+  \    unique_id: orion_xs_input_battery_state_of_charge\n    unit_of_measurement:\
+  \ \"%\"\n    device_class: battery\n    state_class: measurement\n    availability:\
+  \ \"{{ states('sensor.orion_xs_input_voltage') | float(none) is not none }}\"\n\
+  \    state: >\n      {% set voltage = states('sensor.orion_xs_input_voltage') |\
+  \ float(none) %}\n      {% if voltage is none %}\n        {{ none }}\n      {% else\
+  \ %}\n        {# Approximate 12V lead-acid resting reference: 11.8V empty, 12.8V\
+  \ full; calibrate thresholds for battery chemistry/age and load profile #}\n   \
+  \     {% set empty_soc_voltage = 11.8 %}\n        {% set full_soc_voltage = 12.8\
+  \ %}\n        {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage -\
+  \ empty_soc_voltage)) * 100 %}\n        {% if soc < 0 %}\n          0\n        {%\
+  \ elif soc > 100 %}\n          100\n        {% else %}\n          {{ soc | round(0)\
+  \ }}\n        {% endif %}\n      {% endif %}\n\n  select:\n  - name: Inverter Mode\n\
+  \    unique_id: victron_inverter_mode_control\n    state: >\n      {% set mode =\
+  \ states('select.inverter') | lower %}\n      {% if 'charger' in mode %}\n     \
+  \   Charger Only\n      {% elif 'inverter' in mode %}\n        Inverter Only\n \
+  \     {% elif mode == 'on' %}\n        On\n      {% elif mode == 'off' %}\n    \
+  \    Off\n      {% else %}\n        Unknown\n      {% endif %}\n    options: \"\
+  {{ ['Charger Only', 'Inverter Only', 'On', 'Off'] }}\"\n    select_option:\n   \
+  \ - service: select.select_option\n      target:\n        entity_id: select.inverter\n\
+  \      data:\n        option: >\n          {% set map = {\n            'Charger\
+  \ Only': 'charger_only',\n            'Inverter Only': 'inverter_only',\n      \
+  \      'On': 'on',\n            'Off': 'off'\n          } %}\n          {{ map.get(option,\
+  \ option) }}\n\n  switch:\n  - name: Inverter Enabled\n    unique_id: victron_inverter_power_switch\n\
+  \    state: \"{{ states('select.inverter') | lower == 'on' }}\"\n    turn_on:\n\
+  \    - service: select.select_option\n      target:\n        entity_id: select.inverter\n\
+  \      data:\n        option: \"on\"\n    turn_off:\n    - service: select.select_option\n\
+  \      target:\n        entity_id: select.inverter\n      data:\n        option:\
+  \ \"off\"\n\n- sensor:\n  - name: \"EWD108 Fix Status\"\n    unique_id: ewd108_fix_status\n\
+  \    state: >\n      {% set v = states('sensor.ewd108_position_valid') | int(-1)\
+  \ %}\n      {% if v == 1 %}\n        Valid\n      {% elif v == 0 %}\n        Invalid\n\
+  \      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Longitude\
+  \ Direction\"\n    unique_id: ewd108_longitude_direction\n    state: >\n      {%\
+  \ set v = states('sensor.ewd108_longitude_direction_raw') | int(0) %}\n      {%\
+  \ if v == 69 %}\n        E\n      {% elif v == 87 %}\n        W\n      {% else %}\n\
+  \        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Latitude Direction\"\n\
+  \    unique_id: ewd108_latitude_direction\n    state: >\n      {% set v = states('sensor.ewd108_latitude_direction_raw')\
+  \ | int(0) %}\n      {% if v == 78 %}\n        N\n      {% elif v == 83 %}\n   \
+  \     S\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108\
+  \ Signed Longitude\"\n    unique_id: ewd108_signed_longitude\n    unit_of_measurement:\
+  \ \"\xB0\"\n    availability: >\n      {{ states('sensor.ewd108_longitude') | is_number\
+  \ and\n         states('sensor.ewd108_longitude_direction') in ['E', 'W'] }}\n \
+  \   state: >\n      {% set lon = states('sensor.ewd108_longitude') | float(0) %}\n\
+  \      {% set dir = states('sensor.ewd108_longitude_direction') %}\n      {% if\
+  \ dir == 'W' %}\n        {{ -lon }}\n      {% else %}\n        {{ lon }}\n     \
+  \ {% endif %}\n\n  - name: \"EWD108 Signed Latitude\"\n    unique_id: ewd108_signed_latitude\n\
+  \    unit_of_measurement: \"\xB0\"\n    availability: >\n      {{ states('sensor.ewd108_latitude')\
+  \ | is_number and\n         states('sensor.ewd108_latitude_direction') in ['N',\
+  \ 'S'] }}\n    state: >\n      {% set lat = states('sensor.ewd108_latitude') | float(0)\
+  \ %}\n      {% set dir = states('sensor.ewd108_latitude_direction') %}\n      {%\
+  \ if dir == 'S' %}\n        {{ -lat }}\n      {% else %}\n        {{ lat }}\n  \
+  \    {% endif %}\n\n  - name: \"EWD108 Speed Over Ground kmh\"\n    unique_id: ewd108_speed_over_ground_kmh\n\
+  \    unit_of_measurement: \"km/h\"\n    device_class: speed\n    state_class: measurement\n\
+  \    availability: \"{{ states('sensor.ewd108_speed_over_ground') | is_number }}\"\
+  \n    state: >\n      {{ (states('sensor.ewd108_speed_over_ground') | float(0) *\
+  \ 1.852) | round(2) }}\n\n  - name: \"EWD108 GNSS UTC Time\"\n    unique_id: ewd108_gnss_utc_time\n\
+  \    device_class: timestamp\n    availability: >\n      {{ states('sensor.ewd108_year')\
+  \ | int(0) > 2000 and\n         states('sensor.ewd108_month') | int(0) in range(1,\
+  \ 13) and\n         states('sensor.ewd108_day') | int(0) in range(1, 32) and\n \
+  \        states('sensor.ewd108_hour_utc') | int(-1) in range(0, 24) and\n      \
+  \   states('sensor.ewd108_minute_utc') | int(-1) in range(0, 60) and\n         states('sensor.ewd108_second_utc')\
+  \ | int(-1) in range(0, 60) }}\n    state: >\n      {% set y = states('sensor.ewd108_year')\
+  \ | int(0) %}\n      {% set mo = states('sensor.ewd108_month') | int(0) %}\n   \
+  \   {% set d = states('sensor.ewd108_day') | int(0) %}\n      {% set h = states('sensor.ewd108_hour_utc')\
+  \ | int(0) %}\n      {% set mi = states('sensor.ewd108_minute_utc') | int(0) %}\n\
+  \      {% set s = states('sensor.ewd108_second_utc') | int(0) %}\n      {{ \"%04d-%02d-%02dT%02d:%02d:%02d+00:00\"\
+  \ | format(y, mo, d, h, mi, s) }}\n\n  - name: \"EWD108 Antenna Mode\"\n    unique_id:\
+  \ ewd108_antenna_mode\n    state: >\n      {% set v = states('sensor.ewd108_antenna_setting')\
+  \ | int(-1) %}\n      {% if v == 0 %}\n        Active\n      {% elif v == 1 %}\n\
+  \        Passive\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name:\
+  \ \"EWD108 Update Frequency Text\"\n    unique_id: ewd108_update_frequency_text\n\
+  \    state: >\n      {% set v = states('sensor.ewd108_update_frequency') | int(-1)\
+  \ %}\n      {% if v == 0 %}\n        1 Hz\n      {% elif v == 1 %}\n        10 Hz\n\
+  \      {% else %}\n        Unknown\n      {% endif %}\n"
+kind: text

@@ -1,0 +1,20 @@
+# ha_mcp_backup
+schema_version: 1
+domain: yaml
+entity_id: configuration.yaml::rest
+captured: '2026-10-12T09:09:03.586757+00:00'
+tool: ha_config_set_yaml
+config: "- resource_template: >-\n    {{ 'https://photon.komoot.io/reverse?lat=' ~\
+  \ (states('input_text.jaskier_location_query') | from_json({})).get('lat', 0) ~\
+  \ '&lon=' ~ (states('input_text.jaskier_location_query') | from_json({})).get('lon',\
+  \ 0) ~ '&limit=1' }}\n  scan_interval: 86400\n  timeout: 15\n  headers:\n    User-Agent:\
+  \ \"JaskierHomeAssistant/1.0 (https://github.com/mswietlicki/jaskierha_config)\"\
+  \n  sensor:\n  - name: Jaskier Current Place\n    unique_id: jaskier_current_place\n\
+  \    value_template: >-\n      {% set f = value_json.get('features', []) %}\n  \
+  \    {% set p = f[0].get('properties', {}) if f else {} %}\n      {{ [p.get('name',''),\
+  \ p.get('city', p.get('district','')), p.get('state',''), p.get('country','')] |\
+  \ reject('equalto','') | unique | join(', ') | truncate(240, true, '') }}\n    availability:\
+  \ >-\n      {{ value_json is defined and value_json.get('features', []) | count\
+  \ > 0 }}\n    json_attributes_path: \"$.features[0]\"\n    json_attributes:\n  \
+  \  - geometry\n    - properties\n"
+kind: text

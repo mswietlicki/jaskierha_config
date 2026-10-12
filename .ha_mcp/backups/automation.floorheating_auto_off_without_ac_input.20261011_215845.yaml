@@ -1,0 +1,30 @@
+# ha_mcp_backup
+schema_version: 1
+domain: automation
+entity_id: floorheating_auto_off_without_ac_input
+captured: '2026-10-11T21:58:45.060404+00:00'
+tool: ha_config_set_automation
+config:
+  id: floorheating_auto_off_without_ac_input
+  alias: Floor Heating - Auto Disable Without AC Input
+  description: Turn off floor heating after 5 minutes unless the inverter reports
+    an active AC input.
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.floorheating
+    to: 'on'
+    for:
+      minutes: 5
+  conditions:
+  - condition: state
+    entity_id: switch.floorheating
+    state: 'on'
+  - condition: numeric_state
+    entity_id: sensor.inverter_input_power_l1
+    below: 500
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.floorheating
+  mode: single

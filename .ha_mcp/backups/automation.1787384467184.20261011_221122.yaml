@@ -1,0 +1,52 @@
+# ha_mcp_backup
+schema_version: 1
+domain: automation
+entity_id: '1787384467184'
+captured: '2026-10-11T22:11:22.453894+00:00'
+tool: ha_config_set_automation
+config:
+  id: '1787384467184'
+  alias: Starter Battery Charging
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.jaskier_wican_obd_pro_batt_voltage
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    below: 12
+    id: low
+  - trigger: numeric_state
+    entity_id:
+    - sensor.jaskier_wican_obd_pro_batt_voltage
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    above: 13
+    id: high
+  conditions:
+  - condition: state
+    entity_id: sensor.jaskier_shunt_main_low_state_of_charge
+    state:
+    - no_alarm
+  actions:
+  - condition: trigger
+    id:
+    - low
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.front_controller_starter_battery_charger
+    data: {}
+  - condition: trigger
+    id:
+    - high
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      entity_id: switch.front_controller_starter_battery_charger
+    data: {}
+  mode: single
