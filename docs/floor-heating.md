@@ -14,7 +14,8 @@ Panel: https://jaskierha.swietlicki.net/dashboard-jaskier/climate
 ## Wybór trybu
 
 Auto wybiera noc/dzień, gdy są koty, potwierdzona obecność albo nocne podtrzymanie obecności. W pozostałych przypadkach wybiera Idle.
-Obecność wymaga 2 minut ciągłego sygnału ON. Każdy krótszy impuls jest ignorowany. Znacznik ostatniej obecności odświeża się co minutę tylko wtedy, gdy sygnał utrzymuje ON nieprzerwanie przez co najmniej 2 minuty; kontrola okresowa nie omija filtra. Jest zachowywany w `input_datetime.floor_heating_last_presence`; podtrzymanie trwa 45 minut, także przez restarty HA. Awaria czujnika obecności jest traktowana zachowawczo jako obecność.
+Obecność wymaga 2 minut ciągłego sygnału ON. Każdy krótszy impuls jest ignorowany. Znacznik ostatniej obecności odświeża się co minutę tylko wtedy, gdy sygnał utrzymuje ON nieprzerwanie przez co najmniej 2 minuty; kontrola okresowa nie omija filtra. Jest zachowywany w `input_datetime.jaskier_last_presence`; podtrzymanie trwa 45 minut, także przez restarty HA. Awaria czujnika obecności jest traktowana zachowawczo jako obecność.
+Od 12 października obecność jest wspólna dla całego Jaskra: `binary_sensor.jaskier_occupied` (Jaskier Occupied, dawniej `binary_sensor.floor_heating_occupied`) i automatyzacja `automation.occupancy_presence_memory` (Occupancy - Presence Memory). Korzysta z niej ogrzewanie podłogowe oraz wyłączanie pompy wody pod nieobecność (`automation.water_pump_off_when_unoccupied`).
 Nocne wykrycie obecności włącza pamięć `input_boolean.floor_heating_night_occupied`, która jest resetowana rano. Brak ruchu w czasie snu nie zmienia wtedy trybu na Idle. Nocny wyjazd ludzi wymaga ręcznego Idle, jeśli ma nastąpić obniżenie temperatury przed 08:00.
 
 ## Regulacja i zabezpieczenia

@@ -32,6 +32,18 @@ This document describes the target end-state for each water mode and the valve n
 - For `Grid` and `Grid Filling`, pump remains OFF after transition.
 - For other modes, pump returns to its pre-transition state.
 
+## Mode Detection
+
+- The water mode is defined by the valve layout only (valve columns of the table above). The pump state is not part of the mode: the pump is switched off whenever water is not used or nobody is home, and that is a normal state.
+- `automation.water_reconcile_mode_on_start` (HA start) and the exit path of `automation.water_maintenance_gate` set `input_select.water_mode_current` and `input_select.water_mode_target` from the valves. For `Grid` and `Grid Filling` they also switch the pump OFF.
+- `Fault` is set, and the pump stopped, only when the valves match no known mode. A recognized layout dismisses an earlier `water_mode_fault` notification.
+
+## Pump Safety
+
+- `automation.water_pump_off_when_unoccupied` switches the pump off when `binary_sensor.jaskier_occupied` turns off. This occupancy sensor is shared with floor heating (45-minute presence memory; an unavailable presence sensor counts as occupied). Skipped during Water Maintenance; the water mode is not changed.
+- `automation.water_leak_protection` stops the pump and sends a warning to `notify.mobile_app_mateuszphone` plus a persistent notification when `binary_sensor.sonoff_snzb_05p` (Moisture under Pump) detects water, or when the pump is switched on while the sensor is still wet. It also runs during Water Maintenance and does not change any valve.
+- No pump run-time check yet: `switch.water_pump_relay` only enables the pump, and the pump's own pressure switch decides when it runs. Add the check once a pump current and/or pressure sensor is installed.
+
 ## Transition Sequences
 
 The sequence below lists only valves that actually change for each transition.

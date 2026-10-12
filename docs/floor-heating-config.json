@@ -59,7 +59,7 @@
     },
     {
       "helper_type": "input_datetime",
-      "name": "Floor Heating Last Presence",
+      "name": "Jaskier Last Presence",
       "has_date": true,
       "has_time": true,
       "icon": "mdi:account-clock"
@@ -111,10 +111,10 @@
     },
     {
       "helper_type": "template",
-      "name": "Floor Heating Occupied",
+      "name": "Jaskier Occupied",
       "config": {
         "next_step_id": "binary_sensor",
-        "state": "{% set last = state_attr('input_datetime.floor_heating_last_presence', 'timestamp') | float(0) %}\n{{ states('binary_sensor.presents_sensor_zg_204zx') in ['unknown', 'unavailable']\n   or 0 <= now().timestamp() - last < 2700 }}",
+        "state": "{% set last = state_attr('input_datetime.jaskier_last_presence', 'timestamp') | float(0) %}\n{{ states('binary_sensor.presents_sensor_zg_204zx') in ['unknown', 'unavailable']\n   or 0 <= now().timestamp() - last < 2700 }}",
         "device_class": "occupancy"
       }
     },
@@ -131,7 +131,7 @@
       "name": "Floor Heating Mode",
       "config": {
         "next_step_id": "sensor",
-        "state": "{% set override = states('input_select.floor_heating_override') %}\n{% if override in ['Nocny', 'Dzienny', 'Idle'] %}\n  {{ override }}\n{% elif is_state('input_boolean.cats_in_van','on')\n     or is_state('binary_sensor.floor_heating_occupied','on')\n     or (is_state('binary_sensor.floor_heating_night','on') and is_state('input_boolean.floor_heating_night_occupied','on')) %}\n  {{ 'Nocny' if is_state('binary_sensor.floor_heating_night','on') else 'Dzienny' }}\n{% else %}Idle{% endif %}"
+        "state": "{% set override = states('input_select.floor_heating_override') %}\n{% if override in ['Nocny', 'Dzienny', 'Idle'] %}\n  {{ override }}\n{% elif is_state('input_boolean.cats_in_van','on')\n     or is_state('binary_sensor.jaskier_occupied','on')\n     or (is_state('binary_sensor.floor_heating_night','on') and is_state('input_boolean.floor_heating_night_occupied','on')) %}\n  {{ 'Nocny' if is_state('binary_sensor.floor_heating_night','on') else 'Dzienny' }}\n{% else %}Idle{% endif %}"
       }
     },
     {
@@ -221,8 +221,8 @@
   "automations": [
     {
       "id": "floor_heating_presence_memory",
-      "alias": "Floor Heating - Presence Memory",
-      "description": "Record confirmed presence only after 2 continuous minutes; refresh each minute only after the same confirmation. Short pulses never refresh the persistent 45-minute occupancy memory. Survives HA restarts.",
+      "alias": "Occupancy - Presence Memory",
+      "description": "Shared Jaskier occupancy (used by floor heating and water). Record confirmed presence only after 2 continuous minutes; refresh each minute only after the same confirmation. Short pulses never refresh the persistent 45-minute occupancy memory in input_datetime.jaskier_last_presence. Survives HA restarts.",
       "triggers": [
         {
           "trigger": "state",
@@ -255,7 +255,7 @@
         {
           "action": "input_datetime.set_datetime",
           "target": {
-            "entity_id": "input_datetime.floor_heating_last_presence"
+            "entity_id": "input_datetime.jaskier_last_presence"
           },
           "data": {
             "timestamp": "{{ now().timestamp() }}"
@@ -273,7 +273,7 @@
           "trigger": "state",
           "entity_id": [
             "binary_sensor.floor_heating_night",
-            "binary_sensor.floor_heating_occupied"
+            "binary_sensor.jaskier_occupied"
           ]
         },
         {
@@ -319,7 +319,7 @@
                 },
                 {
                   "condition": "state",
-                  "entity_id": "binary_sensor.floor_heating_occupied",
+                  "entity_id": "binary_sensor.jaskier_occupied",
                   "state": "on"
                 },
                 {
@@ -659,7 +659,7 @@
       },
       {
         "type": "tile",
-        "entity": "binary_sensor.floor_heating_occupied",
+        "entity": "binary_sensor.jaskier_occupied",
         "name": "Obecność (45 min)",
         "grid_options": {
           "columns": 6,

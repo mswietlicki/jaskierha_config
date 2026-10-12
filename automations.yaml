@@ -679,8 +679,9 @@
 - id: '1787042217987'
   alias: Water - Maintenance Gate
   description: Suppress normal water and hot-water automation during service overrides.
-    Stop active transitions on entry and only leave maintenance when physical states
-    match a known water mode.
+    Stop active transitions on entry and only leave maintenance when the valve layout
+    matches a known water mode (the pump state does not define the mode; Grid modes
+    switch the pump off).
   triggers:
   - trigger: state
     entity_id: input_boolean.water_maintenance
@@ -745,19 +746,11 @@
       - choose:
         - conditions:
           - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_tank
+            entity_id:
+            - switch.water_valve_pump_overwrite
+            - switch.water_valve_loop
+            - switch.water_valve_grid
+            - switch.water_valve_tank
             state: 'off'
           sequence:
           - action: input_select.select_option
@@ -772,16 +765,10 @@
               option: Normal
         - conditions:
           - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
+            entity_id:
+            - switch.water_valve_pump_overwrite
+            - switch.water_valve_loop
+            - switch.water_valve_grid
             state: 'on'
           - condition: state
             entity_id: switch.water_valve_tank
@@ -799,21 +786,20 @@
               option: Pump Filling
         - conditions:
           - condition: state
-            entity_id: switch.water_pump_relay
+            entity_id:
+            - switch.water_valve_pump_overwrite
+            - switch.water_valve_tank
             state: 'off'
           - condition: state
-            entity_id: switch.water_valve_pump_overwrite
-            state: 'off'
-          - condition: state
-            entity_id: switch.water_valve_loop
+            entity_id:
+            - switch.water_valve_loop
+            - switch.water_valve_grid
             state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_tank
-            state: 'off'
           sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.water_pump_relay
+            note: Grid Filling runs with the pump OFF.
           - action: input_select.select_option
             target:
               entity_id: input_select.water_mode_current
@@ -826,21 +812,19 @@
               option: Grid Filling
         - conditions:
           - condition: state
-            entity_id: switch.water_pump_relay
-            state: 'off'
-          - condition: state
             entity_id: switch.water_valve_pump_overwrite
             state: 'off'
           - condition: state
-            entity_id: switch.water_valve_loop
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_grid
-            state: 'on'
-          - condition: state
-            entity_id: switch.water_valve_tank
+            entity_id:
+            - switch.water_valve_loop
+            - switch.water_valve_grid
+            - switch.water_valve_tank
             state: 'on'
           sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.water_pump_relay
+            note: Grid runs with the pump OFF.
           - action: input_select.select_option
             target:
               entity_id: input_select.water_mode_current
@@ -856,9 +840,8 @@
           data:
             notification_id: water_maintenance_exit_blocked
             title: Water Maintenance exit blocked
-            message: Pump and valve states do not match a known water mode. Maintenance
-              has been re-enabled; correct the manual switch states before trying
-              again.
+            message: Valve states do not match a known water mode. Maintenance has
+              been re-enabled; correct the manual valve states before trying again.
         - action: input_boolean.turn_on
           target:
             entity_id: input_boolean.water_maintenance
@@ -874,7 +857,10 @@
   max: 3
 - id: water_mode_reconcile_on_start
   alias: Water - Reconcile Mode on Start
-  description: Restore the logical water mode from the physical pump and valve states.
+  description: 'Restore the logical water mode from the physical valve layout. The
+    pump state does not define the mode: the pump is switched off whenever water is
+    not used or nobody is home. Grid and Grid Filling require the pump OFF, so it
+    is switched off there. Fault only when the valve layout matches no known mode.'
   triggers:
   - trigger: homeassistant
     event: start
@@ -883,17 +869,21 @@
     entity_id: input_boolean.water_maintenance
     state: 'off'
   actions:
-  - wait_template: "{{ has_value('switch.water_pump_relay') and\n   has_value('switch.water_valve_pump_overwrite')
-      and\n   has_value('switch.water_valve_loop') and\n   has_value('switch.water_valve_grid')
-      and\n   has_value('switch.water_valve_tank') }}"
+  - wait_template: "{{ has_value('switch.water_valve_pump_overwrite') and\n   has_value('switch.water_valve_loop')
+      and\n   has_value('switch.water_valve_grid') and\n   has_value('switch.water_valve_tank')
+      }}"
     timeout: 00:02:00
     continue_on_timeout: false
+    note: Valves are Modbus coils; wait until all four report a value after start.
   - choose:
     - conditions:
-      - condition: template
-        value_template: "{{ is_state('switch.water_pump_relay', 'on') and\n   is_state('switch.water_valve_pump_overwrite',
-          'off') and\n   is_state('switch.water_valve_loop', 'off') and\n   is_state('switch.water_valve_grid',
-          'off') and\n   is_state('switch.water_valve_tank', 'off') }}"
+      - condition: state
+        entity_id:
+        - switch.water_valve_pump_overwrite
+        - switch.water_valve_loop
+        - switch.water_valve_grid
+        - switch.water_valve_tank
+        state: 'off'
       sequence:
       - action: input_select.select_option
         target:
@@ -903,10 +893,15 @@
         data:
           option: Normal
     - conditions:
-      - condition: template
-        value_template: "{{ is_state('switch.water_pump_relay', 'on') and\n   is_state('switch.water_valve_pump_overwrite',
-          'on') and\n   is_state('switch.water_valve_loop', 'on') and\n   is_state('switch.water_valve_grid',
-          'on') and\n   is_state('switch.water_valve_tank', 'off') }}"
+      - condition: state
+        entity_id:
+        - switch.water_valve_pump_overwrite
+        - switch.water_valve_loop
+        - switch.water_valve_grid
+        state: 'on'
+      - condition: state
+        entity_id: switch.water_valve_tank
+        state: 'off'
       sequence:
       - action: input_select.select_option
         target:
@@ -916,11 +911,21 @@
         data:
           option: Pump Filling
     - conditions:
-      - condition: template
-        value_template: "{{ is_state('switch.water_pump_relay', 'off') and\n   is_state('switch.water_valve_pump_overwrite',
-          'off') and\n   is_state('switch.water_valve_loop', 'on') and\n   is_state('switch.water_valve_grid',
-          'on') and\n   is_state('switch.water_valve_tank', 'off') }}"
+      - condition: state
+        entity_id:
+        - switch.water_valve_pump_overwrite
+        - switch.water_valve_tank
+        state: 'off'
+      - condition: state
+        entity_id:
+        - switch.water_valve_loop
+        - switch.water_valve_grid
+        state: 'on'
       sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
+        note: Grid Filling runs with the pump OFF.
       - action: input_select.select_option
         target:
           entity_id:
@@ -929,11 +934,20 @@
         data:
           option: Grid Filling
     - conditions:
-      - condition: template
-        value_template: "{{ is_state('switch.water_pump_relay', 'off') and\n   is_state('switch.water_valve_pump_overwrite',
-          'off') and\n   is_state('switch.water_valve_loop', 'on') and\n   is_state('switch.water_valve_grid',
-          'on') and\n   is_state('switch.water_valve_tank', 'on') }}"
+      - condition: state
+        entity_id: switch.water_valve_pump_overwrite
+        state: 'off'
+      - condition: state
+        entity_id:
+        - switch.water_valve_loop
+        - switch.water_valve_grid
+        - switch.water_valve_tank
+        state: 'on'
       sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.water_pump_relay
+        note: Grid runs with the pump OFF.
       - action: input_select.select_option
         target:
           entity_id:
@@ -954,8 +968,16 @@
       data:
         notification_id: water_mode_fault
         title: Water mode fault
-        message: Pump and valve states do not match a known water mode. The water
-          pump was stopped; inspect the valve states before selecting another mode.
+        message: Valve states (tank {{ states('switch.water_valve_tank') }}, loop
+          {{ states('switch.water_valve_loop') }}, pump overwrite {{ states('switch.water_valve_pump_overwrite')
+          }}, grid {{ states('switch.water_valve_grid') }}) do not match a known water
+          mode. The water pump was stopped; inspect the valves before selecting another
+          mode.
+    - stop: Valve layout is not a recognized mode.
+  - action: persistent_notification.dismiss
+    data:
+      notification_id: water_mode_fault
+    note: A recognized valve layout clears any earlier fault notice.
   mode: single
 - id: '1787384467184'
   alias: Starter Battery Charging
@@ -1036,10 +1058,11 @@
         entity_id: switch.front_controller_starter_battery_charger
   mode: restart
 - id: floor_heating_presence_memory
-  alias: Floor Heating - Presence Memory
-  description: Record confirmed presence only after 2 continuous minutes; refresh
-    each minute only after the same confirmation. Short pulses never refresh the persistent
-    45-minute occupancy memory. Survives HA restarts.
+  alias: Occupancy - Presence Memory
+  description: Shared Jaskier occupancy (used by floor heating and water). Record
+    confirmed presence only after 2 continuous minutes; refresh each minute only after
+    the same confirmation. Short pulses never refresh the persistent 45-minute occupancy
+    memory in input_datetime.jaskier_last_presence. Survives HA restarts.
   triggers:
   - trigger: state
     entity_id: binary_sensor.presents_sensor_zg_204zx
@@ -1059,7 +1082,7 @@
   actions:
   - action: input_datetime.set_datetime
     target:
-      entity_id: input_datetime.floor_heating_last_presence
+      entity_id: input_datetime.jaskier_last_presence
     data:
       timestamp: '{{ now().timestamp() }}'
   mode: restart
@@ -1071,7 +1094,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.floor_heating_night
-    - binary_sensor.floor_heating_occupied
+    - binary_sensor.jaskier_occupied
   - trigger: time_pattern
     minutes: /1
   - trigger: homeassistant
@@ -1094,7 +1117,7 @@
         entity_id: binary_sensor.floor_heating_night
         state: 'on'
       - condition: state
-        entity_id: binary_sensor.floor_heating_occupied
+        entity_id: binary_sensor.jaskier_occupied
         state: 'on'
       - condition: state
         entity_id: input_boolean.floor_heating_night_occupied
@@ -1181,3 +1204,86 @@
         data:
           hvac_mode: 'off'
   mode: restart
+- id: water_leak_protection
+  alias: Water - Leak Protection
+  description: 'Stop the water pump and warn Mateusz when Moisture under Pump detects
+    water, or when the pump is switched on while the sensor is still wet. Safety function:
+    also active during Water Maintenance. Valves are not changed. A pump run-time
+    check is planned once a pump current/pressure sensor is installed (the relay only
+    enables the pump; its own pressure switch decides when it runs).'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.sonoff_snzb_05p
+    to: 'on'
+    id: moisture
+  - trigger: state
+    entity_id: switch.water_pump_relay
+    to: 'on'
+    id: pump_on
+    note: Pump switched on while the sensor is still wet.
+  - trigger: homeassistant
+    event: start
+    id: startup
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.sonoff_snzb_05p
+    state: 'on'
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.water_pump_relay
+    continue_on_error: true
+    note: Continue so the warning is still sent if the Modbus write fails.
+  - variables:
+      pump_status: '{{ ''The water pump was switched off.'' if is_state(''switch.water_pump_relay'',
+        ''off'') else ''WARNING: the water pump did NOT switch off (state: '' ~ states(''switch.water_pump_relay'')
+        ~ ''). Cut its power manually.'' }}'
+  - action: persistent_notification.create
+    data:
+      notification_id: water_leak_detected
+      title: Water leak under the pump
+      message: 'Moisture under Pump detected water at {{ now().strftime(''%H:%M'')
+        }}. {{ pump_status }} Water mode: {{ states(''input_select.water_mode_current'')
+        }}. Valves were not changed. Dry the sensor and fix the leak before switching
+        the pump on again.'
+  - action: notify.mobile_app_mateuszphone
+    continue_on_error: true
+    data:
+      title: Water leak under the pump
+      message: Moisture under Pump detected water. {{ pump_status }} Valves were not
+        changed.
+      data:
+        tag: water_leak
+        channel: Water alerts
+        importance: high
+        priority: high
+        ttl: 0
+  mode: queued
+  max: 5
+- id: water_pump_off_when_unoccupied
+  alias: Water - Pump Off When Unoccupied
+  description: Switch the water pump off when nobody is in Jaskier, using the shared
+    binary_sensor.jaskier_occupied (same 45-minute presence memory as floor heating;
+    an unavailable presence sensor counts as occupied). The water mode is not changed.
+    Skipped while Water Maintenance is on.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.jaskier_occupied
+    to: 'off'
+  - trigger: homeassistant
+    event: start
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.jaskier_occupied
+    state: 'off'
+  - condition: state
+    entity_id: switch.water_pump_relay
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.water_maintenance
+    state: 'off'
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.water_pump_relay
+  mode: single
