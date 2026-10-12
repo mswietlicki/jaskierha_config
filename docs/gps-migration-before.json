@@ -1,0 +1,650 @@
+{
+  "captured_for": "EWD108 shared Modbus migration",
+  "tracker": {
+    "success": true,
+    "entry_id": "01M09T43DKES1NEJGX7CY7R178",
+    "entry": {
+      "created_at": 1787035782.580055,
+      "modified_at": 1791788679.598585,
+      "entry_id": "01M09T43DKES1NEJGX7CY7R178",
+      "domain": "template",
+      "unique_id": null,
+      "title": "Jaskier GPS",
+      "state": "loaded",
+      "source": "user",
+      "supports_options": true,
+      "supports_remove_device": false,
+      "supports_unload": true,
+      "supports_reconfigure": false,
+      "supported_subentry_types": {},
+      "pref_disable_new_entities": false,
+      "pref_disable_polling": false,
+      "disabled_by": null,
+      "reason": null,
+      "error_reason_translation_key": null,
+      "error_reason_translation_placeholders": null,
+      "num_subentries": 0,
+      "options": {
+        "additional_options": {
+          "availability": "{% set lat = states('sensor.ewd108_signed_latitude') | float(none) %}\n{% set lon = states('sensor.ewd108_signed_longitude') | float(none) %}\n{{ is_state('sensor.ewd108_fix_status', 'Valid') and\n   lat is not none and lon is not none and\n   -90 <= lat <= 90 and -180 <= lon <= 180 and\n   lat != 0 and lon != 0 }}",
+          "location_accuracy": "10"
+        },
+        "latitude": "{{ states('sensor.ewd108_signed_latitude') | float(none) }}",
+        "longitude": "{{ states('sensor.ewd108_signed_longitude') | float(none) }}",
+        "name": "Jaskier GPS",
+        "template_type": "device_tracker"
+      }
+    },
+    "log_level": "WARNING",
+    "log_level_raw": 30
+  },
+  "trips": {
+    "success": true,
+    "action": "get",
+    "url_path": "dashboard-jaskier",
+    "view_path": "trips",
+    "view_index": 4,
+    "view_count": 5,
+    "view": {
+      "type": "sections",
+      "max_columns": 3,
+      "title": "Trips",
+      "path": "trips",
+      "icon": "mdi:map-marker-path",
+      "show_icon_and_title": true,
+      "cards": [],
+      "sections": [
+        {
+          "type": "grid",
+          "column_span": 2,
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current location and recent route",
+              "heading_style": "title",
+              "icon": "mdi:map-marker-path"
+            },
+            {
+              "type": "map",
+              "entities": [
+                {
+                  "entity": "device_tracker.jaskier_gps",
+                  "name": "Jaskier",
+                  "label_mode": "icon"
+                }
+              ],
+              "show_all": false,
+              "auto_fit": true,
+              "hours_to_show": 24,
+              "theme_mode": "auto",
+              "grid_options": {
+                "columns": "full",
+                "rows": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current trip",
+              "heading_style": "title",
+              "icon": "mdi:van-utility"
+            },
+            {
+              "type": "tile",
+              "entity": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+              "name": "Engine",
+              "color": "accent",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_current_trip_distance",
+              "name": "Distance",
+              "icon": "mdi:map-marker-distance",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2",
+              "name": "OBD speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ewd108_speed_over_ground_kmh",
+              "name": "GPS speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "device_tracker.jaskier_gps",
+              "name": "Jaskier GPS",
+              "icon": "mdi:crosshairs-gps",
+              "grid_options": {
+                "columns": "full"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Completed trips",
+              "heading_style": "title",
+              "icon": "mdi:timeline-check"
+            },
+            {
+              "type": "calendar",
+              "title": "Trip list",
+              "initial_view": "listWeek",
+              "entities": [
+                "calendar.jaskier_trips"
+              ],
+              "grid_options": {
+                "columns": "full",
+                "rows": 6
+              }
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Completed trip pulses",
+              "entities": [
+                {
+                  "entity": "sensor.jaskier_completed_trip_distance",
+                  "name": "Completed trip"
+                }
+              ],
+              "days_to_show": 7,
+              "period": "hour",
+              "chart_type": "bar",
+              "stat_types": [
+                "max"
+              ],
+              "grid_options": {
+                "columns": "full",
+                "rows": 5
+              }
+            }
+          ],
+          "column_span": 2
+        }
+      ]
+    },
+    "config_hash": "1bfe443618ab1f6e",
+    "config_size_bytes": 16466,
+    "view_size_bytes": 2006,
+    "hint": "Scoped to view 'trips' — config['views'][4] of 5 views. config_hash and config_size_bytes cover the FULL dashboard config, so ha_config_set_dashboard(python_transform=...) edits addressed via config['views'][4] validate as-is. Do NOT pass this view object as the config parameter — that would replace the entire dashboard. Omit view_path for the full config.",
+    "render_paths": [
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 4,
+        "view_path": "trips",
+        "title": "Trips",
+        "render_path": "dashboard-jaskier/trips",
+        "stable": true
+      }
+    ]
+  },
+  "automations": [
+    {
+      "success": true,
+      "action": "get",
+      "automation_id": "automation.jaskier_trip_capture_start",
+      "config": {
+        "id": "1787035861878",
+        "alias": "Jaskier Trip - Capture Start",
+        "description": "Capture the OBD odometer, time, and EWD108 position when Jaskier's engine starts. This baseline drives the current-trip distance and the completed trip record.",
+        "triggers": [
+          {
+            "trigger": "state",
+            "entity_id": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+            "from": "off",
+            "to": "on",
+            "id": "engine_started"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "state",
+            "entity_id": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+            "state": "on"
+          },
+          {
+            "condition": "not",
+            "conditions": [
+              {
+                "condition": "state",
+                "entity_id": "sensor.jaskier_wican_obd_pro_31_distancesincecodeclear",
+                "state": [
+                  "unknown",
+                  "unavailable"
+                ]
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "variables": {
+              "start_location": "{% if is_state('sensor.ewd108_fix_status', 'Valid') %}{{ states('sensor.ewd108_signed_latitude') }},{{ states('sensor.ewd108_signed_longitude') }}{% else %}Unknown{% endif %}"
+            }
+          },
+          {
+            "action": "input_number.set_value",
+            "target": {
+              "entity_id": "input_number.jaskier_trip_start_odometer"
+            },
+            "data": {
+              "value": "{{ states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear') | float }}"
+            }
+          },
+          {
+            "action": "input_datetime.set_datetime",
+            "target": {
+              "entity_id": "input_datetime.jaskier_trip_started_at"
+            },
+            "data": {
+              "datetime": "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+            }
+          },
+          {
+            "action": "input_text.set_value",
+            "target": {
+              "entity_id": "input_text.jaskier_trip_start_location"
+            },
+            "data": {
+              "value": "{{ start_location }}"
+            }
+          }
+        ],
+        "mode": "restart"
+      },
+      "config_hash": "d889feeb2e0181fa"
+    },
+    {
+      "success": true,
+      "action": "get",
+      "automation_id": "automation.jaskier_trip_record_end",
+      "config": {
+        "id": "1787035862435",
+        "alias": "Jaskier Trip - Record End",
+        "description": "At engine-off, pulse the completed distance for history graphs and add a dated trip with EWD108 endpoints to the Jaskier Trips calendar.",
+        "triggers": [
+          {
+            "trigger": "state",
+            "entity_id": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+            "from": "on",
+            "to": "off",
+            "id": "engine_stopped"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "not",
+            "conditions": [
+              {
+                "condition": "state",
+                "entity_id": "sensor.jaskier_wican_obd_pro_31_distancesincecodeclear",
+                "state": [
+                  "unknown",
+                  "unavailable"
+                ]
+              }
+            ]
+          },
+          {
+            "condition": "numeric_state",
+            "entity_id": "input_number.jaskier_trip_start_odometer",
+            "above": 0
+          }
+        ],
+        "actions": [
+          {
+            "variables": {
+              "start_odometer": "{{ states('input_number.jaskier_trip_start_odometer') | float(0) }}",
+              "end_odometer": "{{ states('sensor.jaskier_wican_obd_pro_31_distancesincecodeclear') | float(0) }}",
+              "trip_distance": "{{ ([end_odometer - start_odometer, 0] | max) | round(1) }}",
+              "start_time": "{{ states('input_datetime.jaskier_trip_started_at') }}",
+              "end_time": "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}",
+              "start_location": "{{ states('input_text.jaskier_trip_start_location') }}",
+              "end_location": "{% if is_state('sensor.ewd108_fix_status', 'Valid') %}{{ states('sensor.ewd108_signed_latitude') }},{{ states('sensor.ewd108_signed_longitude') }}{% else %}Unknown{% endif %}"
+            }
+          },
+          {
+            "condition": "template",
+            "value_template": "{{ trip_distance | float(0) >= 0.1 }}"
+          },
+          {
+            "action": "input_number.set_value",
+            "target": {
+              "entity_id": "input_number.jaskier_completed_trip_pulse"
+            },
+            "data": {
+              "value": "{{ trip_distance }}"
+            }
+          },
+          {
+            "action": "calendar.create_event",
+            "target": {
+              "entity_id": "calendar.jaskier_trips"
+            },
+            "data": {
+              "summary": "Jaskier trip — {{ trip_distance }} km",
+              "start_date_time": "{{ start_time }}",
+              "end_date_time": "{{ end_time }}",
+              "location": "{{ end_location }}",
+              "description": "Distance: {{ trip_distance }} km\nStart: {{ start_location }}\nEnd: {{ end_location }}\nRoute: https://www.google.com/maps/dir/?api=1&origin={{ start_location }}&destination={{ end_location }}"
+            }
+          },
+          {
+            "delay": {
+              "minutes": 1
+            }
+          },
+          {
+            "action": "input_number.set_value",
+            "target": {
+              "entity_id": "input_number.jaskier_completed_trip_pulse"
+            },
+            "data": {
+              "value": 0
+            }
+          }
+        ],
+        "mode": "queued",
+        "max": 5
+      },
+      "config_hash": "cbbc59d5b6de3386"
+    },
+    {
+      "success": true,
+      "action": "get",
+      "automation_id": "automation.update_home_assistant_location_from_ewd108",
+      "config": {
+        "id": "update_ha_location_from_ewd108",
+        "alias": "Update Home Assistant Location from EWD108",
+        "triggers": [
+          {
+            "minutes": "/5",
+            "trigger": "time_pattern"
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "state",
+            "entity_id": "sensor.ewd108_fix_status",
+            "state": "Valid"
+          },
+          {
+            "condition": "numeric_state",
+            "entity_id": "sensor.ewd108_signed_latitude",
+            "above": -90,
+            "below": 90
+          },
+          {
+            "condition": "numeric_state",
+            "entity_id": "sensor.ewd108_signed_longitude",
+            "above": -180,
+            "below": 180
+          },
+          {
+            "condition": "and",
+            "conditions": [
+              {
+                "condition": "or",
+                "conditions": [
+                  {
+                    "condition": "numeric_state",
+                    "entity_id": "sensor.ewd108_signed_latitude",
+                    "above": 0.000001
+                  },
+                  {
+                    "condition": "numeric_state",
+                    "entity_id": "sensor.ewd108_signed_latitude",
+                    "below": -0.000001
+                  }
+                ]
+              },
+              {
+                "condition": "or",
+                "conditions": [
+                  {
+                    "condition": "numeric_state",
+                    "entity_id": "sensor.ewd108_signed_longitude",
+                    "above": 0.000001
+                  },
+                  {
+                    "condition": "numeric_state",
+                    "entity_id": "sensor.ewd108_signed_longitude",
+                    "below": -0.000001
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "condition": "not",
+            "conditions": [
+              {
+                "condition": "state",
+                "entity_id": "device_tracker.jaskier_gps",
+                "state": [
+                  "unknown",
+                  "unavailable"
+                ]
+              }
+            ]
+          },
+          {
+            "condition": "not",
+            "conditions": [
+              {
+                "condition": "zone",
+                "entity_id": "device_tracker.jaskier_gps",
+                "zone": "zone.home"
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "action": "homeassistant.set_location",
+            "data": {
+              "latitude": "{{ state_attr('device_tracker.jaskier_gps', 'latitude') | float }}",
+              "longitude": "{{ state_attr('device_tracker.jaskier_gps', 'longitude') | float }}"
+            }
+          }
+        ],
+        "mode": "single"
+      },
+      "config_hash": "6f24d3769d455f45"
+    }
+  ],
+  "template": {
+    "success": true,
+    "yaml_path": "template",
+    "matches": [
+      {
+        "file": "configuration.yaml",
+        "yaml_path": "template",
+        "content": "- binary_sensor:\n  - name: Water Mode Normal Selected\n    unique_id: water_mode_normal_selected\n    state: \"{{ is_state('input_select.water_mode_target', 'Normal') }}\"\n\n  - name: Water Mode Pump Filling Selected\n    unique_id: water_mode_pump_filling_selected\n    state: \"{{ is_state('input_select.water_mode_target', 'Pump Filling') }}\"\n\n  - name: Water Mode Grid Filling Selected\n    unique_id: water_mode_grid_filling_selected\n    state: \"{{ is_state('input_select.water_mode_target', 'Grid Filling') }}\"\n\n  - name: Water Mode Grid Selected\n    unique_id: water_mode_grid_selected\n    state: \"{{ is_state('input_select.water_mode_target', 'Grid') }}\"\n\n  sensor:\n  - name: \"Water Tank Liters\"\n    unique_id: water_tank_liters_rational\n    unit_of_measurement: \"L\"\n    device_class: water\n    state_class: measurement\n    icon: mdi:water\n    availability: >\n      {{ states('sensor.water_height')\n         not in ['unknown', 'unavailable', 'none', ''] }}\n    state: >\n      {% set h = states('sensor.water_height') | float(0) %}\n\n      {% if h <= 0 %}\n        0\n      {% elif h >= 55.8 %}\n        100\n      {% else %}\n        {% set numerator =\n          0.668752847 * h\n          - 0.0296241152 * h**2\n          + 0.00171244226 * h**3\n          - 0.0000722092929 * h**4\n          + 0.00000103272088 * h**5\n        %}\n\n        {% set denominator =\n          1\n          - 0.00347494792 * h\n          - 0.00156556425 * h**2\n          + 0.0000292356265 * h**3\n        %}\n\n        {{ (numerator / denominator) | round(1) }}\n      {% endif %}\n  - name: VE.Bus Switch Position Mode\n    unique_id: victron_vebus_switch_position_mode\n    state: >\n      {% set mode = states('select.inverter') | lower %}\n      {% if 'charger' in mode %}\n        Charger Only\n      {% elif 'inverter' in mode %}\n        Inverter Only\n      {% elif mode == 'on' %}\n        On\n      {% elif mode == 'off' %}\n        Off\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: Orion XS Input Battery State of Charge\n    unique_id: orion_xs_input_battery_state_of_charge\n    unit_of_measurement: \"%\"\n    device_class: battery\n    state_class: measurement\n    availability: \"{{ states('sensor.orion_xs_input_voltage') | float(none) is not none }}\"\n    state: >\n      {% set voltage = states('sensor.orion_xs_input_voltage') | float(none) %}\n      {% if voltage is none %}\n        {{ none }}\n      {% else %}\n        {# Approximate 12V lead-acid resting reference: 11.8V empty, 12.8V full; calibrate thresholds for battery chemistry/age and load profile #}\n        {% set empty_soc_voltage = 11.8 %}\n        {% set full_soc_voltage = 12.8 %}\n        {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage - empty_soc_voltage)) * 100 %}\n        {% if soc < 0 %}\n          0\n        {% elif soc > 100 %}\n          100\n        {% else %}\n          {{ soc | round(0) }}\n        {% endif %}\n      {% endif %}\n\n  select:\n  - name: Inverter Mode\n    unique_id: victron_inverter_mode_control\n    state: >\n      {% set mode = states('select.inverter') | lower %}\n      {% if 'charger' in mode %}\n        Charger Only\n      {% elif 'inverter' in mode %}\n        Inverter Only\n      {% elif mode == 'on' %}\n        On\n      {% elif mode == 'off' %}\n        Off\n      {% else %}\n        Unknown\n      {% endif %}\n    options: \"{{ ['Charger Only', 'Inverter Only', 'On', 'Off'] }}\"\n    select_option:\n    - service: select.select_option\n      target:\n        entity_id: select.inverter\n      data:\n        option: >\n          {% set map = {\n            'Charger Only': 'charger_only',\n            'Inverter Only': 'inverter_only',\n            'On': 'on',\n            'Off': 'off'\n          } %}\n          {{ map.get(option, option) }}\n\n  switch:\n  - name: Inverter Enabled\n    unique_id: victron_inverter_power_switch\n    state: \"{{ states('select.inverter') | lower == 'on' }}\"\n    turn_on:\n    - service: select.select_option\n      target:\n        entity_id: select.inverter\n      data:\n        option: \"on\"\n    turn_off:\n    - service: select.select_option\n      target:\n        entity_id: select.inverter\n      data:\n        option: \"off\"\n\n- sensor:\n  - name: \"EWD108 Fix Status\"\n    unique_id: ewd108_fix_status\n    state: >\n      {% set v = states('sensor.ewd108_position_valid') | int(-1) %}\n      {% if v == 1 %}\n        Valid\n      {% elif v == 0 %}\n        Invalid\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Longitude Direction\"\n    unique_id: ewd108_longitude_direction\n    state: >\n      {% set v = states('sensor.ewd108_longitude_direction_raw') | int(0) %}\n      {% if v == 69 %}\n        E\n      {% elif v == 87 %}\n        W\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Latitude Direction\"\n    unique_id: ewd108_latitude_direction\n    state: >\n      {% set v = states('sensor.ewd108_latitude_direction_raw') | int(0) %}\n      {% if v == 78 %}\n        N\n      {% elif v == 83 %}\n        S\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Signed Longitude\"\n    unique_id: ewd108_signed_longitude\n    unit_of_measurement: \"°\"\n    availability: >\n      {{ states('sensor.ewd108_longitude') | is_number and\n         states('sensor.ewd108_longitude_direction') in ['E', 'W'] }}\n    state: >\n      {% set lon = states('sensor.ewd108_longitude') | float(0) %}\n      {% set dir = states('sensor.ewd108_longitude_direction') %}\n      {% if dir == 'W' %}\n        {{ -lon }}\n      {% else %}\n        {{ lon }}\n      {% endif %}\n\n  - name: \"EWD108 Signed Latitude\"\n    unique_id: ewd108_signed_latitude\n    unit_of_measurement: \"°\"\n    availability: >\n      {{ states('sensor.ewd108_latitude') | is_number and\n         states('sensor.ewd108_latitude_direction') in ['N', 'S'] }}\n    state: >\n      {% set lat = states('sensor.ewd108_latitude') | float(0) %}\n      {% set dir = states('sensor.ewd108_latitude_direction') %}\n      {% if dir == 'S' %}\n        {{ -lat }}\n      {% else %}\n        {{ lat }}\n      {% endif %}\n\n  - name: \"EWD108 Speed Over Ground kmh\"\n    unique_id: ewd108_speed_over_ground_kmh\n    unit_of_measurement: \"km/h\"\n    device_class: speed\n    state_class: measurement\n    availability: \"{{ states('sensor.ewd108_speed_over_ground') | is_number }}\"\n    state: >\n      {{ (states('sensor.ewd108_speed_over_ground') | float(0) * 1.852) | round(2) }}\n\n  - name: \"EWD108 GNSS UTC Time\"\n    unique_id: ewd108_gnss_utc_time\n    device_class: timestamp\n    availability: >\n      {{ states('sensor.ewd108_year') | int(0) > 2000 and\n         states('sensor.ewd108_month') | int(0) in range(1, 13) and\n         states('sensor.ewd108_day') | int(0) in range(1, 32) and\n         states('sensor.ewd108_hour_utc') | int(-1) in range(0, 24) and\n         states('sensor.ewd108_minute_utc') | int(-1) in range(0, 60) and\n         states('sensor.ewd108_second_utc') | int(-1) in range(0, 60) }}\n    state: >\n      {% set y = states('sensor.ewd108_year') | int(0) %}\n      {% set mo = states('sensor.ewd108_month') | int(0) %}\n      {% set d = states('sensor.ewd108_day') | int(0) %}\n      {% set h = states('sensor.ewd108_hour_utc') | int(0) %}\n      {% set mi = states('sensor.ewd108_minute_utc') | int(0) %}\n      {% set s = states('sensor.ewd108_second_utc') | int(0) %}\n      {{ \"%04d-%02d-%02dT%02d:%02d:%02d+00:00\" | format(y, mo, d, h, mi, s) }}\n\n  - name: \"EWD108 Antenna Mode\"\n    unique_id: ewd108_antenna_mode\n    state: >\n      {% set v = states('sensor.ewd108_antenna_setting') | int(-1) %}\n      {% if v == 0 %}\n        Active\n      {% elif v == 1 %}\n        Passive\n      {% else %}\n        Unknown\n      {% endif %}\n\n  - name: \"EWD108 Update Frequency Text\"\n    unique_id: ewd108_update_frequency_text\n    state: >\n      {% set v = states('sensor.ewd108_update_frequency') | int(-1) %}\n      {% if v == 0 %}\n        1 Hz\n      {% elif v == 1 %}\n        10 Hz\n      {% else %}\n        Unknown\n      {% endif %}\n",
+        "parsed": [
+          {
+            "binary_sensor": [
+              {
+                "name": "Water Mode Normal Selected",
+                "unique_id": "water_mode_normal_selected",
+                "state": "{{ is_state('input_select.water_mode_target', 'Normal') }}"
+              },
+              {
+                "name": "Water Mode Pump Filling Selected",
+                "unique_id": "water_mode_pump_filling_selected",
+                "state": "{{ is_state('input_select.water_mode_target', 'Pump Filling') }}"
+              },
+              {
+                "name": "Water Mode Grid Filling Selected",
+                "unique_id": "water_mode_grid_filling_selected",
+                "state": "{{ is_state('input_select.water_mode_target', 'Grid Filling') }}"
+              },
+              {
+                "name": "Water Mode Grid Selected",
+                "unique_id": "water_mode_grid_selected",
+                "state": "{{ is_state('input_select.water_mode_target', 'Grid') }}"
+              }
+            ],
+            "sensor": [
+              {
+                "name": "Water Tank Liters",
+                "unique_id": "water_tank_liters_rational",
+                "unit_of_measurement": "L",
+                "device_class": "water",
+                "state_class": "measurement",
+                "icon": "mdi:water",
+                "availability": "{{ states('sensor.water_height')\n   not in ['unknown', 'unavailable', 'none', ''] }}\n",
+                "state": "{% set h = states('sensor.water_height') | float(0) %}\n{% if h <= 0 %}\n  0\n{% elif h >= 55.8 %}\n  100\n{% else %}\n  {% set numerator =\n    0.668752847 * h\n    - 0.0296241152 * h**2\n    + 0.00171244226 * h**3\n    - 0.0000722092929 * h**4\n    + 0.00000103272088 * h**5\n  %}\n\n  {% set denominator =\n    1\n    - 0.00347494792 * h\n    - 0.00156556425 * h**2\n    + 0.0000292356265 * h**3\n  %}\n\n  {{ (numerator / denominator) | round(1) }}\n{% endif %}\n"
+              },
+              {
+                "name": "VE.Bus Switch Position Mode",
+                "unique_id": "victron_vebus_switch_position_mode",
+                "state": "{% set mode = states('select.inverter') | lower %} {% if 'charger' in mode %}\n  Charger Only\n{% elif 'inverter' in mode %}\n  Inverter Only\n{% elif mode == 'on' %}\n  On\n{% elif mode == 'off' %}\n  Off\n{% else %}\n  Unknown\n{% endif %}\n"
+              },
+              {
+                "name": "Orion XS Input Battery State of Charge",
+                "unique_id": "orion_xs_input_battery_state_of_charge",
+                "unit_of_measurement": "%",
+                "device_class": "battery",
+                "state_class": "measurement",
+                "availability": "{{ states('sensor.orion_xs_input_voltage') | float(none) is not none }}",
+                "state": "{% set voltage = states('sensor.orion_xs_input_voltage') | float(none) %} {% if voltage is none %}\n  {{ none }}\n{% else %}\n  {# Approximate 12V lead-acid resting reference: 11.8V empty, 12.8V full; calibrate thresholds for battery chemistry/age and load profile #}\n  {% set empty_soc_voltage = 11.8 %}\n  {% set full_soc_voltage = 12.8 %}\n  {% set soc = ((voltage - empty_soc_voltage) / (full_soc_voltage - empty_soc_voltage)) * 100 %}\n  {% if soc < 0 %}\n    0\n  {% elif soc > 100 %}\n    100\n  {% else %}\n    {{ soc | round(0) }}\n  {% endif %}\n{% endif %}\n"
+              }
+            ],
+            "select": [
+              {
+                "name": "Inverter Mode",
+                "unique_id": "victron_inverter_mode_control",
+                "state": "{% set mode = states('select.inverter') | lower %} {% if 'charger' in mode %}\n  Charger Only\n{% elif 'inverter' in mode %}\n  Inverter Only\n{% elif mode == 'on' %}\n  On\n{% elif mode == 'off' %}\n  Off\n{% else %}\n  Unknown\n{% endif %}\n",
+                "options": "{{ ['Charger Only', 'Inverter Only', 'On', 'Off'] }}",
+                "select_option": [
+                  {
+                    "service": "select.select_option",
+                    "target": {
+                      "entity_id": "select.inverter"
+                    },
+                    "data": {
+                      "option": "{% set map = {\n  'Charger Only': 'charger_only',\n  'Inverter Only': 'inverter_only',\n  'On': 'on',\n  'Off': 'off'\n} %} {{ map.get(option, option) }}\n"
+                    }
+                  }
+                ]
+              }
+            ],
+            "switch": [
+              {
+                "name": "Inverter Enabled",
+                "unique_id": "victron_inverter_power_switch",
+                "state": "{{ states('select.inverter') | lower == 'on' }}",
+                "turn_on": [
+                  {
+                    "service": "select.select_option",
+                    "target": {
+                      "entity_id": "select.inverter"
+                    },
+                    "data": {
+                      "option": "on"
+                    }
+                  }
+                ],
+                "turn_off": [
+                  {
+                    "service": "select.select_option",
+                    "target": {
+                      "entity_id": "select.inverter"
+                    },
+                    "data": {
+                      "option": "off"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "sensor": [
+              {
+                "name": "EWD108 Fix Status",
+                "unique_id": "ewd108_fix_status",
+                "state": "{% set v = states('sensor.ewd108_position_valid') | int(-1) %} {% if v == 1 %}\n  Valid\n{% elif v == 0 %}\n  Invalid\n{% else %}\n  Unknown\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Longitude Direction",
+                "unique_id": "ewd108_longitude_direction",
+                "state": "{% set v = states('sensor.ewd108_longitude_direction_raw') | int(0) %} {% if v == 69 %}\n  E\n{% elif v == 87 %}\n  W\n{% else %}\n  Unknown\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Latitude Direction",
+                "unique_id": "ewd108_latitude_direction",
+                "state": "{% set v = states('sensor.ewd108_latitude_direction_raw') | int(0) %} {% if v == 78 %}\n  N\n{% elif v == 83 %}\n  S\n{% else %}\n  Unknown\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Signed Longitude",
+                "unique_id": "ewd108_signed_longitude",
+                "unit_of_measurement": "°",
+                "availability": "{{ states('sensor.ewd108_longitude') | is_number and\n   states('sensor.ewd108_longitude_direction') in ['E', 'W'] }}\n",
+                "state": "{% set lon = states('sensor.ewd108_longitude') | float(0) %} {% set dir = states('sensor.ewd108_longitude_direction') %} {% if dir == 'W' %}\n  {{ -lon }}\n{% else %}\n  {{ lon }}\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Signed Latitude",
+                "unique_id": "ewd108_signed_latitude",
+                "unit_of_measurement": "°",
+                "availability": "{{ states('sensor.ewd108_latitude') | is_number and\n   states('sensor.ewd108_latitude_direction') in ['N', 'S'] }}\n",
+                "state": "{% set lat = states('sensor.ewd108_latitude') | float(0) %} {% set dir = states('sensor.ewd108_latitude_direction') %} {% if dir == 'S' %}\n  {{ -lat }}\n{% else %}\n  {{ lat }}\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Speed Over Ground kmh",
+                "unique_id": "ewd108_speed_over_ground_kmh",
+                "unit_of_measurement": "km/h",
+                "device_class": "speed",
+                "state_class": "measurement",
+                "availability": "{{ states('sensor.ewd108_speed_over_ground') | is_number }}",
+                "state": "{{ (states('sensor.ewd108_speed_over_ground') | float(0) * 1.852) | round(2) }}\n"
+              },
+              {
+                "name": "EWD108 GNSS UTC Time",
+                "unique_id": "ewd108_gnss_utc_time",
+                "device_class": "timestamp",
+                "availability": "{{ states('sensor.ewd108_year') | int(0) > 2000 and\n   states('sensor.ewd108_month') | int(0) in range(1, 13) and\n   states('sensor.ewd108_day') | int(0) in range(1, 32) and\n   states('sensor.ewd108_hour_utc') | int(-1) in range(0, 24) and\n   states('sensor.ewd108_minute_utc') | int(-1) in range(0, 60) and\n   states('sensor.ewd108_second_utc') | int(-1) in range(0, 60) }}\n",
+                "state": "{% set y = states('sensor.ewd108_year') | int(0) %} {% set mo = states('sensor.ewd108_month') | int(0) %} {% set d = states('sensor.ewd108_day') | int(0) %} {% set h = states('sensor.ewd108_hour_utc') | int(0) %} {% set mi = states('sensor.ewd108_minute_utc') | int(0) %} {% set s = states('sensor.ewd108_second_utc') | int(0) %} {{ \"%04d-%02d-%02dT%02d:%02d:%02d+00:00\" | format(y, mo, d, h, mi, s) }}\n"
+              },
+              {
+                "name": "EWD108 Antenna Mode",
+                "unique_id": "ewd108_antenna_mode",
+                "state": "{% set v = states('sensor.ewd108_antenna_setting') | int(-1) %} {% if v == 0 %}\n  Active\n{% elif v == 1 %}\n  Passive\n{% else %}\n  Unknown\n{% endif %}\n"
+              },
+              {
+                "name": "EWD108 Update Frequency Text",
+                "unique_id": "ewd108_update_frequency_text",
+                "state": "{% set v = states('sensor.ewd108_update_frequency') | int(-1) %} {% if v == 0 %}\n  1 Hz\n{% elif v == 1 %}\n  10 Hz\n{% else %}\n  Unknown\n{% endif %}\n"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "count": 1,
+    "files_searched": 1,
+    "files_unreadable": 0
+  }
+}

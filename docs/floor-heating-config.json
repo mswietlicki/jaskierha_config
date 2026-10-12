@@ -1,0 +1,1057 @@
+{
+  "implemented_local_date": "2026-10-12",
+  "helpers": [
+    {
+      "helper_type": "input_boolean",
+      "name": "Floor Heating Enabled",
+      "icon": "mdi:heating-coil"
+    },
+    {
+      "helper_type": "input_boolean",
+      "name": "Cats In Van",
+      "icon": "mdi:cat"
+    },
+    {
+      "helper_type": "input_boolean",
+      "name": "Floor Heating Night Occupied",
+      "icon": "mdi:sleep"
+    },
+    {
+      "helper_type": "input_number",
+      "name": "Floor Heating Night Temperature",
+      "min_value": 5,
+      "max_value": 24,
+      "step": 0.5,
+      "unit_of_measurement": "°C",
+      "mode": "box",
+      "icon": "mdi:weather-night"
+    },
+    {
+      "helper_type": "input_number",
+      "name": "Floor Heating Day Temperature",
+      "min_value": 5,
+      "max_value": 24,
+      "step": 0.5,
+      "unit_of_measurement": "°C",
+      "mode": "box",
+      "icon": "mdi:white-balance-sunny"
+    },
+    {
+      "helper_type": "input_number",
+      "name": "Floor Heating Idle Temperature",
+      "min_value": 5,
+      "max_value": 24,
+      "step": 0.5,
+      "unit_of_measurement": "°C",
+      "mode": "box",
+      "icon": "mdi:van-utility"
+    },
+    {
+      "helper_type": "input_select",
+      "name": "Floor Heating Override",
+      "options": [
+        "Auto",
+        "Nocny",
+        "Dzienny",
+        "Idle"
+      ],
+      "icon": "mdi:thermostat-auto"
+    },
+    {
+      "helper_type": "input_datetime",
+      "name": "Floor Heating Last Presence",
+      "has_date": true,
+      "has_time": true,
+      "icon": "mdi:account-clock"
+    },
+    {
+      "helper_type": "tod",
+      "name": "Floor Heating Night",
+      "config": {
+        "after_time": "22:00:00",
+        "before_time": "08:00:00"
+      }
+    },
+    {
+      "helper_type": "min_max",
+      "name": "Floor Heating Temperature",
+      "config": {
+        "type": "mean",
+        "entity_ids": [
+          "sensor.sensor_internal_temperature",
+          "sensor.presents_sensor_zg_204zx_temperature"
+        ],
+        "round_digits": 1
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Shore Power Available",
+      "config": {
+        "next_step_id": "binary_sensor",
+        "state": "{% set v = states('sensor.inverter_input_voltage_l1') | float(none) %}\n{% set hz = states('sensor.inverter_input_frequency_l1') | float(none) %}\n{% set voltage = states.sensor.inverter_input_voltage_l1 %}\n{{ is_state('sensor.gx_device_ac_active_input_source', 'shore_power')\n   and is_state('binary_sensor.inverter_connected', 'on')\n   and is_state('sensor.inverter_state_of_ignore_ac_in_1', 'off')\n   and v is not none and 190 <= v <= 255\n   and hz is not none and 45 <= hz <= 55\n   and voltage is defined and (now() - voltage.last_reported).total_seconds() < 300 }}",
+        "device_class": "power",
+        "additional_options": {
+          "delay_on": {
+            "seconds": 60
+          },
+          "delay_off": {
+            "seconds": 0
+          }
+        }
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Temperature Safe",
+      "config": {
+        "next_step_id": "binary_sensor",
+        "state": "{% set ns = namespace(count=0, ok=true) %}\n{% for e in ['sensor.sensor_internal_temperature', 'sensor.presents_sensor_zg_204zx_temperature'] %}\n  {% set s = states[e] %}\n  {% if s is not none and is_number(s.state) %}\n    {% set ns.count = ns.count + 1 %}\n    {% if not (-30 <= s.state | float < 26) %}\n      {% set ns.ok = false %}\n    {% endif %}\n  {% elif s is not none and s.state not in ['unknown', 'unavailable'] %}\n    {% set ns.ok = false %}\n  {% endif %}\n{% endfor %}\n{{ ns.count > 0 and ns.ok and is_number(states('sensor.floor_heating_temperature')) }}"
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Occupied",
+      "config": {
+        "next_step_id": "binary_sensor",
+        "state": "{% set last = state_attr('input_datetime.floor_heating_last_presence', 'timestamp') | float(0) %}\n{{ states('binary_sensor.presents_sensor_zg_204zx') in ['unknown', 'unavailable']\n   or 0 <= now().timestamp() - last < 2700 }}",
+        "device_class": "occupancy"
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Permitted",
+      "config": {
+        "next_step_id": "binary_sensor",
+        "state": "{{ is_state('input_boolean.floor_heating_enabled','on') and is_state('binary_sensor.shore_power_available','on') and is_state('binary_sensor.floor_heating_temperature_safe','on') }}"
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Mode",
+      "config": {
+        "next_step_id": "sensor",
+        "state": "{% set override = states('input_select.floor_heating_override') %}\n{% if override in ['Nocny', 'Dzienny', 'Idle'] %}\n  {{ override }}\n{% elif is_state('input_boolean.cats_in_van','on')\n     or is_state('binary_sensor.floor_heating_occupied','on')\n     or (is_state('binary_sensor.floor_heating_night','on') and is_state('input_boolean.floor_heating_night_occupied','on')) %}\n  {{ 'Nocny' if is_state('binary_sensor.floor_heating_night','on') else 'Dzienny' }}\n{% else %}Idle{% endif %}"
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Target Temperature",
+      "config": {
+        "next_step_id": "sensor",
+        "device_class": "temperature",
+        "unit_of_measurement": "°C",
+        "state": "{% set mode = states('sensor.floor_heating_mode') %}\n{% set e = {'Nocny':'input_number.floor_heating_night_temperature', 'Dzienny':'input_number.floor_heating_day_temperature', 'Idle':'input_number.floor_heating_idle_temperature'}.get(mode) %}\n{{ states(e) | float(none) if e else none }}"
+      }
+    },
+    {
+      "helper_type": "template",
+      "name": "Floor Heating Protected Relay",
+      "config": {
+        "next_step_id": "switch",
+        "value_template": "{{ is_state('switch.floorheating','on') }}",
+        "turn_on": [
+          {
+            "condition": "state",
+            "entity_id": "binary_sensor.floor_heating_permitted",
+            "state": "on"
+          },
+          {
+            "condition": "state",
+            "entity_id": "sensor.gx_device_ac_active_input_source",
+            "state": "shore_power"
+          },
+          {
+            "condition": "state",
+            "entity_id": "input_boolean.floor_heating_enabled",
+            "state": "on"
+          },
+          {
+            "action": "switch.turn_on",
+            "target": {
+              "entity_id": "switch.floorheating"
+            }
+          }
+        ],
+        "turn_off": [
+          {
+            "action": "switch.turn_off",
+            "target": {
+              "entity_id": "switch.floorheating"
+            }
+          }
+        ],
+        "additional_options": {
+          "availability": "{{ has_value('switch.floorheating') }}"
+        }
+      }
+    },
+    {
+      "helper_type": "generic_thermostat",
+      "name": "Floor Heating",
+      "config": {
+        "heater": "switch.floor_heating_protected_relay",
+        "target_sensor": "sensor.floor_heating_temperature",
+        "ac_mode": false,
+        "cold_tolerance": 0.3,
+        "hot_tolerance": 0.2,
+        "min_cycle_duration": {
+          "minutes": 10
+        },
+        "cycle_cooldown": {
+          "minutes": 5
+        },
+        "min_temp": 5,
+        "max_temp": 24
+      }
+    }
+  ],
+  "initial_values": {
+    "input_boolean.floor_heating_enabled": "on",
+    "input_boolean.cats_in_van": "off",
+    "input_select.floor_heating_override": "Auto",
+    "input_number.floor_heating_night_temperature": 18,
+    "input_number.floor_heating_day_temperature": 20,
+    "input_number.floor_heating_idle_temperature": 10
+  },
+  "display_names": {
+    "input_boolean.floor_heating_enabled": "Ogrzewanie podłogowe",
+    "input_boolean.cats_in_van": "Koty w samochodzie"
+  },
+  "automations": [
+    {
+      "id": "floor_heating_presence_memory",
+      "alias": "Floor Heating - Presence Memory",
+      "description": "Record confirmed presence only after 2 continuous minutes; refresh each minute only after the same confirmation. Short pulses never refresh the persistent 45-minute occupancy memory. Survives HA restarts.",
+      "triggers": [
+        {
+          "trigger": "state",
+          "entity_id": "binary_sensor.presents_sensor_zg_204zx",
+          "to": "on",
+          "for": {
+            "minutes": 2
+          }
+        },
+        {
+          "trigger": "time_pattern",
+          "minutes": "/1"
+        },
+        {
+          "trigger": "homeassistant",
+          "event": "start"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "state",
+          "entity_id": "binary_sensor.presents_sensor_zg_204zx",
+          "state": "on",
+          "for": {
+            "minutes": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "action": "input_datetime.set_datetime",
+          "target": {
+            "entity_id": "input_datetime.floor_heating_last_presence"
+          },
+          "data": {
+            "timestamp": "{{ now().timestamp() }}"
+          }
+        }
+      ],
+      "mode": "restart"
+    },
+    {
+      "id": "floor_heating_night_presence",
+      "alias": "Floor Heating - Night Presence",
+      "description": "Latch confirmed occupancy through 22:00–08:00 to protect sleeping occupants. Daytime resets the latch; manual Idle bypasses it.",
+      "triggers": [
+        {
+          "trigger": "state",
+          "entity_id": [
+            "binary_sensor.floor_heating_night",
+            "binary_sensor.floor_heating_occupied"
+          ]
+        },
+        {
+          "trigger": "time_pattern",
+          "minutes": "/1"
+        },
+        {
+          "trigger": "homeassistant",
+          "event": "start"
+        }
+      ],
+      "actions": [
+        {
+          "choose": [
+            {
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity_id": "binary_sensor.floor_heating_night",
+                  "state": "off"
+                },
+                {
+                  "condition": "state",
+                  "entity_id": "input_boolean.floor_heating_night_occupied",
+                  "state": "on"
+                }
+              ],
+              "sequence": [
+                {
+                  "action": "input_boolean.turn_off",
+                  "target": {
+                    "entity_id": "input_boolean.floor_heating_night_occupied"
+                  }
+                }
+              ]
+            },
+            {
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity_id": "binary_sensor.floor_heating_night",
+                  "state": "on"
+                },
+                {
+                  "condition": "state",
+                  "entity_id": "binary_sensor.floor_heating_occupied",
+                  "state": "on"
+                },
+                {
+                  "condition": "state",
+                  "entity_id": "input_boolean.floor_heating_night_occupied",
+                  "state": "off"
+                }
+              ],
+              "sequence": [
+                {
+                  "action": "input_boolean.turn_on",
+                  "target": {
+                    "entity_id": "input_boolean.floor_heating_night_occupied"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "mode": "restart"
+    },
+    {
+      "id": "floor_heating_comfort_control",
+      "alias": "Floor Heating - Comfort Control",
+      "description": "Apply Auto/day/night/idle setpoint (20/18/10°C initially) to the native thermostat; main enable, shore power and valid temperature are mandatory. Periodic and startup reconciliation; safety bypasses minimum heating time.",
+      "triggers": [
+        {
+          "trigger": "state",
+          "entity_id": [
+            "input_boolean.floor_heating_enabled",
+            "binary_sensor.floor_heating_permitted",
+            "sensor.floor_heating_target_temperature",
+            "sensor.floor_heating_temperature",
+            "sensor.gx_device_ac_active_input_source",
+            "climate.floor_heating"
+          ]
+        },
+        {
+          "trigger": "time_pattern",
+          "minutes": "/1"
+        },
+        {
+          "trigger": "homeassistant",
+          "event": "start"
+        }
+      ],
+      "actions": [
+        {
+          "choose": [
+            {
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity_id": "binary_sensor.floor_heating_permitted",
+                  "state": "on"
+                },
+                {
+                  "condition": "state",
+                  "entity_id": "sensor.gx_device_ac_active_input_source",
+                  "state": "shore_power"
+                },
+                {
+                  "condition": "numeric_state",
+                  "entity_id": "sensor.floor_heating_target_temperature",
+                  "above": 4,
+                  "below": 25
+                }
+              ],
+              "sequence": [
+                {
+                  "if": [
+                    "{{ state_attr('climate.floor_heating','temperature') != states('sensor.floor_heating_target_temperature') | float(none) }}"
+                  ],
+                  "then": [
+                    {
+                      "action": "climate.set_temperature",
+                      "target": {
+                        "entity_id": "climate.floor_heating"
+                      },
+                      "data": {
+                        "temperature": "{{ states('sensor.floor_heating_target_temperature') | float }}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "if": [
+                    {
+                      "condition": "not",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity_id": "climate.floor_heating",
+                          "state": "heat"
+                        }
+                      ]
+                    }
+                  ],
+                  "then": [
+                    {
+                      "action": "climate.set_hvac_mode",
+                      "target": {
+                        "entity_id": "climate.floor_heating"
+                      },
+                      "data": {
+                        "hvac_mode": "heat"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "default": [
+            {
+              "if": [
+                {
+                  "condition": "state",
+                  "entity_id": "switch.floorheating",
+                  "state": "on"
+                }
+              ],
+              "then": [
+                {
+                  "action": "switch.turn_off",
+                  "target": {
+                    "entity_id": "switch.floorheating"
+                  },
+                  "continue_on_error": true
+                }
+              ]
+            },
+            {
+              "if": [
+                {
+                  "condition": "not",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity_id": "climate.floor_heating",
+                      "state": "off"
+                    }
+                  ]
+                }
+              ],
+              "then": [
+                {
+                  "action": "climate.set_hvac_mode",
+                  "target": {
+                    "entity_id": "climate.floor_heating"
+                  },
+                  "data": {
+                    "hvac_mode": "off"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "mode": "restart"
+    },
+    {
+      "id": "floorheating_auto_off_without_ac_input",
+      "alias": "Floor Heating - Auto Disable Without AC Input",
+      "description": "Independent safety cutout: no Shore Power, disabled heating, invalid/stale temperatures, or thermostat off. Replaces unsafe 500 W AC-input inference. Turns physical relay off directly even during minimum heating time.",
+      "triggers": [
+        {
+          "trigger": "state",
+          "entity_id": [
+            "sensor.gx_device_ac_active_input_source",
+            "binary_sensor.shore_power_available",
+            "binary_sensor.floor_heating_temperature_safe",
+            "input_boolean.floor_heating_enabled",
+            "switch.floorheating",
+            "climate.floor_heating"
+          ]
+        },
+        {
+          "trigger": "time_pattern",
+          "minutes": "/1"
+        },
+        {
+          "trigger": "homeassistant",
+          "event": "start"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "state",
+          "entity_id": "switch.floorheating",
+          "state": "on"
+        },
+        {
+          "condition": "or",
+          "conditions": [
+            {
+              "condition": "not",
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity_id": "binary_sensor.floor_heating_permitted",
+                  "state": "on"
+                }
+              ]
+            },
+            {
+              "condition": "not",
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity_id": "sensor.gx_device_ac_active_input_source",
+                  "state": "shore_power"
+                }
+              ]
+            },
+            {
+              "condition": "state",
+              "entity_id": "climate.floor_heating",
+              "state": "off"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "action": "switch.turn_off",
+          "target": {
+            "entity_id": "switch.floorheating"
+          }
+        }
+      ],
+      "mode": "restart"
+    }
+  ],
+  "disabled_legacy_automation": "automation.floor_heating_disable_on_inactive_ac_input",
+  "dashboard": {
+    "url_path": "dashboard-jaskier",
+    "view_path": "climate",
+    "heating_cards": [
+      {
+        "type": "heading",
+        "heading": "Ogrzewanie podłogowe",
+        "heading_style": "title",
+        "icon": "mdi:heating-coil"
+      },
+      {
+        "type": "tile",
+        "entity": "input_boolean.floor_heating_enabled",
+        "name": "Ogrzewanie",
+        "grid_options": {
+          "columns": 12,
+          "rows": 1
+        },
+        "features": [
+          {
+            "type": "toggle"
+          }
+        ]
+      },
+      {
+        "type": "tile",
+        "entity": "input_boolean.cats_in_van",
+        "name": "Koty w samochodzie",
+        "grid_options": {
+          "columns": 12,
+          "rows": 1
+        },
+        "icon": "mdi:cat",
+        "features": [
+          {
+            "type": "toggle"
+          }
+        ]
+      },
+      {
+        "type": "conditional",
+        "conditions": [
+          {
+            "entity": "input_boolean.floor_heating_enabled",
+            "state": "on"
+          },
+          {
+            "entity": "input_boolean.cats_in_van",
+            "state": "on"
+          },
+          {
+            "entity": "binary_sensor.shore_power_available",
+            "state_not": "on"
+          }
+        ],
+        "card": {
+          "type": "markdown",
+          "content": "### Koty w samochodzie: ogrzewanie niedostępne\nBrak potwierdzonego Shore Power. Podłogówka pozostaje wyłączona."
+        },
+        "grid_options": {
+          "columns": "full",
+          "rows": "auto"
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "sensor.floor_heating_mode",
+        "name": "Aktualny tryb",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "sensor.floor_heating_target_temperature",
+        "name": "Cel",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "sensor.floor_heating_temperature",
+        "name": "Temp. średnia",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "binary_sensor.shore_power_available",
+        "name": "Shore Power",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "binary_sensor.floor_heating_occupied",
+        "name": "Obecność (45 min)",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "input_boolean.floor_heating_night_occupied",
+        "name": "Obecność nocna",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        },
+        "tap_action": {
+          "action": "none"
+        },
+        "hold_action": {
+          "action": "none"
+        }
+      },
+      {
+        "type": "entities",
+        "title": "Ustawienia ogrzewania",
+        "show_header_toggle": false,
+        "entities": [
+          {
+            "entity": "input_select.floor_heating_override",
+            "name": "Wybór trybu"
+          },
+          {
+            "entity": "input_number.floor_heating_night_temperature",
+            "name": "Noc"
+          },
+          {
+            "entity": "input_number.floor_heating_day_temperature",
+            "name": "Dzień"
+          },
+          {
+            "entity": "input_number.floor_heating_idle_temperature",
+            "name": "Pusty samochód"
+          }
+        ],
+        "grid_options": {
+          "columns": "full",
+          "rows": "auto"
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "climate.floor_heating",
+        "name": "Termostat",
+        "grid_options": {
+          "columns": 12,
+          "rows": 1
+        },
+        "state_content": [
+          "hvac_action",
+          "current_temperature"
+        ],
+        "tap_action": {
+          "action": "none"
+        },
+        "hold_action": {
+          "action": "none"
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "switch.floorheating",
+        "name": "Przekaźnik grzania",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        },
+        "tap_action": {
+          "action": "none"
+        },
+        "hold_action": {
+          "action": "none"
+        }
+      },
+      {
+        "type": "tile",
+        "entity": "binary_sensor.floor_heating_temperature_safe",
+        "name": "Temperatura wiarygodna",
+        "grid_options": {
+          "columns": 6,
+          "rows": 1
+        },
+        "tap_action": {
+          "action": "none"
+        },
+        "hold_action": {
+          "action": "more-info"
+        }
+      },
+      {
+        "type": "markdown",
+        "content": "**Obecność:** co najmniej 2 min ciągłej detekcji; krótkie impulsy są ignorowane.\n\n**Auto:** noc 22:00–08:00, dzień przy obecności, idle po 45 min bez obecności. Nocna obecność jest pamiętana do rana. **Koty w samochodzie** utrzymują komfort bez wykrytego ruchu. Ręczny tryb ma pierwszeństwo.\n\nWyłącz **Ogrzewanie**, aby zatrzymać automatykę. Bez Shore Power grzanie pozostaje wyłączone i wraca po podłączeniu, jeśli Ogrzewanie jest włączone.",
+        "grid_options": {
+          "columns": "full",
+          "rows": "auto"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "mode_scenarios": [
+      {
+        "name": "occupied day",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": true,
+        "night": false,
+        "night_occupied": false,
+        "expected": "Dzienny"
+      },
+      {
+        "name": "occupied night",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": true,
+        "night": true,
+        "night_occupied": false,
+        "expected": "Nocny"
+      },
+      {
+        "name": "sleep without motion",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": false,
+        "night": true,
+        "night_occupied": true,
+        "expected": "Nocny"
+      },
+      {
+        "name": "empty day",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": false,
+        "night": false,
+        "night_occupied": false,
+        "expected": "Idle"
+      },
+      {
+        "name": "empty night",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": false,
+        "night": true,
+        "night_occupied": false,
+        "expected": "Idle"
+      },
+      {
+        "name": "cats day",
+        "override_value": "Auto",
+        "cats": true,
+        "occupied": false,
+        "night": false,
+        "night_occupied": false,
+        "expected": "Dzienny"
+      },
+      {
+        "name": "cats night",
+        "override_value": "Auto",
+        "cats": true,
+        "occupied": false,
+        "night": true,
+        "night_occupied": false,
+        "expected": "Nocny"
+      },
+      {
+        "name": "manual idle",
+        "override_value": "Idle",
+        "cats": true,
+        "occupied": true,
+        "night": true,
+        "night_occupied": true,
+        "expected": "Idle"
+      },
+      {
+        "name": "manual day",
+        "override_value": "Dzienny",
+        "cats": false,
+        "occupied": false,
+        "night": true,
+        "night_occupied": false,
+        "expected": "Dzienny"
+      },
+      {
+        "name": "manual night",
+        "override_value": "Nocny",
+        "cats": false,
+        "occupied": false,
+        "night": false,
+        "night_occupied": false,
+        "expected": "Nocny"
+      },
+      {
+        "name": "morning ignores sleep latch",
+        "override_value": "Auto",
+        "cats": false,
+        "occupied": false,
+        "night": false,
+        "night_occupied": true,
+        "expected": "Idle"
+      }
+    ],
+    "shore_scenarios": [
+      {
+        "name": "shore connected",
+        "source": "shore_power",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": true
+      },
+      {
+        "name": "disconnected with stale voltage",
+        "source": "not_connected",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "unknown source",
+        "source": "unknown",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "generator",
+        "source": "generator",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "no voltage",
+        "source": "shore_power",
+        "v_value": 0,
+        "hz_value": 0,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "telemetry lost",
+        "source": "shore_power",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": false,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "AC ignored",
+        "source": "shore_power",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": true,
+        "age": 0,
+        "expected": false
+      },
+      {
+        "name": "old AC sample",
+        "source": "shore_power",
+        "v_value": 238,
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 600,
+        "expected": false
+      },
+      {
+        "name": "invalid voltage",
+        "source": "shore_power",
+        "v_value": "unavailable",
+        "hz_value": 50.1,
+        "connected": true,
+        "ignored": false,
+        "age": 0,
+        "expected": false
+      }
+    ],
+    "temperature_scenarios": [
+      {
+        "name": "two healthy sensors",
+        "a": "17.8",
+        "b": "15.4",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "16.6",
+        "expected": true
+      },
+      {
+        "name": "one missing sensor",
+        "a": "17.8",
+        "b": "unavailable",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "17.8",
+        "expected": true
+      },
+      {
+        "name": "both missing",
+        "a": "unavailable",
+        "b": "unknown",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "unknown",
+        "expected": false
+      },
+      {
+        "name": "hotter sensor reaches limit",
+        "a": "26",
+        "b": "15.4",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "20.7",
+        "expected": false
+      },
+      {
+        "name": "implausible low reading",
+        "a": "-80",
+        "b": "15.4",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "-32.3",
+        "expected": false
+      },
+      {
+        "name": "stable numeric sensor with old timestamp",
+        "a": "17.8",
+        "b": "15.4",
+        "ageA": 8000,
+        "ageB": 0,
+        "mean_value": "16.6",
+        "expected": true
+      },
+      {
+        "name": "invalid numeric text",
+        "a": "broken",
+        "b": "15.4",
+        "ageA": 0,
+        "ageB": 0,
+        "mean_value": "15.4",
+        "expected": false
+      }
+    ],
+    "all_passed": true,
+    "live_disable_and_protected_relay_test": {
+      "data": {
+        "success": true,
+        "count": 3,
+        "states": {
+          "climate.floor_heating": {
+            "entity_id": "climate.floor_heating",
+            "state": "off"
+          },
+          "switch.floorheating": {
+            "entity_id": "switch.floorheating",
+            "state": "off"
+          },
+          "binary_sensor.floor_heating_permitted": {
+            "entity_id": "binary_sensor.floor_heating_permitted",
+            "state": "off"
+          }
+        }
+      },
+      "metadata": {
+        "home_assistant_timezone": "Europe/Warsaw",
+        "timestamp_format": "ISO 8601 (Europe/Warsaw)",
+        "note": "Per-record timestamp fields (last_changed, last_updated, last_reported, when, last_triggered) have been converted to Europe/Warsaw local time. Query-window boundary fields (period, start_time, end_time) remain in UTC."
+      }
+    },
+    "configuration_check": "valid"
+  }
+}

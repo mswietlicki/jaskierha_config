@@ -1,0 +1,145 @@
+- name: rs485_3
+  type: rtuovertcp
+  host: 192.168.88.20
+  port: 502
+  delay: 1
+  timeout: 1
+
+  sensors:
+    # ===== EWD108-GN05 GNSS =====
+
+    - name: "EWD108 Position Valid"
+      unique_id: ewd108_position_valid
+      slave: 16
+      address: 200       # 0x00C8 / 40200
+      input_type: holding
+      data_type: uint16
+      scan_interval: 5
+
+    - name: "EWD108 Year"
+      unique_id: ewd108_year
+      slave: 16
+      address: 201       # 0x00C9 / 40201
+      input_type: holding
+      data_type: uint16
+      scan_interval: 30
+
+    - name: "EWD108 Month"
+      unique_id: ewd108_month
+      slave: 16
+      address: 202       # 0x00CA / 40202
+      input_type: holding
+      data_type: uint16
+      scan_interval: 30
+
+    - name: "EWD108 Day"
+      unique_id: ewd108_day
+      slave: 16
+      address: 203       # 0x00CB / 40203
+      input_type: holding
+      data_type: uint16
+      scan_interval: 30
+
+    - name: "EWD108 Hour UTC"
+      unique_id: ewd108_hour_utc
+      slave: 16
+      address: 204       # 0x00CC / 40204
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "EWD108 Minute UTC"
+      unique_id: ewd108_minute_utc
+      slave: 16
+      address: 205       # 0x00CD / 40205
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "EWD108 Second UTC"
+      unique_id: ewd108_second_utc
+      slave: 16
+      address: 206       # 0x00CE / 40206
+      input_type: holding
+      data_type: uint16
+      scan_interval: 10
+
+    - name: "EWD108 Longitude Direction Raw"
+      unique_id: ewd108_longitude_direction_raw
+      slave: 16
+      address: 207       # 0x00CF / 40207
+      input_type: holding
+      data_type: uint16
+      scan_interval: 5
+
+    - name: "EWD108 Longitude"
+      unique_id: ewd108_longitude
+      slave: 16
+      address: 208       # 0x00D0 / 40208, uses 2 registers
+      input_type: holding
+      data_type: float32
+      precision: 6
+      unit_of_measurement: "°"
+      scan_interval: 5
+
+    - name: "EWD108 Latitude Direction Raw"
+      unique_id: ewd108_latitude_direction_raw
+      slave: 16
+      address: 210       # 0x00D2 / 40210
+      input_type: holding
+      data_type: uint16
+      scan_interval: 5
+
+    - name: "EWD108 Latitude"
+      unique_id: ewd108_latitude
+      slave: 16
+      address: 211       # 0x00D3 / 40211, uses 2 registers
+      input_type: holding
+      data_type: float32
+      precision: 6
+      unit_of_measurement: "°"
+      scan_interval: 5
+
+    - name: "EWD108 Speed Over Ground"
+      unique_id: ewd108_speed_over_ground
+      slave: 16
+      address: 213       # 0x00D5 / 40213, uses 2 registers
+      input_type: holding
+      data_type: float32
+      precision: 2
+      unit_of_measurement: "kn"
+      scan_interval: 5
+
+    - name: "EWD108 Course Over Ground"
+      unique_id: ewd108_course_over_ground
+      slave: 16
+      address: 215       # 0x00D7 / 40215, uses 2 registers
+      input_type: holding
+      data_type: float32
+      precision: 2
+      unit_of_measurement: "°"
+      scan_interval: 5
+
+    - name: "EWD108 Antenna Setting"
+      unique_id: ewd108_antenna_setting
+      slave: 16
+      address: 217       # 0x00D9 / 40217
+      input_type: holding
+      data_type: uint16
+      scan_interval: 60
+
+    - name: "EWD108 Satellite System"
+      unique_id: ewd108_satellite_system
+      slave: 16
+      address: 218       # 0x00DA / 40218
+      input_type: holding
+      data_type: uint16
+      scan_interval: 60
+
+    - name: "EWD108 Update Frequency"
+      unique_id: ewd108_update_frequency
+      slave: 16
+      address: 219       # 0x00DB / 40219
+      input_type: holding
+      data_type: uint16
+      scan_interval: 60

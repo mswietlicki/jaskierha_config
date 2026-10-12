@@ -1,0 +1,1040 @@
+{
+  "automations": [
+    {
+      "success": true,
+      "action": "get",
+      "automation_id": "automation.floor_heating_auto_disable_without_ac_input",
+      "config": {
+        "id": "floorheating_auto_off_without_ac_input",
+        "alias": "Floor Heating - Auto Disable Without AC Input",
+        "description": "Turn off floor heating after 5 minutes unless the inverter reports an active AC input.",
+        "triggers": [
+          {
+            "trigger": "state",
+            "entity_id": [
+              "switch.floorheating"
+            ],
+            "to": "on",
+            "for": {
+              "minutes": 5
+            }
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "state",
+            "entity_id": "switch.floorheating",
+            "state": "on"
+          },
+          {
+            "condition": "numeric_state",
+            "entity_id": "sensor.inverter_input_power_l1",
+            "below": 500
+          }
+        ],
+        "actions": [
+          {
+            "action": "switch.turn_off",
+            "target": {
+              "entity_id": "switch.floorheating"
+            }
+          }
+        ],
+        "mode": "single"
+      },
+      "config_hash": "e085986e9c014ef5"
+    },
+    {
+      "success": true,
+      "action": "get",
+      "automation_id": "automation.floor_heating_disable_on_inactive_ac_input",
+      "config": {
+        "id": "floorheating_turn_off_when_ac_input_inactive",
+        "alias": "Floor Heating - Disable On Inactive AC Input",
+        "description": "Turn off floor heating when the inverter AC input becomes inactive.",
+        "triggers": [
+          {
+            "trigger": "state",
+            "entity_id": [
+              "sensor.inverter_active_ac_input"
+            ]
+          }
+        ],
+        "conditions": [
+          {
+            "condition": "state",
+            "entity_id": "switch.floorheating",
+            "state": "on"
+          },
+          {
+            "condition": "template",
+            "value_template": "{% set ac_input = trigger.to_state.state | lower | trim %} {% set inactive = ['0', 'off', 'none', 'disconnected', 'not available', 'unknown', 'unavailable', 'false', 'no input'] %} {{ ac_input in inactive or ac_input.startswith('no ') }}\n"
+          }
+        ],
+        "actions": [
+          {
+            "action": "switch.turn_off",
+            "target": {
+              "entity_id": "switch.floorheating"
+            }
+          }
+        ],
+        "mode": "single"
+      },
+      "config_hash": "7e4d3c3bc4b4ba7d"
+    }
+  ],
+  "dashboard": {
+    "success": true,
+    "action": "get",
+    "url_path": "dashboard-jaskier",
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Control",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.relay_0",
+                  "name": "Światło",
+                  "icon": "mdi:lightbulb",
+                  "features": [
+                    {
+                      "type": "toggle"
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.inverter_power",
+                  "icon": "mdi:current-ac",
+                  "features": [
+                    {
+                      "type": "toggle"
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.ir_rf_remote_maxxfan_off",
+                  "hide_state": false,
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "button.press",
+                    "target": {
+                      "entity_id": "button.ir_rf_remote_maxxfan_off"
+                    }
+                  },
+                  "features_position": "bottom",
+                  "name": "MaxxFan off",
+                  "state_content": "state",
+                  "hold_action": {
+                    "action": "more-info"
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.ir_rf_remote_maxxfan_in_low",
+                  "hide_state": false,
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "button.press",
+                    "target": {
+                      "entity_id": "button.ir_rf_remote_maxxfan_in_low"
+                    }
+                  },
+                  "features_position": "bottom",
+                  "name": "MaxxFan low",
+                  "state_content": "state",
+                  "hold_action": {
+                    "action": "more-info"
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.ir_rf_remote_gajowa_gate",
+                  "name": "Gajowa Gate",
+                  "hide_state": false,
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "button.press",
+                    "target": {
+                      "entity_id": "button.ir_rf_remote_gajowa_gate"
+                    }
+                  },
+                  "features_position": "bottom",
+                  "state_content": "state",
+                  "hold_action": {
+                    "action": "more-info"
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.relay_7",
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "features_position": "bottom",
+                  "name": "Air compressor"
+                },
+                {
+                  "type": "tile",
+                  "entity": "lock.jaskier_back_door_lock_door_lock",
+                  "features": [
+                    {
+                      "type": "lock-commands"
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.water_pump_relay"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.water_tank_liters",
+                  "show_entity_picture": false,
+                  "hide_state": false,
+                  "vertical": false,
+                  "features_position": "inline"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Energy",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.shunt_main_charge",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  },
+                  "name": "Battery Charge",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.shunt_main_power",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  },
+                  "name": "Main Power",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.gx_device_pv_power",
+                  "name": "Solar",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.orion_xs_input_battery_state_of_charge",
+                  "name": "Car AUX Battery",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.jaskier_wican_obd_pro_batt_voltage",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 6
+                    }
+                  ]
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+                  "name": "Engine",
+                  "color": "accent",
+                  "tap_action": {
+                    "action": "none"
+                  },
+                  "hold_action": {
+                    "action": "none"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Vehicle",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2",
+                  "name": "Speed",
+                  "max": 140,
+                  "needle": true,
+                  "severity": {
+                    "green": 50,
+                    "yellow": 80,
+                    "red": 100
+                  },
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.jaskier_wican_obd_pro_0c_enginerpm_2",
+                  "max": 5000,
+                  "severity": {
+                    "green": 1000,
+                    "yellow": 2500,
+                    "red": 4000
+                  },
+                  "needle": true,
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Weather",
+                  "heading_style": "title"
+                },
+                {
+                  "show_current": true,
+                  "show_forecast": true,
+                  "type": "weather-forecast",
+                  "entity": "weather.forecast_home",
+                  "forecast_type": "hourly"
+                },
+                {
+                  "show_current": false,
+                  "show_forecast": true,
+                  "type": "weather-forecast",
+                  "entity": "weather.forecast_home",
+                  "forecast_type": "daily",
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": "auto"
+                  },
+                  "forecast_slots": 5
+                }
+              ]
+            }
+          ],
+          "header": {},
+          "show_icon_and_title": false,
+          "background": {
+            "opacity": 33,
+            "alignment": "center",
+            "size": "cover",
+            "repeat": "no-repeat",
+            "attachment": "fixed"
+          },
+          "cards": [],
+          "max_columns": 4,
+          "dense_section_placement": false,
+          "title": "Main",
+          "icon": "mdi:van-utility",
+          "path": "main"
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Zadania",
+          "path": "zadania",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "icon": "mdi:basket",
+                  "heading_style": "title",
+                  "heading": "Zakupy"
+                },
+                {
+                  "display_order": "none",
+                  "type": "todo-list",
+                  "entity": "todo.shopping_list",
+                  "hide_completed": true
+                },
+                {
+                  "display_order": "none",
+                  "type": "todo-list",
+                  "entity": "todo.zakupy_jaskier",
+                  "title": "Zakupy do Jaskra",
+                  "hide_completed": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "heading": "Jaskier Prace",
+                  "icon": "mdi:tools"
+                },
+                {
+                  "display_order": "none",
+                  "type": "todo-list",
+                  "entity": "todo.jaskier"
+                }
+              ]
+            }
+          ],
+          "show_icon_and_title": true,
+          "icon": "mdi:calendar-check",
+          "cards": []
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Energy",
+          "path": "energy",
+          "icon": "mdi:flash",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "icon": "mdi:battery",
+                  "heading": "Main Battery",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.gx_device_dc_battery_charge",
+                  "name": "Charge",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 24
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.gx_device_dc_battery_voltage",
+                  "name": "Voltage",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 24
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 2
+                  }
+                },
+                {
+                  "chart_type": "line",
+                  "period": "hour",
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.gx_device_dc_battery_charge"
+                  ],
+                  "stat_types": [
+                    "mean",
+                    "min",
+                    "max"
+                  ]
+                },
+                {
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.gx_device_dc_battery_power"
+                  ]
+                },
+                {
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.gx_device_dc_battery_discharge_energy"
+                  ],
+                  "days_to_show": 30,
+                  "period": "day",
+                  "chart_type": "bar-stack",
+                  "stat_types": [
+                    "change"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "icon": "mdi:solar-panel",
+                  "heading": "Solar",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.gx_device_pv_power",
+                  "name": "PV Power",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 24
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.smartsolar_charger_mppt_100_30_id_278_pv_bus_voltage",
+                  "name": "Roof Voltage",
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.smartsolar_charger_mppt_100_30_id_279_pv_bus_voltage",
+                  "name": "Aux Voltage",
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.gx_device_pv_power",
+                    "sensor.smartsolar_charger_mppt_100_30_id_278_pv_yield_power",
+                    "sensor.smartsolar_charger_mppt_100_30_id_279_pv_yield_power"
+                  ]
+                },
+                {
+                  "chart_type": "bar-stack",
+                  "period": "day",
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.smartsolar_charger_mppt_100_30_id_278_yield_today",
+                    "sensor.smartsolar_charger_mppt_100_30_id_279_yield_today"
+                  ],
+                  "stat_types": [
+                    "state"
+                  ],
+                  "days_to_show": 30
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Inverter",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "select.inverter_mode",
+                  "name": "Mode",
+                  "features": [
+                    {
+                      "type": "select-options"
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.inverter_dc_power",
+                  "name": "DC Power",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 6
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.inverter_energy_from_inverter_to_ac_out",
+                  "name": "Energy to AC Out",
+                  "grid_options": {
+                    "columns": 4,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.inverter_dc_power"
+                  ]
+                },
+                {
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.inverter_output_power_l1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Car Batteries",
+                  "heading_style": "title",
+                  "icon": "fa6-solid:car-battery"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.front_controller_starter_battery_charger",
+                  "name": {
+                    "type": "entity"
+                  },
+                  "vertical": false,
+                  "features": [
+                    {
+                      "type": "toggle"
+                    }
+                  ],
+                  "features_position": "bottom"
+                }
+              ]
+            }
+          ],
+          "show_icon_and_title": true,
+          "cards": []
+        },
+        {
+          "type": "sections",
+          "max_columns": 3,
+          "title": "Trips",
+          "path": "trips",
+          "icon": "mdi:map-marker-path",
+          "show_icon_and_title": true,
+          "cards": [],
+          "sections": [
+            {
+              "type": "grid",
+              "column_span": 2,
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Current location and recent route",
+                  "heading_style": "title",
+                  "icon": "mdi:map-marker-path"
+                },
+                {
+                  "type": "map",
+                  "entities": [
+                    {
+                      "entity": "device_tracker.jaskier_gps",
+                      "name": "Jaskier",
+                      "label_mode": "icon"
+                    }
+                  ],
+                  "show_all": false,
+                  "auto_fit": true,
+                  "hours_to_show": 24,
+                  "theme_mode": "auto",
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 8
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Current trip",
+                  "heading_style": "title",
+                  "icon": "mdi:van-utility"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+                  "name": "Engine",
+                  "color": "accent",
+                  "grid_options": {
+                    "columns": 6
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.jaskier_current_trip_distance",
+                  "name": "Distance",
+                  "icon": "mdi:map-marker-distance",
+                  "grid_options": {
+                    "columns": 6
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2",
+                  "name": "OBD speed",
+                  "grid_options": {
+                    "columns": 6
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.ewd108_speed_over_ground_kmh",
+                  "name": "GPS speed",
+                  "grid_options": {
+                    "columns": 6
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.jaskier_gps",
+                  "name": "Jaskier GPS",
+                  "icon": "mdi:crosshairs-gps",
+                  "grid_options": {
+                    "columns": "full"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Completed trips",
+                  "heading_style": "title",
+                  "icon": "mdi:timeline-check"
+                },
+                {
+                  "type": "calendar",
+                  "title": "Trip list",
+                  "initial_view": "listWeek",
+                  "entities": [
+                    "calendar.jaskier_trips"
+                  ],
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 6
+                  }
+                },
+                {
+                  "type": "statistics-graph",
+                  "title": "Completed trip pulses",
+                  "entities": [
+                    {
+                      "entity": "sensor.jaskier_completed_trip_distance",
+                      "name": "Completed trip"
+                    }
+                  ],
+                  "days_to_show": 7,
+                  "period": "hour",
+                  "chart_type": "bar",
+                  "stat_types": [
+                    "max"
+                  ],
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 5
+                  }
+                }
+              ],
+              "column_span": 2
+            }
+          ]
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Climate",
+          "path": "climate",
+          "icon": "mdi:home-thermometer",
+          "show_icon_and_title": true,
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Air Temperature",
+                  "heading_style": "title",
+                  "icon": "mdi:thermometer"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.sensor_internal_temperature",
+                  "name": "Internal Air",
+                  "icon": "mdi:thermometer",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 24
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.presents_sensor_zg_204zx_temperature",
+                  "name": "Living Area",
+                  "icon": "mdi:home-thermometer-outline",
+                  "features": [
+                    {
+                      "type": "trend-graph",
+                      "hours_to_show": 24
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "history-graph",
+                  "title": "Cabin Temperature — 24 hours",
+                  "hours_to_show": 24,
+                  "entities": [
+                    {
+                      "entity": "sensor.sensor_internal_temperature",
+                      "name": "Internal Air",
+                      "color": "#6498ff"
+                    },
+                    {
+                      "entity": "sensor.presents_sensor_zg_204zx_temperature",
+                      "name": "Living Area",
+                      "color": "#ff9800"
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 5
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Heating",
+                  "heading_style": "title",
+                  "icon": "mdi:radiator"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.floorheating",
+                  "name": "Floor Heating",
+                  "icon": "mdi:radiator",
+                  "features": [
+                    {
+                      "type": "toggle"
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": 1
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Ventilation",
+                  "heading_style": "title",
+                  "icon": "mdi:fan"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.ir_rf_remote_maxxfan_off",
+                  "name": "MaxxFan off",
+                  "icon": "mdi:fan-off",
+                  "hide_state": false,
+                  "state_content": "state",
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "button.press",
+                    "target": {
+                      "entity_id": "button.ir_rf_remote_maxxfan_off"
+                    }
+                  },
+                  "hold_action": {
+                    "action": "more-info"
+                  },
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.ir_rf_remote_maxxfan_in_low",
+                  "name": "MaxxFan low",
+                  "icon": "mdi:fan-speed-1",
+                  "hide_state": false,
+                  "state_content": "state",
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "button.press",
+                    "target": {
+                      "entity_id": "button.ir_rf_remote_maxxfan_in_low"
+                    }
+                  },
+                  "hold_action": {
+                    "action": "more-info"
+                  },
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Future Climate Equipment",
+                  "heading_style": "title",
+                  "icon": "mdi:progress-wrench"
+                },
+                {
+                  "type": "markdown",
+                  "content": "## 🔥 Diesel Heater\nReserved for future heater status and controls.",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "markdown",
+                  "content": "## ❄️ Air Conditioner\nReserved for future cooling status and controls.",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "cards": []
+        }
+      ]
+    },
+    "config_hash": "57c1653bac4454c1",
+    "config_size_bytes": 12996,
+    "render_paths": [
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 0,
+        "view_path": "main",
+        "title": "Main",
+        "render_path": "dashboard-jaskier/main",
+        "stable": true
+      },
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 1,
+        "view_path": "zadania",
+        "title": "Zadania",
+        "render_path": "dashboard-jaskier/zadania",
+        "stable": true
+      },
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 2,
+        "view_path": "energy",
+        "title": "Energy",
+        "render_path": "dashboard-jaskier/energy",
+        "stable": true
+      },
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 3,
+        "view_path": "trips",
+        "title": "Trips",
+        "render_path": "dashboard-jaskier/trips",
+        "stable": true
+      },
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 4,
+        "view_path": "climate",
+        "title": "Climate",
+        "render_path": "dashboard-jaskier/climate",
+        "stable": true
+      }
+    ],
+    "hint": "Large config (12,996 bytes). Pass view_path=... to fetch a single view, or use ha_config_get_dashboard(entity_id=...) to find card positions, then ha_config_set_dashboard(python_transform=...) instead of full config replacement."
+  }
+}

@@ -1,0 +1,352 @@
+{
+  "before": {
+    "success": true,
+    "action": "get",
+    "url_path": "dashboard-jaskier",
+    "view_path": "trips",
+    "view_index": 4,
+    "view_count": 5,
+    "view": {
+      "type": "sections",
+      "max_columns": 3,
+      "title": "Trips",
+      "path": "trips",
+      "icon": "mdi:map-marker-path",
+      "show_icon_and_title": true,
+      "cards": [],
+      "sections": [
+        {
+          "type": "grid",
+          "column_span": 2,
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current location and recent route",
+              "heading_style": "title",
+              "icon": "mdi:map-marker-path"
+            },
+            {
+              "type": "map",
+              "entities": [
+                {
+                  "entity": "device_tracker.ewd108_slave_16_gps",
+                  "name": "Jaskier",
+                  "label_mode": "icon"
+                }
+              ],
+              "show_all": false,
+              "auto_fit": true,
+              "hours_to_show": 24,
+              "theme_mode": "auto",
+              "grid_options": {
+                "columns": "full",
+                "rows": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current trip",
+              "heading_style": "title",
+              "icon": "mdi:van-utility"
+            },
+            {
+              "type": "tile",
+              "entity": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+              "name": "Engine",
+              "color": "accent",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_current_trip_distance",
+              "name": "Distance",
+              "icon": "mdi:map-marker-distance",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2",
+              "name": "OBD speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ewd108_slave_16_speed",
+              "name": "GPS speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "device_tracker.ewd108_slave_16_gps",
+              "name": "Jaskier GPS",
+              "icon": "mdi:crosshairs-gps",
+              "grid_options": {
+                "columns": "full"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Completed trips",
+              "heading_style": "title",
+              "icon": "mdi:timeline-check"
+            },
+            {
+              "type": "calendar",
+              "title": "Trip list",
+              "initial_view": "listWeek",
+              "entities": [
+                "calendar.jaskier_trips"
+              ],
+              "grid_options": {
+                "columns": "full",
+                "rows": 6
+              }
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Completed trip pulses",
+              "entities": [
+                {
+                  "entity": "sensor.jaskier_completed_trip_distance",
+                  "name": "Completed trip"
+                }
+              ],
+              "days_to_show": 7,
+              "period": "hour",
+              "chart_type": "bar",
+              "stat_types": [
+                "max"
+              ],
+              "grid_options": {
+                "columns": "full",
+                "rows": 5
+              }
+            }
+          ],
+          "column_span": 2
+        }
+      ]
+    },
+    "config_hash": "94fe4d2779b43b4d",
+    "config_size_bytes": 16475,
+    "view_size_bytes": 2015,
+    "hint": "Scoped to view 'trips' — config['views'][4] of 5 views. config_hash and config_size_bytes cover the FULL dashboard config, so ha_config_set_dashboard(python_transform=...) edits addressed via config['views'][4] validate as-is. Do NOT pass this view object as the config parameter — that would replace the entire dashboard. Omit view_path for the full config.",
+    "render_paths": [
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 4,
+        "view_path": "trips",
+        "title": "Trips",
+        "render_path": "dashboard-jaskier/trips",
+        "stable": true
+      }
+    ]
+  },
+  "after": {
+    "success": true,
+    "action": "get",
+    "url_path": "dashboard-jaskier",
+    "view_path": "trips",
+    "view_index": 4,
+    "view_count": 5,
+    "view": {
+      "type": "sections",
+      "max_columns": 3,
+      "title": "Trips",
+      "path": "trips",
+      "icon": "mdi:map-marker-path",
+      "show_icon_and_title": true,
+      "cards": [],
+      "sections": [
+        {
+          "type": "grid",
+          "column_span": 2,
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current location and recent route",
+              "heading_style": "title",
+              "icon": "mdi:map-marker-path"
+            },
+            {
+              "type": "map",
+              "entities": [
+                {
+                  "entity": "device_tracker.ewd108_slave_16_gps",
+                  "name": "Jaskier",
+                  "label_mode": "icon"
+                }
+              ],
+              "show_all": false,
+              "auto_fit": true,
+              "hours_to_show": 24,
+              "theme_mode": "auto",
+              "grid_options": {
+                "columns": "full",
+                "rows": 8
+              }
+            },
+            {
+              "type": "custom:jaskier-current-place",
+              "entity": "device_tracker.ewd108_slave_16_gps",
+              "title": "Current location",
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "weather-forecast",
+              "entity": "weather.forecast_home",
+              "name": "Forecast for this location",
+              "forecast_type": "daily",
+              "show_current": true,
+              "show_forecast": true,
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current trip",
+              "heading_style": "title",
+              "icon": "mdi:van-utility"
+            },
+            {
+              "type": "tile",
+              "entity": "binary_sensor.jaskier_wican_obd_pro_engine_on",
+              "name": "Engine",
+              "color": "accent",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_current_trip_distance",
+              "name": "Distance",
+              "icon": "mdi:map-marker-distance",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.jaskier_wican_obd_pro_0d_vehiclespeed_2",
+              "name": "OBD speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "sensor.ewd108_slave_16_speed",
+              "name": "GPS speed",
+              "grid_options": {
+                "columns": 6
+              }
+            },
+            {
+              "type": "tile",
+              "entity": "device_tracker.ewd108_slave_16_gps",
+              "name": "Jaskier GPS",
+              "icon": "mdi:crosshairs-gps",
+              "grid_options": {
+                "columns": "full"
+              }
+            }
+          ]
+        },
+        {
+          "type": "grid",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Completed trips",
+              "heading_style": "title",
+              "icon": "mdi:timeline-check"
+            },
+            {
+              "type": "custom:jaskier-weekly-trips",
+              "entity": "calendar.jaskier_trips",
+              "title": "Trips · last 7 days",
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto"
+              }
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Completed trip pulses",
+              "entities": [
+                {
+                  "entity": "sensor.jaskier_completed_trip_distance",
+                  "name": "Completed trip"
+                }
+              ],
+              "days_to_show": 7,
+              "period": "hour",
+              "chart_type": "bar",
+              "stat_types": [
+                "max"
+              ],
+              "grid_options": {
+                "columns": "full",
+                "rows": 5
+              }
+            }
+          ],
+          "column_span": 2
+        }
+      ]
+    },
+    "config_hash": "df42196acf8af16c",
+    "config_size_bytes": 16881,
+    "view_size_bytes": 2421,
+    "hint": "Scoped to view 'trips' — config['views'][4] of 5 views. config_hash and config_size_bytes cover the FULL dashboard config, so ha_config_set_dashboard(python_transform=...) edits addressed via config['views'][4] validate as-is. Do NOT pass this view object as the config parameter — that would replace the entire dashboard. Omit view_path for the full config.",
+    "render_paths": [
+      {
+        "url_path": "dashboard-jaskier",
+        "view_index": 4,
+        "view_path": "trips",
+        "title": "Trips",
+        "render_path": "dashboard-jaskier/trips",
+        "stable": true
+      }
+    ]
+  },
+  "resource": {
+    "success": true,
+    "action": "created",
+    "resource_id": "0eb76480dae747f7861f60e426f2b962",
+    "resource_type": "module",
+    "size": 12824,
+    "note": "Clear browser cache or hard refresh to load changes"
+  },
+  "validated_weekly_trip_count": 9,
+  "validated_weekly_distance_km": 112
+}

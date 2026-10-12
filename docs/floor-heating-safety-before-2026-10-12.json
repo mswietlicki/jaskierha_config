@@ -1,0 +1,20 @@
+{
+  "entry_id": "01M4PFFRAVWT17X4CHCNXK0XAA",
+  "domain": "template",
+  "title": "Floor Heating Temperature Safe",
+  "state": "loaded",
+  "source": "user",
+  "supports_options": true,
+  "supports_unload": true,
+  "supports_reconfigure": false,
+  "disabled_by": null,
+  "log_level": "WARNING",
+  "log_level_raw": 30,
+  "options": {
+    "template_type": "binary_sensor",
+    "name": "Floor Heating Temperature Safe",
+    "state": "{% set ns = namespace(count=0, ok=true) %}\n{% for e in ['sensor.sensor_internal_temperature', 'sensor.presents_sensor_zg_204zx_temperature'] %}\n  {% set s = states[e] %}\n  {% if s is not none and is_number(s.state) %}\n    {% set ns.count = ns.count + 1 %}\n    {% if not (-30 <= s.state | float < 26) or (now() - s.last_reported).total_seconds() > 7200 %}\n      {% set ns.ok = false %}\n    {% endif %}\n  {% elif s is not none and s.state not in ['unknown', 'unavailable'] %}\n    {% set ns.ok = false %}\n  {% endif %}\n{% endfor %}\n{{ ns.count > 0 and ns.ok and is_number(states('sensor.floor_heating_temperature')) }}"
+  },
+  "pref_disable_new_entities": false,
+  "pref_disable_polling": false
+}

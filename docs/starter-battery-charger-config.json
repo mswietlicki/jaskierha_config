@@ -1,0 +1,135 @@
+{
+  "enabled": true,
+  "config": {
+    "id": "1787384467184",
+    "alias": "Starter Battery Charging",
+    "description": "Automatically charge the starter battery only while an external AC input is active (shore power/grid/generator). Require 30 seconds of stable source before starting; disconnect/unknown/unavailable cuts off immediately. Reconcile after HA start, relay reconnects/manual changes and every minute. Replaces the previous voltage-trigger logic.",
+    "category": "01M12C1HWHV684C8KXA2P8FA88",
+    "triggers": [
+      {
+        "trigger": "state",
+        "entity_id": [
+          "sensor.gx_device_ac_active_input_source",
+          "binary_sensor.inverter_connected",
+          "sensor.inverter_state_of_ignore_ac_in_1",
+          "sensor.inverter_input_voltage_l1",
+          "switch.front_controller_starter_battery_charger"
+        ],
+        "to": null
+      },
+      {
+        "trigger": "state",
+        "entity_id": "sensor.gx_device_ac_active_input_source",
+        "to": [
+          "shore_power",
+          "grid",
+          "generator"
+        ],
+        "for": {
+          "seconds": 30
+        }
+      },
+      {
+        "trigger": "homeassistant",
+        "event": "start"
+      },
+      {
+        "trigger": "time_pattern",
+        "minutes": "/1"
+      }
+    ],
+    "conditions": [],
+    "actions": [
+      {
+        "choose": [
+          {
+            "conditions": [
+              {
+                "condition": "or",
+                "conditions": [
+                  {
+                    "condition": "state",
+                    "entity_id": "sensor.gx_device_ac_active_input_source",
+                    "state": "shore_power",
+                    "for": {
+                      "seconds": 30
+                    }
+                  },
+                  {
+                    "condition": "state",
+                    "entity_id": "sensor.gx_device_ac_active_input_source",
+                    "state": "grid",
+                    "for": {
+                      "seconds": 30
+                    }
+                  },
+                  {
+                    "condition": "state",
+                    "entity_id": "sensor.gx_device_ac_active_input_source",
+                    "state": "generator",
+                    "for": {
+                      "seconds": 30
+                    }
+                  }
+                ]
+              },
+              {
+                "condition": "state",
+                "entity_id": "binary_sensor.inverter_connected",
+                "state": "on"
+              },
+              {
+                "condition": "state",
+                "entity_id": "sensor.inverter_state_of_ignore_ac_in_1",
+                "state": "off"
+              },
+              {
+                "condition": "numeric_state",
+                "entity_id": "sensor.inverter_input_voltage_l1",
+                "above": 190,
+                "below": 255
+              }
+            ],
+            "sequence": [
+              {
+                "condition": "not",
+                "conditions": [
+                  {
+                    "condition": "state",
+                    "entity_id": "switch.front_controller_starter_battery_charger",
+                    "state": "on"
+                  }
+                ]
+              },
+              {
+                "action": "switch.turn_on",
+                "target": {
+                  "entity_id": "switch.front_controller_starter_battery_charger"
+                }
+              }
+            ]
+          }
+        ],
+        "default": [
+          {
+            "condition": "not",
+            "conditions": [
+              {
+                "condition": "state",
+                "entity_id": "switch.front_controller_starter_battery_charger",
+                "state": "off"
+              }
+            ]
+          },
+          {
+            "action": "switch.turn_off",
+            "target": {
+              "entity_id": "switch.front_controller_starter_battery_charger"
+            }
+          }
+        ]
+      }
+    ],
+    "mode": "restart"
+  }
+}

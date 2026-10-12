@@ -1,0 +1,65 @@
+[
+  {
+    "start": "2026-10-06T16:11:21+02:00",
+    "end": "2026-10-06T16:30:07+02:00",
+    "summary": "Jaskier trip — 12.0 km",
+    "description": "Distance: 12.0 km\nStart: 51.267891,22.507864\nEnd: 51.302067,22.583363\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.267891,22.507864&destination=51.302067,22.583363",
+    "location": "51.302067,22.583363"
+  },
+  {
+    "start": "2026-10-06T16:30:22+02:00",
+    "end": "2026-10-06T16:36:52+02:00",
+    "summary": "Jaskier trip — 4.0 km",
+    "description": "Distance: 4.0 km\nStart: 51.300724,22.585808\nEnd: 51.338142,22.618233\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.300724,22.585808&destination=51.338142,22.618233",
+    "location": "51.338142,22.618233"
+  },
+  {
+    "start": "2026-10-06T16:37:07+02:00",
+    "end": "2026-10-06T16:40:06+02:00",
+    "summary": "Jaskier trip — 2.0 km",
+    "description": "Distance: 2.0 km\nStart: 51.339237,22.618505\nEnd: Unknown\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.339237,22.618505&destination=Unknown",
+    "location": "Unknown"
+  },
+  {
+    "start": "2026-10-06T16:40:36+02:00",
+    "end": "2026-10-06T16:47:21+02:00",
+    "summary": "Jaskier trip — 2.0 km",
+    "description": "Distance: 2.0 km\nStart: 51.335228,22.623226\nEnd: 51.322628,22.632908\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.335228,22.623226&destination=51.322628,22.632908",
+    "location": "51.322628,22.632908"
+  },
+  {
+    "start": "2026-10-06T17:19:21+02:00",
+    "end": "2026-10-06T17:34:21+02:00",
+    "summary": "Jaskier trip — 4.0 km",
+    "description": "Distance: 4.0 km\nStart: 51.32267,22.633064\nEnd: 51.307747,22.621027\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.32267,22.633064&destination=51.307747,22.621027",
+    "location": "51.307747,22.621027"
+  },
+  {
+    "start": "2026-10-06T17:38:52+02:00",
+    "end": "2026-10-06T17:50:21+02:00",
+    "summary": "Jaskier trip — 4.0 km",
+    "description": "Distance: 4.0 km\nStart: 51.307774,22.620974\nEnd: 51.282909,22.610741\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.307774,22.620974&destination=51.282909,22.610741",
+    "location": "51.282909,22.610741"
+  },
+  {
+    "start": "2026-10-06T18:15:07+02:00",
+    "end": "2026-10-06T18:19:51+02:00",
+    "summary": "Jaskier trip — 2.0 km",
+    "description": "Distance: 2.0 km\nStart: 51.266304,22.515278\nEnd: 51.267784,22.507025\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.266304,22.515278&destination=51.267784,22.507025",
+    "location": "51.267784,22.507025"
+  },
+  {
+    "start": "2026-10-08T09:54:59+02:00",
+    "end": "2026-10-08T10:17:30+02:00",
+    "summary": "Jaskier trip — 26.0 km",
+    "description": "Distance: 26.0 km\nStart: 51.265091,22.504713\nEnd: 51.390179,22.248421\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.265091,22.504713&destination=51.390179,22.248421",
+    "location": "51.390179,22.248421"
+  },
+  {
+    "start": "2026-10-08T11:11:30+02:00",
+    "end": "2026-10-08T11:51:30+02:00",
+    "summary": "Jaskier trip — 56.0 km",
+    "description": "Distance: 56.0 km\nStart: 51.390205,22.248295\nEnd: 51.761684,21.757233\nRoute: https://www.google.com/maps/dir/?api=1&origin=51.390205,22.248295&destination=51.761684,21.757233",
+    "location": "51.761684,21.757233"
+  }
+]

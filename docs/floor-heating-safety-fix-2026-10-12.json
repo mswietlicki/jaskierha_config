@@ -1,0 +1,62 @@
+{
+  "applied": true,
+  "entry_id": "01M4PFFRAVWT17X4CHCNXK0XAA",
+  "new_state": "{% set ns = namespace(count=0, ok=true) %}\n{% for e in ['sensor.sensor_internal_temperature', 'sensor.presents_sensor_zg_204zx_temperature'] %}\n  {% set s = states[e] %}\n  {% if s is not none and is_number(s.state) %}\n    {% set ns.count = ns.count + 1 %}\n    {% if not (-30 <= s.state | float < 26) %}\n      {% set ns.ok = false %}\n    {% endif %}\n  {% elif s is not none and s.state not in ['unknown', 'unavailable'] %}\n    {% set ns.ok = false %}\n  {% endif %}\n{% endfor %}\n{{ ns.count > 0 and ns.ok and is_number(states('sensor.floor_heating_temperature')) }}",
+  "tests": [
+    {
+      "name": "Noc 05:49: stabilna temperatura, stare znaczniki",
+      "expected": true,
+      "actual": true,
+      "pass": true
+    },
+    {
+      "name": "Pierwszy czujnik niedostępny",
+      "expected": true,
+      "actual": true,
+      "pass": true
+    },
+    {
+      "name": "Drugi czujnik niedostępny",
+      "expected": true,
+      "actual": true,
+      "pass": true
+    },
+    {
+      "name": "Oba czujniki niedostępne",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    },
+    {
+      "name": "Przegrzanie pierwszego czujnika",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    },
+    {
+      "name": "Przegrzanie drugiego czujnika",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    },
+    {
+      "name": "Nieprawidłowy odczyt",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    },
+    {
+      "name": "Nieprawidłowo niska temperatura",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    },
+    {
+      "name": "Brak agregatu",
+      "expected": false,
+      "actual": false,
+      "pass": true
+    }
+  ],
+  "overnight_failure_reproduced": true
+}

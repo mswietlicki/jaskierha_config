@@ -1,0 +1,50 @@
+{
+  "status": "active",
+  "integration_entry_id": "01M4QMG28TR9M2Y9E8QER88ZQC",
+  "native_tracker": "device_tracker.ewd108_slave_16_gps",
+  "compatibility_tracker": "device_tracker.jaskier_gps",
+  "configuration": {
+    "connection_type": "rtuovertcp",
+    "host": "192.168.88.20",
+    "port": 502,
+    "slave_id": 16,
+    "scan_interval": 30,
+    "timeout": 3,
+    "delay": 1,
+    "set_ha_location": false
+  },
+  "retry_policy": {
+    "attempts": 3,
+    "waits_seconds": [
+      1,
+      2
+    ]
+  },
+  "legacy_hub_removed": true,
+  "legacy_gps_templates_removed": true,
+  "map": "dashboard-jaskier/trips",
+  "validation": {
+    "gps_records": 9,
+    "invalid_coordinates": 0,
+    "unavailable_records": 0,
+    "gnss_intervals_seconds": [
+      30,
+      30,
+      30,
+      30,
+      30,
+      30,
+      30
+    ],
+    "position_states": [
+      "accepted"
+    ]
+  },
+  "rollback_backup": "docs/rs485_3-before-gps-migration.yaml",
+  "consumer_backup": "docs/gps-migration-before.json",
+  "notes": [
+    "Native GPS uses one complete RMC frame for both coordinates.",
+    "Map history starts with the new tracker; old recorder history is retained.",
+    "Screenshot verification was unavailable because the dashboard screenshot feature is disabled."
+  ]
+}

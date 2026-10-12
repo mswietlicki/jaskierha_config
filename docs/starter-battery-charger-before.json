@@ -1,0 +1,81 @@
+{
+  "success": true,
+  "action": "get",
+  "automation_id": "automation.starter_battery_charging",
+  "config": {
+    "id": "1787384467184",
+    "alias": "Starter Battery Charging",
+    "description": "",
+    "triggers": [
+      {
+        "trigger": "numeric_state",
+        "entity_id": [
+          "sensor.jaskier_wican_obd_pro_batt_voltage"
+        ],
+        "for": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 10
+        },
+        "below": 12,
+        "id": "low"
+      },
+      {
+        "trigger": "numeric_state",
+        "entity_id": [
+          "sensor.jaskier_wican_obd_pro_batt_voltage"
+        ],
+        "for": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 10
+        },
+        "above": 13,
+        "id": "high"
+      }
+    ],
+    "conditions": [
+      {
+        "condition": "state",
+        "entity_id": "sensor.jaskier_shunt_main_low_state_of_charge",
+        "state": [
+          "no_alarm"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "condition": "trigger",
+        "id": [
+          "low"
+        ]
+      },
+      {
+        "action": "switch.turn_on",
+        "metadata": {},
+        "target": {
+          "entity_id": "switch.front_controller_starter_battery_charger"
+        },
+        "data": {}
+      },
+      {
+        "condition": "trigger",
+        "id": [
+          "high"
+        ]
+      },
+      {
+        "action": "switch.turn_off",
+        "metadata": {},
+        "target": {
+          "entity_id": "switch.front_controller_starter_battery_charger"
+        },
+        "data": {}
+      }
+    ],
+    "mode": "single",
+    "category": "01M12C1HWHV684C8KXA2P8FA88"
+  },
+  "config_hash": "92026efa6b01f6d4",
+  "previous_enabled": false
+}
