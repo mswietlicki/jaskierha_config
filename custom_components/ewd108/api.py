@@ -2,26 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
+import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from math import atan2, cos, radians, sin, sqrt
-from typing import Any
+from datetime import UTC, datetime
+from math import atan2, cos, isfinite, radians, sin, sqrt
+from typing import TYPE_CHECKING, Any
 
-from pymodbus.client import AsyncModbusSerialClient, AsyncModbusTcpClient
-from pymodbus.exceptions import ModbusException
+from modbus_connection import ModbusError
 
-try:
-    from pymodbus import FramerType
-except Exception:  # pragma: no cover - depends on pymodbus version
-    FramerType = None
+if TYPE_CHECKING:
+    from modbus_connection import ModbusUnit
 
-from .const import (
-    CONNECTION_TYPE_RTU_OVER_TCP,
-    CONNECTION_TYPE_SERIAL,
-    CONNECTION_TYPE_TCP,
-    RMC_REGISTER_ADDRESS,
-    RMC_REGISTER_COUNT,
-)
+from .const import LOGGER, RMC_REGISTER_ADDRESS, RMC_REGISTER_COUNT
 
 
 class Ewd108ClientError(Exception):
@@ -56,70 +49,37 @@ class Ewd108RmcData:
 class Ewd108ModbusClient:
     """Read and parse EWD108 RMC data over Modbus RTU."""
 
-    def __init__(
-        self,
-        connection_type: str,
-        host: str | None,
-        port: int | str,
-        serial_port: str | None,
-        baudrate: int,
-        bytesize: int,
-        parity: str,
-        stopbits: int,
-        slave_id: int,
-        delay: float,
-        timeout: int,
-    ) -> None:
-        """Initialize Modbus client settings."""
-        self._connection_type = connection_type
-        self._host = host
-        self._port = port
-        self._serial_port = serial_port
-        self._baudrate = baudrate
-        self._bytesize = bytesize
-        self._parity = parity
-        self._stopbits = stopbits
-        self._slave_id = slave_id
-        self._delay = delay
-        self._timeout = timeout
-        self._client: AsyncModbusSerialClient | AsyncModbusTcpClient | None = None
-
-    async def async_close(self) -> None:
-        """Close the Modbus connection if opened."""
-        if self._client is not None:
-            self._client.close()
-            self._client = None
+    def __init__(self, unit: ModbusUnit) -> None:
+        """Receive a unit; Home Assistant owns its shared connection."""
+        self._unit = unit
+        self._read_lock = asyncio.Lock()
 
     async def async_get_data(self) -> dict[str, Any]:
-        """Read and parse one RMC frame from the device."""
+        """Poll once, retrying read/parse failures after one and two seconds."""
+        async with self._read_lock:
+            for attempt in range(3):
+                try:
+                    return await self._async_read_frame()
+                except Ewd108ClientError:
+                    if attempt == 2:
+                        raise
+                    LOGGER.debug("Retrying EWD108 frame after attempt %s", attempt + 1)
+                    await asyncio.sleep(attempt + 1)
+        msg = "Unreachable retry loop"
+        raise AssertionError(msg)
+
+    async def _async_read_frame(self) -> dict[str, Any]:
+        """Read a complete GPS frame in one serialized Modbus transaction."""
         try:
-            client = await self._async_ensure_client()
-        except Ewd108ClientError:
-            raise
-        except Exception as err:  # pylint: disable=broad-except
-            raise Ewd108ClientCommunicationError(
-                f"Unable to open Modbus connection: {err}"
-            ) from err
-
-        try:
-            response = await client.read_holding_registers(
-                address=RMC_REGISTER_ADDRESS,
-                count=RMC_REGISTER_COUNT,
-                slave=self._slave_id,
+            registers = await self._unit.read_holding_registers(
+                RMC_REGISTER_ADDRESS, RMC_REGISTER_COUNT
             )
-        except ModbusException as err:
-            raise Ewd108ClientCommunicationError(f"Modbus read failed: {err}") from err
-        except Exception as err:  # pylint: disable=broad-except
-            raise Ewd108ClientCommunicationError(f"Unexpected Modbus error: {err}") from err
-
-        if response.isError():
-            raise Ewd108ClientCommunicationError(
-                f"Modbus exception response: {response}"
-            )
-
-        registers = getattr(response, "registers", None)
-        if not registers:
-            raise Ewd108ClientCommunicationError("No registers returned by device")
+        except ModbusError as err:
+            msg = f"Modbus read failed: {err}"
+            raise Ewd108ClientCommunicationError(msg) from err
+        if len(registers) != RMC_REGISTER_COUNT:
+            msg = "Incomplete RMC register response"
+            raise Ewd108ClientCommunicationError(msg)
 
         raw_payload = _decode_registers_to_ascii(registers)
         sentence = _extract_rmc_sentence(raw_payload)
@@ -139,61 +99,6 @@ class Ewd108ModbusClient:
             "position_text": parsed.position_text,
         }
 
-    async def _async_ensure_client(self) -> AsyncModbusSerialClient | AsyncModbusTcpClient:
-        """Create and connect the Modbus client on first use."""
-        if self._client is None:
-            self._client = self._create_client()
-
-        if not getattr(self._client, "connected", False):
-            is_connected = await self._client.connect()
-            if not is_connected:
-                raise Ewd108ClientCommunicationError(
-                    "Unable to connect to Modbus endpoint"
-                )
-
-        return self._client
-
-    def _create_client(self) -> AsyncModbusSerialClient | AsyncModbusTcpClient:
-        """Create a pymodbus client for selected transport."""
-        if self._connection_type == CONNECTION_TYPE_SERIAL:
-            if not self._serial_port:
-                raise Ewd108ClientCommunicationError(
-                    "Serial port is required for serial transport"
-                )
-            return AsyncModbusSerialClient(
-                port=self._serial_port,
-                baudrate=self._baudrate,
-                bytesize=self._bytesize,
-                parity=self._parity,
-                stopbits=self._stopbits,
-                timeout=self._timeout,
-            )
-
-        if not self._host:
-            raise Ewd108ClientCommunicationError("Host is required for TCP transport")
-
-        client_kwargs: dict[str, Any] = {
-            "host": self._host,
-            "port": int(self._port),
-            "timeout": self._timeout,
-        }
-
-        if self._connection_type == CONNECTION_TYPE_RTU_OVER_TCP:
-            if FramerType is not None:
-                client_kwargs["framer"] = FramerType.RTU
-            else:
-                client_kwargs["framer"] = "rtu"
-
-        if self._delay > 0:
-            client_kwargs["reconnect_delay"] = self._delay
-
-        if self._connection_type in {CONNECTION_TYPE_TCP, CONNECTION_TYPE_RTU_OVER_TCP}:
-            return AsyncModbusTcpClient(**client_kwargs)
-
-        raise Ewd108ClientCommunicationError(
-            f"Unsupported connection type: {self._connection_type}"
-        )
-
 
 def _decode_registers_to_ascii(registers: list[int]) -> str:
     """Decode Modbus register values to ASCII payload."""
@@ -202,13 +107,18 @@ def _decode_registers_to_ascii(registers: list[int]) -> str:
         payload.append((register >> 8) & 0xFF)
         payload.append(register & 0xFF)
 
-    return payload.decode("ascii", errors="ignore").replace("\x00", "")
+    try:
+        return payload.decode("ascii").rstrip("\x00")
+    except UnicodeDecodeError as err:
+        msg = "Non-ASCII RMC payload"
+        raise Ewd108ClientParseError(msg) from err
 
 
 def _extract_rmc_sentence(payload: str) -> str:
     """Extract one RMC sentence from the Modbus payload."""
     if "$" not in payload:
-        raise Ewd108ClientParseError("No NMEA sentence start marker in payload")
+        msg = "No NMEA sentence start marker in payload"
+        raise Ewd108ClientParseError(msg)
 
     for segment in payload.split("$"):
         if "RMC" not in segment:
@@ -224,7 +134,8 @@ def _extract_rmc_sentence(payload: str) -> str:
         if len(trimmed) >= 10:
             return trimmed
 
-    raise Ewd108ClientParseError("No valid RMC sentence found in payload")
+    msg = "No valid RMC sentence found in payload"
+    raise Ewd108ClientParseError(msg)
 
 
 def _parse_rmc_sentence(sentence: str) -> Ewd108RmcData:
@@ -233,15 +144,37 @@ def _parse_rmc_sentence(sentence: str) -> Ewd108RmcData:
 
     body = sentence[1 : sentence.index("*")]
     fields = body.split(",")
-    if len(fields) < 10 or not fields[0].endswith("RMC"):
-        raise Ewd108ClientParseError("Malformed RMC sentence")
+    if len(fields) < 10 or not re.fullmatch(
+        r"[A-Za-z]{2}RMC", fields[0], re.IGNORECASE
+    ):
+        msg = "Malformed RMC sentence"
+        raise Ewd108ClientParseError(msg)
 
-    fix_valid = fields[2].upper() == "A"
+    status = fields[2].upper()
+    if status not in {"A", "V"}:
+        msg = "Unknown RMC fix status"
+        raise Ewd108ClientParseError(msg)
+    fix_valid = status == "A"
+    # RMC mode N explicitly means no fix, even if the status says A.
+    if len(fields) > 12 and fields[12].upper() == "N":
+        fix_valid = False
     latitude = _parse_nmea_coordinate(fields[3], fields[4], is_latitude=True)
     longitude = _parse_nmea_coordinate(fields[5], fields[6], is_latitude=False)
     speed_knots = _parse_float(fields[7])
     course = _parse_float(fields[8])
     timestamp_utc = _parse_timestamp(fields[9], fields[1])
+
+    if fix_valid and (latitude is None or longitude is None or timestamp_utc is None):
+        msg = "Valid RMC fix has malformed position or timestamp"
+        raise Ewd108ClientParseError(msg)
+    if not fix_valid:
+        latitude = longitude = speed_knots = course = None
+    if speed_knots is not None and speed_knots < 0:
+        msg = "Negative RMC speed"
+        raise Ewd108ClientParseError(msg)
+    if course is not None and not 0 <= course <= 360:
+        msg = "Invalid RMC course"
+        raise Ewd108ClientParseError(msg)
 
     speed_kmh = speed_knots * 1.852 if speed_knots is not None else None
     speed_m_s = speed_knots * 0.514444 if speed_knots is not None else None
@@ -275,35 +208,41 @@ def _parse_rmc_sentence(sentence: str) -> Ewd108RmcData:
 def _verify_nmea_checksum(sentence: str) -> None:
     """Validate the NMEA XOR checksum."""
     if not sentence.startswith("$") or "*" not in sentence:
-        raise Ewd108ClientParseError("Sentence does not contain a checksum")
+        msg = "Sentence does not contain a checksum"
+        raise Ewd108ClientParseError(msg)
 
     body = sentence[1 : sentence.index("*")]
     checksum_text = sentence[sentence.index("*") + 1 :].strip().upper()
     if len(checksum_text) < 2:
-        raise Ewd108ClientParseError("Checksum is missing")
+        msg = "Checksum is missing"
+        raise Ewd108ClientParseError(msg)
 
     try:
         expected = int(checksum_text[:2], 16)
     except ValueError as err:
-        raise Ewd108ClientParseError("Checksum contains non-hex characters") from err
+        msg = "Checksum contains non-hex characters"
+        raise Ewd108ClientParseError(msg) from err
 
     calculated = 0
     for char in body:
         calculated ^= ord(char)
 
     if calculated != expected:
-        raise Ewd108ClientParseError(
-            f"Checksum mismatch: expected {expected:02X}, calculated {calculated:02X}"
-        )
+        msg = f"Checksum mismatch: expected {expected:02X}, calculated {calculated:02X}"
+        raise Ewd108ClientParseError(msg)
 
 
 def _parse_timestamp(date_raw: str, time_raw: str) -> datetime | None:
     """Parse RMC date/time into UTC datetime."""
-    if len(date_raw) != 6 or len(time_raw) < 6:
+    if len(date_raw) != 6 or not date_raw.isdigit() or len(time_raw) < 6:
         return None
 
     time_main, _, fractional = time_raw.partition(".")
-    if len(time_main) < 6:
+    if (
+        len(time_main) != 6
+        or not time_main.isdigit()
+        or (fractional and not fractional.isdigit())
+    ):
         return None
 
     try:
@@ -325,7 +264,7 @@ def _parse_timestamp(date_raw: str, time_raw: str) -> datetime | None:
             minute,
             second,
             microsecond,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
     except ValueError:
         return None
@@ -348,7 +287,7 @@ def _parse_nmea_coordinate(
         return None
 
     degree_digits = 2 if is_latitude else 3
-    if len(value) < degree_digits + 2:
+    if not re.fullmatch(r"[0-9]{" + str(degree_digits + 2) + r"}(?:\.[0-9]+)?", value):
         return None
 
     try:
@@ -357,6 +296,15 @@ def _parse_nmea_coordinate(
     except ValueError:
         return None
 
+    limit = 90 if is_latitude else 180
+    if (
+        not isfinite(degrees)
+        or not isfinite(minutes)
+        or not 0 <= minutes < 60
+        or not 0 <= degrees <= limit
+        or (degrees == limit and minutes != 0)
+    ):
+        return None
     decimal = degrees + (minutes / 60.0)
     if direction in {"S", "W"}:
         decimal *= -1.0
@@ -369,7 +317,8 @@ def _parse_float(raw: str) -> float | None:
     if raw == "":
         return None
     try:
-        return float(raw)
+        value = float(raw)
+        return value if isfinite(value) else None
     except ValueError:
         return None
 
@@ -437,5 +386,6 @@ def distance_meters(
         sin(delta_lat / 2) ** 2
         + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lon / 2) ** 2
     )
+    value = min(1.0, max(0.0, value))
     great_circle = 2 * atan2(sqrt(value), sqrt(1 - value))
     return earth_radius_m * great_circle

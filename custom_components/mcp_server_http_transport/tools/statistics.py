@@ -1,7 +1,6 @@
 """Long-term statistics tools."""
 
 import asyncio
-import json
 import logging
 from datetime import datetime as dt
 from typing import Any
@@ -12,13 +11,17 @@ from homeassistant.util import dt as dt_util
 from . import (
     ANNOTATION_DESTRUCTIVE,
     ANNOTATION_READ_ONLY,
-    _HAJSONEncoder,
+    dumps,
     register_tool,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 _VALID_PERIODS = {"5minute", "hour", "day", "week", "month"}
+
+# Row keys asked of recorder.get_statistics. The service requires the list
+# explicitly; get_statistics shapes the rows down to these plus start and end.
+_STATISTIC_TYPES = ["mean", "min", "max", "sum", "state"]
 _VALID_STATISTIC_TYPES = {"mean", "sum"}
 
 # clear_statistics posts a job to the recorder's queue and does not block; we wait
@@ -63,9 +66,6 @@ _CLEAR_STATISTICS_TIMEOUT = 10
 )
 async def get_statistics(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[str, Any]:
     """Fetch long-term statistics for an entity."""
-    from homeassistant.components.recorder import get_instance
-    from homeassistant.components.recorder.statistics import statistics_during_period
-
     entity_id = arguments["entity_id"]
     start_time = dt.fromisoformat(arguments["start_time"])
     end_time_str = arguments.get("end_time")
@@ -86,18 +86,25 @@ async def get_statistics(hass: HomeAssistant, arguments: dict[str, Any]) -> dict
         }
 
     try:
-        stats = await get_instance(hass).async_add_executor_job(
-            statistics_during_period,
-            hass,
-            start_time,
-            end_time,
-            {entity_id},
-            period,
-            None,
-            {"mean", "min", "max", "sum", "state"},
+        # recorder.get_statistics is the supported way in. It is declared
+        # SupportsResponse.ONLY and wraps its payload in a "statistics" key,
+        # under which rows are keyed by statistic ID. start and end arrive as
+        # ISO strings where statistics_during_period returned epoch floats.
+        stats = await hass.services.async_call(
+            "recorder",
+            "get_statistics",
+            {
+                "start_time": start_time,
+                "end_time": end_time,
+                "statistic_ids": [entity_id],
+                "period": period,
+                "types": _STATISTIC_TYPES,
+            },
+            blocking=True,
+            return_response=True,
         )
 
-        entity_stats = stats.get(entity_id, [])
+        entity_stats = (stats or {}).get("statistics", {}).get(entity_id, [])
         result = []
         for stat in entity_stats:
             entry = {}
@@ -106,9 +113,7 @@ async def get_statistics(hass: HomeAssistant, arguments: dict[str, Any]) -> dict
                     entry[key] = stat[key]
             result.append(entry)
 
-        return {
-            "content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]
-        }
+        return {"content": [{"type": "text", "text": dumps(result)}]}
     except Exception as e:
         _LOGGER.error("Error getting statistics: %s", e)
         return {"content": [{"type": "text", "text": f"Error getting statistics: {str(e)}"}]}
@@ -167,11 +172,7 @@ async def list_statistic_ids(hass: HomeAssistant, arguments: dict[str, Any]) -> 
         metadata = await get_instance(hass).async_add_executor_job(
             recorder_list_statistic_ids, hass, id_set, statistic_type
         )
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(metadata, indent=2, cls=_HAJSONEncoder)}
-            ]
-        }
+        return {"content": [{"type": "text", "text": dumps(metadata)}]}
     except Exception as e:
         _LOGGER.error("Error listing statistic IDs: %s", e)
         return {"content": [{"type": "text", "text": f"Error listing statistic IDs: {str(e)}"}]}
@@ -203,9 +204,7 @@ async def validate_statistics(hass: HomeAssistant, arguments: dict[str, Any]) ->
             statistic_id: [issue.as_dict() for issue in issue_list]
             for statistic_id, issue_list in issues.items()
         }
-        return {
-            "content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]
-        }
+        return {"content": [{"type": "text", "text": dumps(result)}]}
     except Exception as e:
         _LOGGER.error("Error validating statistics: %s", e)
         return {"content": [{"type": "text", "text": f"Error validating statistics: {str(e)}"}]}

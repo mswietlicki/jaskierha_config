@@ -5,8 +5,11 @@
     "@mswietlicki"
   ],
   "config_flow": true,
+  "dependencies": [
+    "modbus"
+  ],
   "documentation": "https://github.com/mswietlicki/HA_EWD108",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/mswietlicki/HA_EWD108/issues",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

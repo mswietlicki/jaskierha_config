@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import (
-    Ewd108ClientCommunicationError,
     Ewd108ClientError,
-    Ewd108ClientParseError,
     distance_meters,
 )
 from .const import CONF_LOCATION_THRESHOLD_METERS, CONF_SET_HA_LOCATION
+from .validation import PositionValidator
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -29,6 +30,7 @@ class Ewd108DataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, **kwargs: Any) -> None:
         """Initialize coordinator and sync state."""
         super().__init__(hass=hass, **kwargs)
+        self._position_validator = PositionValidator()
         self._last_location_sync: tuple[float, float] | None = None
         if hass.config.latitude is not None and hass.config.longitude is not None:
             self._last_location_sync = (hass.config.latitude, hass.config.longitude)
@@ -37,14 +39,14 @@ class Ewd108DataUpdateCoordinator(DataUpdateCoordinator):
         """Update data via library."""
         try:
             data = await self.config_entry.runtime_data.client.async_get_data()
-            await self._async_maybe_update_location(data)
-            return data
-        except Ewd108ClientCommunicationError as exception:
-            raise UpdateFailed(exception) from exception
-        except Ewd108ClientParseError as exception:
-            raise UpdateFailed(exception) from exception
         except Ewd108ClientError as exception:
             raise UpdateFailed(exception) from exception
+        data = self._position_validator.validate(data, datetime.now(UTC))
+        try:
+            await self._async_maybe_update_location(data)
+        except HomeAssistantError:
+            self.logger.exception("Unable to update Home Assistant location")
+        return data
 
     async def _async_maybe_update_location(self, data: dict[str, Any]) -> None:
         """Update HA location when enabled and movement exceeds threshold."""
@@ -83,6 +85,6 @@ class Ewd108DataUpdateCoordinator(DataUpdateCoordinator):
                 "latitude": latitude,
                 "longitude": longitude,
             },
-            blocking=False,
+            blocking=True,
         )
         self._last_location_sync = (latitude, longitude)

@@ -25,7 +25,7 @@ DOMAIN = "ha_mcp_tools"
 # in CI. The
 # capability negotiation — not this version — gates each WS command (see
 # ``websocket_api.CAPABILITIES``).
-COMPONENT_VERSION = "1.3.3"
+COMPONENT_VERSION = "2.2.1"
 
 # Config-entry discriminator (``entry.data[CONF_ENTRY_TYPE]``). A missing value
 # means "tools" so the pre-existing services entry keeps working across the
@@ -39,7 +39,12 @@ ENTRY_TYPE_SERVER = "server"
 # carrying the legacy default (a user-customized title is left alone).
 TOOLS_ENTRY_TITLE = "HA-MCP File & YAML Tools"
 TOOLS_ENTRY_LEGACY_TITLE = "HA MCP Tools"
-MIN_EMBEDDED_HOME_ASSISTANT_VERSION = "2026.6.0"
+# Kept level with the HACS floor in hacs.json: from component 2.1.3 the manifest
+# declares voluptuous-openapi, which Core releases before 2026.7 pin to an older
+# version so the requirement cannot resolve there, and
+# that requirement gates the whole integration before any entry's config flow
+# runs, so a lower runtime floor here would promise what the load cannot keep.
+MIN_EMBEDDED_HOME_ASSISTANT_VERSION = "2026.8.0"
 
 # Allowed directories for file operations (relative to config dir).
 # "blueprints" is read-only BY DEFAULT — in ALLOWED_READ_DIRS but not
@@ -48,9 +53,10 @@ MIN_EMBEDDED_HOME_ASSISTANT_VERSION = "2026.6.0"
 # allowlist, not an absolute guarantee: an admin who adds "blueprints" as a
 # custom extra directory (issue #1567, see _current_extra_dirs) grants it
 # read+write, since extra_dirs are honored on the write path too. Blueprint
-# writes should instead go through ha_import_blueprint (which invokes the
-# blueprint/save WS command internally). Prefer ha_get_blueprint for the parsed
-# body; raw read is the escape hatch for the exact on-disk text.
+# writes should instead go through ha_manage_blueprints(action="import") (which
+# invokes the blueprint/save WS command internally). Prefer
+# ha_manage_blueprints(action="get") for the parsed body; raw read is the escape
+# hatch for the exact on-disk text.
 ALLOWED_READ_DIRS = ["www", "themes", "custom_templates", "dashboards", "blueprints"]
 ALLOWED_WRITE_DIRS = ["www", "themes", "custom_templates", "dashboards"]
 
@@ -68,11 +74,25 @@ ALLOWED_WRITE_DIRS = ["www", "themes", "custom_templates", "dashboards"]
 # leak secrets and hand out the key to this component's own auth gate.
 DENY_PATH_SEGMENTS = frozenset({".storage"})
 
+# Basenames the floor denies wherever they appear. Despite the historical
+# name, this set is enforced on every read, write and delete, and the file
+# lister drops an entry carrying one of these names from its results, so a
+# name here is neither openable nor enumerable through the component.
+#
 # secrets.yaml is reachable ONLY as the canonical config-root file, where the
 # read handler masks its values. Any OTHER secrets.yaml surfaced via a custom
 # dir would be returned UNMASKED (masking keys off the literal root path), so
 # the floor blocks the basename everywhere except that one canonical location.
-DENY_READ_BASENAMES = frozenset({"secrets.yaml"})
+#
+# approval_pin.json holds the digest of the PIN that authorises an approve or
+# deny arriving on the event bus (issue #2502). It lives in ha-mcp's own data
+# directory, which on an embedded install sits under the configuration
+# directory, and an extra file path covering that directory grants read AND
+# write: a tool could copy the digest to attack it offline, or simply replace
+# it with the digest of a PIN of its own and decide its own approvals. Denying
+# the basename leaves the rest of the data directory reachable, which is what
+# the rest of it is for.
+DENY_READ_BASENAMES = frozenset({"secrets.yaml", "approval_pin.json"})
 
 # HAOS sibling-volume mounts (issue #1586). These live OUTSIDE the config dir,
 # so the config-relative custom-directory allowlist (issue #1567) cannot reach
@@ -422,6 +442,10 @@ DATA_SECRET_PATH = "secret_path"
 DATA_OAUTH_CLIENT_ID = "oauth_client_id"
 DATA_OAUTH_CLIENT_SECRET = "oauth_client_secret"
 DATA_OAUTH_SIGNING_KEY = "oauth_signing_key"
+# Hex-encoded per-entry HMAC key signing stateless DCR client_ids (RFC 7591
+# compat endpoint). Generated at setup when absent, so entries created before
+# 2.0.0 gain one on their first reload after upgrade.
+DATA_DCR_SIGNING_KEY = "dcr_signing_key"
 DATA_SERVER_USER_ID = "server_user_id"
 DATA_REFRESH_TOKEN_ID = "refresh_token_id"
 DATA_ACCESS_TOKEN = "access_token"
@@ -467,10 +491,11 @@ DATA_LLM_API_UNSUB = "llm_api_unsub"
 WEBHOOK_AUTH_NONE = "none"  # secret webhook URL is the shared secret (default)
 WEBHOOK_AUTH_HA = "ha_auth"  # HA-native bearer (HA core is the OAuth AS)
 # Self-hosted OAuth 2.1 authorization server with a static client_id/secret,
-# ported from the webhook-proxy add-on's "legacy" mode. Needed because HA
-# core's /auth/authorize does not yet fetch Client ID Metadata Documents for
-# cross-origin redirect_uris (home-assistant/core#176282), which is what
-# Google Gemini Spark's custom connected apps require.
+# ported from the webhook-proxy add-on's "legacy" mode. Originally needed
+# because HA core's /auth/authorize did not fetch Client ID Metadata Documents
+# for cross-origin redirect_uris before 2026.9 (home-assistant/core#176282,
+# fixed by #176286), which Google Gemini Spark's custom connected apps require;
+# kept as the pasted-credential fallback for clients that want one.
 WEBHOOK_AUTH_LEGACY = "legacy"
 
 # Default bind host + port. 9584 (not the add-on's 9583) so this in-process

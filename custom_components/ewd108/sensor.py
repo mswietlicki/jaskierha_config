@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -17,6 +17,8 @@ from homeassistant.helpers.entity import EntityCategory
 from .entity import Ewd108Entity
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -32,6 +34,12 @@ class Ewd108SensorEntityDescription(SensorEntityDescription):
 
 
 ENTITY_DESCRIPTIONS: tuple[Ewd108SensorEntityDescription, ...] = (
+    Ewd108SensorEntityDescription(
+        key="position_status",
+        name="Position status",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data.get("rejection_reason") or "accepted",
+    ),
     Ewd108SensorEntityDescription(
         key="latitude",
         name="Latitude",

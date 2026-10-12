@@ -10,25 +10,21 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
+from homeassistant.components.modbus import async_get_unit
+from homeassistant.components.modbus.const import DATA_MODBUS_HUBS
+from homeassistant.config import async_hass_config_yaml
 from homeassistant.const import (
-    CONF_HOST,
-    CONF_PORT,
     CONF_SCAN_INTERVAL,
     CONF_TIMEOUT,
     Platform,
 )
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.loader import async_get_loaded_integration
 
 from .api import Ewd108ModbusClient
 from .const import (
-    CONF_BAUDRATE,
-    CONF_BYTESIZE,
-    CONF_CONNECTION_TYPE,
     CONF_DELAY,
-    CONF_PARITY,
-    CONF_SERIAL_PORT,
     CONF_SLAVE_ID,
-    CONF_STOPBITS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TIMEOUT,
     DOMAIN,
@@ -36,6 +32,12 @@ from .const import (
 )
 from .coordinator import Ewd108DataUpdateCoordinator
 from .data import Ewd108Data
+from .transport import (
+    LegacyHubConflictError,
+    check_legacy_hubs,
+    check_running_legacy_hubs,
+    connection_params,
+)
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -45,6 +47,7 @@ if TYPE_CHECKING:
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
+    Platform.DEVICE_TRACKER,
 ]
 
 
@@ -54,28 +57,29 @@ async def async_setup_entry(
     entry: Ewd108ConfigEntry,
 ) -> bool:
     """Set up this integration using UI."""
+    yaml_config = await async_hass_config_yaml(hass)
+    try:
+        check_legacy_hubs(entry.data, yaml_config.get("modbus", []))
+        check_running_legacy_hubs(entry.data, hass.data.get(DATA_MODBUS_HUBS, {}))
+    except LegacyHubConflictError as err:
+        raise ConfigEntryError(str(err)) from err
+    unit = async_get_unit(
+        hass, entry, connection_params(entry.data), entry.data[CONF_SLAVE_ID]
+    )
+    unit.require_timeout(entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
+    entry.async_on_unload(lambda: unit.require_timeout(None))
+    unit.set_message_spacing(float(entry.data.get(CONF_DELAY, 0.0)))
     coordinator = Ewd108DataUpdateCoordinator(
         hass=hass,
         logger=LOGGER,
         name=DOMAIN,
+        config_entry=entry,
         update_interval=timedelta(
             seconds=entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         ),
     )
     entry.runtime_data = Ewd108Data(
-        client=Ewd108ModbusClient(
-            connection_type=entry.data[CONF_CONNECTION_TYPE],
-            host=entry.data.get(CONF_HOST),
-            port=entry.data.get(CONF_PORT, 0),
-            serial_port=entry.data.get(CONF_SERIAL_PORT),
-            baudrate=entry.data[CONF_BAUDRATE],
-            bytesize=entry.data[CONF_BYTESIZE],
-            parity=entry.data[CONF_PARITY],
-            stopbits=entry.data[CONF_STOPBITS],
-            slave_id=entry.data[CONF_SLAVE_ID],
-            delay=float(entry.data.get(CONF_DELAY, 0.0)),
-            timeout=entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
-        ),
+        client=Ewd108ModbusClient(unit),
         integration=async_get_loaded_integration(hass, entry.domain),
         coordinator=coordinator,
     )
@@ -94,10 +98,7 @@ async def async_unload_entry(
     entry: Ewd108ConfigEntry,
 ) -> bool:
     """Handle removal of an entry."""
-    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unloaded:
-        await entry.runtime_data.client.async_close()
-    return unloaded
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def async_reload_entry(

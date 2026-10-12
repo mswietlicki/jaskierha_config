@@ -1,11 +1,11 @@
 """Automation-related prompts."""
 
-import json
 import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 
+from ..json_utils import dumps
 from . import register_prompt
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,10 +28,15 @@ async def automation_review(hass: HomeAssistant, arguments: dict[str, Any]) -> d
     """Generate an automation review prompt."""
     from ..config_manager import read_list_entry
 
-    automation_id = arguments.get("automation_id", "")
+    automation_id = arguments["automation_id"]
     try:
         config = await read_list_entry(hass, "automations.yaml", automation_id)
-        config_text = json.dumps(config, indent=2)
+        config_text = dumps(config)
+    except ValueError:
+        # An ID the client made up is its input, not a server fault, and clients
+        # that enumerate prompts at connect time send one for every prompt.
+        _LOGGER.debug("Automation '%s' not found in automations.yaml", automation_id)
+        config_text = f"Automation with id '{automation_id}' not found in automations.yaml"
     except Exception:
         _LOGGER.exception("Error reading automation config for '%s'", automation_id)
         config_text = f"Automation with id '{automation_id}' not found in automations.yaml"

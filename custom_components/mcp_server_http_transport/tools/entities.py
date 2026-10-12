@@ -1,10 +1,9 @@
 """Entity, area, device, and service tools."""
 
-import json
 import logging
 from typing import Any
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, SupportsResponse
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -14,7 +13,7 @@ from homeassistant.helpers.service import async_get_all_descriptions
 from . import (
     ANNOTATION_DESTRUCTIVE,
     ANNOTATION_READ_ONLY,
-    _HAJSONEncoder,
+    dumps,
     register_tool,
 )
 
@@ -79,7 +78,7 @@ async def get_state(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[str,
         "last_updated": state.last_updated.isoformat(),
     }
 
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(result)}]}
 
 
 @register_tool(
@@ -110,7 +109,7 @@ async def get_state(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[str,
     annotations=ANNOTATION_DESTRUCTIVE,
 )
 async def call_service(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[str, Any]:
-    """Call a Home Assistant service."""
+    """Call a Home Assistant service, returning its response data when it has any."""
     domain = arguments["domain"]
     service = arguments["service"]
     entity_id = arguments.get("entity_id")
@@ -121,7 +120,46 @@ async def call_service(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[s
         service_data["entity_id"] = entity_id
 
     try:
-        await hass.services.async_call(domain, service, service_data, blocking=True)
+        # A service declared SupportsResponse.ONLY cannot be called at all
+        # without asking for its response: Home Assistant refuses the call
+        # rather than dropping the data. That covers whole categories of reads
+        # that only exist as services, among them calendar.get_events,
+        # todo.get_items, weather.get_forecasts and recorder.get_statistics.
+        # OPTIONAL services do run, but withhold what they were asked for.
+        #
+        # supports_response() subscripts the service registry directly and
+        # raises KeyError for anything the registry does not hold, despite a
+        # docstring promising NONE, so has_service() guards it. An unknown
+        # service then reaches async_call and is reported as the
+        # ServiceNotFound it is.
+        supports = (
+            hass.services.supports_response(domain, service)
+            if hass.services.has_service(domain, service)
+            else SupportsResponse.NONE
+        )
+        wants_response = supports is not SupportsResponse.NONE
+
+        response = await hass.services.async_call(
+            domain,
+            service,
+            service_data,
+            blocking=True,
+            return_response=wants_response,
+        )
+
+        # An OPTIONAL service with nothing to say answers with an empty dict
+        # rather than None, as every script without a response variable does.
+        # That carries no more than the success message.
+        if wants_response and response:
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": dumps(response),
+                    }
+                ]
+            }
+
         return {
             "content": [
                 {
@@ -209,9 +247,7 @@ async def list_entities(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[
             }
         entities.append(entity)
 
-    return {
-        "content": [{"type": "text", "text": json.dumps(entities, indent=2, cls=_HAJSONEncoder)}]
-    }
+    return {"content": [{"type": "text", "text": dumps(entities)}]}
 
 
 @register_tool(
@@ -235,7 +271,7 @@ async def list_areas(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[str
         for area in registry.async_list_areas()
     ]
 
-    return {"content": [{"type": "text", "text": json.dumps(areas, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(areas)}]}
 
 
 @register_tool(
@@ -272,9 +308,7 @@ async def list_devices(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[s
             }
         )
 
-    return {
-        "content": [{"type": "text", "text": json.dumps(devices, indent=2, cls=_HAJSONEncoder)}]
-    }
+    return {"content": [{"type": "text", "text": dumps(devices)}]}
 
 
 @register_tool(
@@ -360,7 +394,7 @@ async def get_device_details(hass: HomeAssistant, arguments: dict[str, Any]) -> 
             entities.append(entity)
         result["entities"] = entities
 
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(result)}]}
 
 
 @register_tool(
@@ -390,7 +424,7 @@ async def list_services(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[
     for domain, domain_services in services.items():
         result[domain] = list(domain_services.keys())
 
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(result)}]}
 
 
 @register_tool(
@@ -440,7 +474,7 @@ async def describe_service(hass: HomeAssistant, arguments: dict[str, Any]) -> di
     else:
         result = dict(domain_services)
 
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(result)}]}
 
 
 @register_tool(
@@ -547,9 +581,7 @@ async def search_entities(hass: HomeAssistant, arguments: dict[str, Any]) -> dic
         if len(entities) >= limit:
             break
 
-    return {
-        "content": [{"type": "text", "text": json.dumps(entities, indent=2, cls=_HAJSONEncoder)}]
-    }
+    return {"content": [{"type": "text", "text": dumps(entities)}]}
 
 
 @register_tool(
@@ -578,7 +610,7 @@ async def list_labels(hass: HomeAssistant, arguments: dict[str, Any]) -> dict[st
         for label in registry.async_list_labels()
     ]
 
-    return {"content": [{"type": "text", "text": json.dumps(labels, indent=2, cls=_HAJSONEncoder)}]}
+    return {"content": [{"type": "text", "text": dumps(labels)}]}
 
 
 @register_tool(
@@ -642,6 +674,4 @@ async def batch_get_state(hass: HomeAssistant, arguments: dict[str, Any]) -> dic
             }
         )
 
-    return {
-        "content": [{"type": "text", "text": json.dumps(results, indent=2, cls=_HAJSONEncoder)}]
-    }
+    return {"content": [{"type": "text", "text": dumps(results)}]}

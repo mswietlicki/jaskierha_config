@@ -1,6 +1,16 @@
 """Constants for the MCP Server integration."""
 
+import json
+from pathlib import Path
+from typing import Final
+
 DOMAIN = "mcp_server_http_transport"
+
+# The version a client sees in serverInfo is the one the manifest declares, so a
+# release bump in one place is a bump everywhere.
+VERSION: Final[str] = json.loads(
+    Path(__file__).with_name("manifest.json").read_text(encoding="utf-8")
+)["version"]
 
 # MCP Server configuration
 DEFAULT_PORT = 8080
@@ -13,3 +23,54 @@ CONF_NATIVE_AUTH = "native_auth_enabled"
 CONF_CONFIG_FILE_ACCESS = "config_file_access_enabled"
 CONF_CAMERA_IMAGE_ACCESS = "camera_image_access_enabled"
 CONF_IMAGE_FILE_ACCESS = "image_file_access_enabled"
+CONF_APPDAEMON_FILE_ACCESS = "appdaemon_file_access_enabled"
+CONF_APPDAEMON_APPS_ROOT = "appdaemon_apps_root"
+
+DEFAULT_APPDAEMON_APPS_ROOT = "/addon_configs/a0d7b954_appdaemon/apps"
+APPDAEMON_SHARED_ROOTS = ("/share/", "/media/")
+
+# The name a client sees in serverInfo. Clients that key the namespace they show
+# for a server's tools off it end up with one reachable server when two instances
+# report the same name, so the name is configurable per instance.
+CONF_SERVER_NAME = "server_name"
+DEFAULT_SERVER_NAME = "home-assistant-mcp-server"
+
+
+def validate_server_name(value: str) -> str:
+    """Validate the client-facing server name."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("Server name must be a non-empty string")
+    return value.strip()
+
+
+def validate_appdaemon_apps_root(value: str) -> str:
+    """Validate the bounded AppDaemon apps root option."""
+    if not isinstance(value, str) or not value.startswith("/"):
+        raise ValueError("AppDaemon apps root must be an absolute path")
+    normalized = value.rstrip("/") or "/"
+    if "//" in normalized or any(part in (".", "..") for part in normalized.split("/")[1:]):
+        raise ValueError("AppDaemon apps root contains an invalid path component")
+    if normalized == DEFAULT_APPDAEMON_APPS_ROOT:
+        return normalized
+    if not normalized.startswith(APPDAEMON_SHARED_ROOTS):
+        # /share and /media are the only writable folders Home Assistant Core
+        # shares with add-ons on Home Assistant OS; an add-on's private config
+        # folder (/addon_configs, /app_configs) is not mounted into Core at all.
+        raise ValueError(
+            "AppDaemon apps root must be under /share or /media, the folders Home "
+            "Assistant Core shares with add-ons; add-on private folders such as "
+            "/addon_configs and /app_configs are not visible to Core"
+        )
+    return normalized
+
+
+# HTTP paths. Home Assistant's built-in mcp_server integration serves its
+# streamable transport on /api/mcp from 2025.11 onwards, and aiohttp resolves a
+# duplicated path to whichever integration registered it first, silently. This
+# integration therefore also answers on a path nothing else claims.
+MCP_PATH = "/api/mcp"
+MCP_HTTP_PATH = "/api/mcp_http"
+RESOURCE_METADATA_PREFIX = "/.well-known/oauth-protected-resource"
+
+# Repairs issue raised while another integration also serves MCP_PATH.
+ISSUE_ENDPOINT_CONFLICT = "endpoint_conflict"
