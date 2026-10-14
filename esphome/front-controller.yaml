@@ -63,6 +63,105 @@ pca9554:
 
 
 # -------------------------------------------------------------------
+# RS485
+# Isolated port with automatic direction control (no DE/RE pin)
+# -------------------------------------------------------------------
+
+uart:
+  id: rs485_uart
+  tx_pin: GPIO17
+  rx_pin: GPIO18
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+modbus:
+  id: rs485_bus
+  uart_id: rs485_uart
+
+
+# -------------------------------------------------------------------
+# WitMotion WT901C485 inclinometer
+# Modbus RTU, factory address 0x50, 9600 8N1
+# Registers are signed 16-bit:
+#   angle = raw / 32768 * 180 deg (0x3D roll, 0x3E pitch, 0x3F yaw)
+#   temp  = raw / 100 degC        (0x40)
+# -------------------------------------------------------------------
+
+modbus_controller:
+  - id: inclinometer
+    modbus_id: rs485_bus
+    address: 0x50
+    update_interval: 1s
+
+sensor:
+  - platform: modbus_controller
+    modbus_controller_id: inclinometer
+    id: inclinometer_roll
+    name: "Inclinometer Roll"
+    address: 0x3D
+    register_type: holding
+    value_type: S_WORD
+    unit_of_measurement: "°"
+    icon: mdi:axis-x-rotate-clockwise
+    accuracy_decimals: 2
+    state_class: measurement
+    filters:
+      - multiply: 0.0054931640625
+      - delta: 0.05
+
+  - platform: modbus_controller
+    modbus_controller_id: inclinometer
+    id: inclinometer_pitch
+    name: "Inclinometer Pitch"
+    address: 0x3E
+    register_type: holding
+    value_type: S_WORD
+    unit_of_measurement: "°"
+    icon: mdi:axis-y-rotate-clockwise
+    accuracy_decimals: 2
+    state_class: measurement
+    filters:
+      - multiply: 0.0054931640625
+      - delta: 0.05
+
+  # Heading comes from the magnetometer, which is unreliable inside a
+  # steel body, so it is disabled by default
+  - platform: modbus_controller
+    modbus_controller_id: inclinometer
+    id: inclinometer_yaw
+    name: "Inclinometer Yaw"
+    address: 0x3F
+    register_type: holding
+    value_type: S_WORD
+    unit_of_measurement: "°"
+    icon: mdi:compass-outline
+    accuracy_decimals: 1
+    state_class: measurement
+    disabled_by_default: true
+    filters:
+      - multiply: 0.0054931640625
+      - delta: 0.5
+
+  - platform: modbus_controller
+    modbus_controller_id: inclinometer
+    id: inclinometer_temperature
+    name: "Inclinometer Temperature"
+    address: 0x40
+    register_type: holding
+    value_type: S_WORD
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+      - delta: 0.2
+
+
+# -------------------------------------------------------------------
 # CH1 - Starter battery charger
 # -------------------------------------------------------------------
 
@@ -93,3 +192,29 @@ button:
   - platform: restart
     name: "Restart"
     entity_category: diagnostic
+
+  # Makes the current roll/pitch the 0° reference and stores it in the
+  # sensor: unlock (KEY 0x69 = 0xB588), set angle reference
+  # (CALSW 0x01 = 0x08), save (SAVE 0x00 = 0x0000)
+  - platform: template
+    name: "Inclinometer Set Level Reference"
+    icon: mdi:angle-acute
+    entity_category: config
+    on_press:
+      - modbus_client.write_single_register:
+          modbus_id: rs485_bus
+          address: 0x50
+          start_address: 0x0069
+          value: 0xB588
+      - delay: 200ms
+      - modbus_client.write_single_register:
+          modbus_id: rs485_bus
+          address: 0x50
+          start_address: 0x0001
+          value: 0x0008
+      - delay: 1s
+      - modbus_client.write_single_register:
+          modbus_id: rs485_bus
+          address: 0x50
+          start_address: 0x0000
+          value: 0x0000
